@@ -12,16 +12,19 @@ using static PubPot.Web.Tests.TestSupport;
 namespace PubPot.Web.Tests;
 
 /// <summary>Admin-Login: Schutz aller Admin-Seiten, Cookie, Sperre, Abmelden, Rate-Limit (E-026).</summary>
-public class AdminLoginTests
+[Collection("Database")]
+public class AdminLoginTests(DatabaseWebFactory factory)
 {
     /// <summary>Alle Admin-Seiten, die einen Login verlangen. Neue Seiten hier ergänzen.</summary>
     public static readonly TheoryData<string> ProtectedPages = new(["/admin", "/admin/index", "/admin/logout"]);
 
     private readonly TestClock _clock = new();
 
-    /// <summary>Eigene App pro Test: Sperre und abgemeldete Sitzungen liegen im Arbeitsspeicher der App.</summary>
+    /// <summary>
+    /// Eigene App pro Test (gleiche Datenbank): Sperre und abgemeldete Sitzungen liegen im Arbeitsspeicher der App.
+    /// </summary>
     private WebApplicationFactory<Program> App(params (string Key, string Value)[] settings) =>
-        new PubPotWebFactory().WithWebHostBuilder(b =>
+        factory.WithWebHostBuilder(b =>
         {
             foreach (var (key, value) in settings)
             {

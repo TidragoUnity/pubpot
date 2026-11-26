@@ -41,3 +41,95 @@
   max-width: 26rem;
   padding-block: 3rem 4rem;
 }
+
+/* ---------- Liste ---------- */
+.admin-filter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.admin-filter__search {
+  grid-column: 1 / -1;
+}
+
+.admin-filter__actions,
+.admin-count,
+.admin-filter > p,
+.admin-filter > .table-scroll,
+.admin-pager {
+  grid-column: 1 / -1;
+}
+
+.admin-count {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-table th {
+  background: var(--surface-2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table__name {
+  display: block;
+  font-weight: 600;
+}
+
+.admin-table__email {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.status {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.status--pilot {
+  background: var(--accent-soft);
+}
+
+.status--declined {
+  color: var(--text-muted);
+}
+
+.admin-pager {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

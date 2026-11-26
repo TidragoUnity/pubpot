@@ -5,6 +5,15 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.4 – Liste mit Filter und Suche
+- `/admin` zeigt alle Anmeldungen als Tabelle: Eingang, Name mit E-Mail, Art, Studio/Spiel bzw. Kanal, Sprache, Bestätigung, Status, nächster Schritt. Neueste zuerst, 50 pro Seite.
+- Filter nach Art, bestätigt, Status und Sprache in der URL. Der Suchtext geht nur per POST und landet so nie in URLs oder Logs (E-027).
+- `AdminSignups` (Abfragen) und `AdminText` (deutsche Bezeichnungen, Datum in Europe/Berlin, gespeichert wird UTC).
+- **Gefunden:** `page` ist in Razor Pages ein reservierter Routenwert. Als Name für die Seitennummer führte er zu einem Fehler 500 bei der Weiterleitung. Jetzt heißt der Parameter `p`.
+- Die Login-Tests laufen jetzt gegen die Test-Datenbank, weil `/admin` Daten lädt.
+- 23 neue Tests (`AdminListTests`): jeder Filter, Suche in allen Feldern, `%`/`_` als normale Zeichen, kein Suchtext in URLs, Seiten, HTML-Ausgabe maskiert (XSS).
+- **Als Nächstes:** 4.5 Detailseite mit Bearbeiten.
+
 ## 2026-11-26 · Schritt 4.3 – Datenmodell Pipeline
 - `Signup` hat neue Felder: `PipelineStatus` (New, Contacted, Conversation, Pilot, Declined, als Text gespeichert), `AdminNote` (höchstens 4000 Zeichen), `NextStepOn` (Datum) und `AdminUpdatedAt` (letzte Änderung im Admin-Bereich, zählt später für E-023).
 - Vierte Migration `AdminPipeline`. Die Spalte `pipeline_status` ist Pflicht. Den Standardwert für bestehende Zeilen habe ich von Hand von `""` auf `"New"` geändert, sonst hätten alte Anmeldungen einen ungültigen Status.

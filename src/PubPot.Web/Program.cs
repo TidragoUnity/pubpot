@@ -130,6 +130,7 @@ builder.Services.AddOptions<AdminOptions>().Bind(builder.Configuration.GetSectio
     .Validate(AdminOptions.IsValid, "Admin:Username fehlt oder Admin:PasswordHash ist kein gültiger Hash (neu erzeugen mit: hash-password).")
     .ValidateOnStart();
 builder.Services.AddAdminAuthentication();
+builder.Services.AddScoped<AdminSignups>();
 
 // --- Sicherheit ---
 // Kein "Server: Kestrel"-Header: verrät unnötig, welche Software läuft.

@@ -166,6 +166,16 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **Ins Log** kommen Fehlversuche und Sperren, aber nie der eingegebene Benutzername. Dort steht oft versehentlich das Passwort.
 **Alternative:** ASP.NET Core Identity mit Benutzertabelle, Lockout und Sicherheitsstempel in der Datenbank. Das ist für ein Konto zu groß (siehe E-025). Für mehrere Admins wäre es der richtige Weg.
 
+## E-027 · Admin-Liste: Filter in der URL, Suchtext nur per POST
+**Entscheidungen:**
+- **Filter ohne Personenbezug** (Art, bestätigt, Status, Sprache, Seite) stehen in der URL, z. B. `/admin?kind=Developer&status=Contacted`. So funktionieren Neu laden, Zurück und Lesezeichen.
+- **Der Suchtext geht nur per POST.** Er enthält oft eine E-Mail-Adresse oder einen Namen. In einer URL würde er in Server-Logs (später Caddy), im Browserverlauf und im Referrer landen. Der Auftrag sagt: „keine personenbezogenen Daten in URLs“. Ein Suchtext in der URL wird ignoriert.
+- **Post/Redirect/Get:** Wird das Formular ohne Suchtext abgeschickt, leitet die Seite auf die passende GET-Adresse weiter. Mit Suchtext wird das Ergebnis direkt angezeigt. Neu laden fragt dann „Formular erneut senden?“, das ist der Preis.
+- **Seitenwechsel über Buttons im selben Formular** (`name="p"`), damit Filter und Suchtext erhalten bleiben. `page` geht als Name nicht, weil Razor Pages diesen Routenwert selbst belegt (Seitenpfad).
+- **Suche mit `ILIKE`** (Groß-/Kleinschreibung egal) in Name, E-Mail, Studio, Spiel und Kanal. `%` und `_` aus der Eingabe werden maskiert und gelten als normale Zeichen. Ohne Volltextindex: Bei ein paar hundert Zeilen reicht ein Durchsuchen der Tabelle.
+- **50 pro Seite**, neueste zuerst. Eine zu große Seitenzahl springt auf die letzte Seite.
+**Alternative:** Alles per GET (einfacher, aber E-Mail-Adressen in Logs) oder alles per POST (keine Lesezeichen, kein Zurück).
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

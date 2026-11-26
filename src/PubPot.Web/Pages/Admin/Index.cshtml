@@ -1,9 +1,132 @@
 @page
+@model PubPot.Web.Pages.Admin.IndexModel
+@using PubPot.Web.Admin
+@using PubPot.Web.Data
 @{
     ViewData["Title"] = "Anmeldungen";
+    var result = Model.Result;
 }
 
 <div class="container admin-page">
     <h1>Anmeldungen</h1>
-    <p>Angemeldet als <strong>@User.Identity?.Name</strong>. Die Liste der Anmeldungen folgt in Schritt 4.4.</p>
+
+    <form method="post" class="admin-filter" aria-label="Filter und Suche">
+        <div class="field admin-filter__search">
+            <label asp-for="Search">Suche</label>
+            <input asp-for="Search" type="search" maxlength="@SignupFilter.SearchMaxLength" aria-describedby="search-hint" />
+            <p id="search-hint" class="field-hint">Name, E-Mail, Studio, Spiel oder Kanal</p>
+        </div>
+
+        @* Auswahlfelder ohne asp-for: Die Vorauswahl setzen wir selbst, auch für "alle" (leer). *@
+        <div class="field">
+            <label asp-for="Kind">Art</label>
+            <select id="Kind" name="Kind">
+                <option value="">alle</option>
+                <option value="@SignupKind.Developer" selected="@(Model.Kind == SignupKind.Developer)">@AdminText.Label(SignupKind.Developer)</option>
+                <option value="@SignupKind.Creator" selected="@(Model.Kind == SignupKind.Creator)">@AdminText.Label(SignupKind.Creator)</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label asp-for="Confirmed">Bestätigt</label>
+            <select id="Confirmed" name="Confirmed">
+                <option value="">alle</option>
+                <option value="true" selected="@(Model.Confirmed == true)">bestätigt</option>
+                <option value="false" selected="@(Model.Confirmed == false)">unbestätigt</option>
+            </select>
+        </div>
+
+        <div class="field">
+            <label asp-for="Status">Status</label>
+            <select id="Status" name="Status">
+                <option value="">alle</option>
+                @foreach (var status in AdminText.Statuses)
+                {
+                    <option value="@status" selected="@(Model.Status == status)">@AdminText.Label(status)</option>
+                }
+            </select>
+        </div>
+
+        <div class="field">
+            <label asp-for="Language">Sprache</label>
+            <select id="Language" name="Language">
+                <option value="">alle</option>
+                @foreach (var language in PubPot.Web.Localization.SupportedCultures.All)
+                {
+                    <option value="@language" selected="@(Model.Language == language)">@AdminText.LanguageLabel(language)</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-actions admin-filter__actions">
+            <button class="btn btn-primary" type="submit">Filtern</button>
+            @if (Model.IsFiltered)
+            {
+                <a class="btn btn-secondary" href="/admin">Zurücksetzen</a>
+            }
+        </div>
+
+        <p class="admin-count" role="status">
+            @(result.Total == 1 ? "1 Anmeldung" : $"{result.Total} Anmeldungen")@(Model.IsFiltered ? " (gefiltert)" : "")
+        </p>
+
+        @if (result.Rows.Count == 0)
+        {
+            <p>Keine Anmeldungen gefunden.</p>
+        }
+        else
+        {
+            <div class="table-scroll">
+                <table class="admin-table">
+                    <caption class="visually-hidden">Anmeldungen, neueste zuerst</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Eingang</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Art</th>
+                            <th scope="col">Studio / Spiel bzw. Kanal</th>
+                            <th scope="col">Sprache</th>
+                            <th scope="col">Bestätigt</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Nächster Schritt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in result.Rows)
+                        {
+                            <tr>
+                                <td>@AdminText.Date(row.CreatedAt)</td>
+                                <td>
+                                    <span class="admin-table__name">@row.Name</span>
+                                    <span class="admin-table__email">@row.Email</span>
+                                </td>
+                                <td>@AdminText.Label(row.Kind)</td>
+                                <td>@(row.Kind == SignupKind.Developer ? $"{row.Studio} / {row.GameTitle}" : row.Channel)</td>
+                                <td>@row.Language.ToUpperInvariant()</td>
+                                <td>@(row.ConfirmedAt is { } confirmed ? AdminText.Date(confirmed) : "nein")</td>
+                                <td><span class="status status--@row.Status.ToString().ToLowerInvariant()">@AdminText.Label(row.Status)</span></td>
+                                <td>@(row.NextStepOn is { } next ? AdminText.Date(next) : "–")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        @if (result.PageCount > 1)
+        {
+            @* Seitenwechsel über das Formular: So bleiben Filter und Suche erhalten, der Suchtext steht nie in der URL. *@
+            <nav class="admin-pager" aria-label="Seiten">
+                @if (result.PageNumber > 1)
+                {
+                    <button class="btn btn-secondary btn-small" type="submit" name="p" value="@(result.PageNumber - 1)">Zurück</button>
+                }
+                <span>Seite @result.PageNumber von @result.PageCount</span>
+                @if (result.PageNumber < result.PageCount)
+                {
+                    <button class="btn btn-secondary btn-small" type="submit" name="p" value="@(result.PageNumber + 1)">Weiter</button>
+                }
+            </nav>
+        }
+    </form>
 </div>
