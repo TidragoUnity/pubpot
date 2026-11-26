@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Layout.SkipLink" xml:space="preserve">
+    <value>Zum Inhalt springen</value>
+  </data>
+  <data name="Layout.HomeLabel" xml:space="preserve">
+    <value>PubPot – zur Startseite</value>
+  </data>
+  <data name="Nav.Label" xml:space="preserve">
+    <value>Hauptnavigation</value>
+  </data>
+  <data name="Nav.How" xml:space="preserve">
+    <value>So funktioniert's</value>
+  </data>
+  <data name="Nav.Developers" xml:space="preserve">
+    <value>Für Entwickler</value>
+  </data>
+  <data name="Nav.Creators" xml:space="preserve">
+    <value>Für Creator</value>
+  </data>
+  <data name="Nav.Faq" xml:space="preserve">
+    <value>FAQ</value>
+  </data>
+  <data name="Theme.Toggle" xml:space="preserve">
+    <value>Dunkles Design</value>
+  </data>
+  <data name="Lang.Switch.Short" xml:space="preserve">
+    <value>EN</value>
+  </data>
+  <data name="Lang.Switch.Label" xml:space="preserve">
+    <value>Zur englischen Version wechseln</value>
+  </data>
+  <data name="Suggest.Label" xml:space="preserve">
+    <value>Sprachvorschlag</value>
+  </data>
+  <data name="Suggest.Text" xml:space="preserve">
+    <value>Diese Seite gibt es auch auf Deutsch.</value>
+  </data>
+  <data name="Suggest.Switch" xml:space="preserve">
+    <value>Auf Deutsch wechseln</value>
+  </data>
+  <data name="Suggest.Stay" xml:space="preserve">
+    <value>Auf Englisch bleiben</value>
+  </data>
+  <data name="Footer.LegalLabel" xml:space="preserve">
+    <value>Rechtliches</value>
+  </data>
+  <data name="Footer.Imprint" xml:space="preserve">
+    <value>Impressum</value>
+  </data>
+  <data name="Footer.Privacy" xml:space="preserve">
+    <value>Datenschutz</value>
+  </data>
+  <data name="Footer.WorkingTitle" xml:space="preserve">
+    <value>PubPot ist ein Arbeitstitel.</value>
+  </data>
+  <data name="Common.BackHome" xml:space="preserve">
+    <value>Zur Startseite</value>
+  </data>
+  <data name="Error.Title" xml:space="preserve">
+    <value>Fehler</value>
+  </data>
+  <data name="Error.Heading" xml:space="preserve">
+    <value>Da ist etwas schiefgelaufen.</value>
+  </data>
+  <data name="Error.Text" xml:space="preserve">
+    <value>Bitte versuche es in ein paar Minuten noch einmal.</value>
+  </data>
+  <data name="NotFound.Title" xml:space="preserve">
+    <value>Seite nicht gefunden</value>
+  </data>
+  <data name="NotFound.Heading" xml:space="preserve">
+    <value>Diese Seite gibt es nicht.</value>
+  </data>
+  <data name="NotFound.Text" xml:space="preserve">
+    <value>Vielleicht hat sich ein Tippfehler eingeschlichen, oder der Link ist veraltet.</value>
+  </data>
+</root>

@@ -1,3 +1,12 @@
 @using PubPot.Web
+@using PubPot.Web.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization
 @namespace PubPot.Web.Pages
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@* Sprache der Anfrage (Code, Umschalter, hreflang) *@
+@inject CurrentLanguage Lang
+@* Gemeinsame Texte (Resources/SharedResource.resx) *@
+@inject IStringLocalizer<SharedResource> S
+@* Texte der jeweiligen Seite (Resources/Pages/<Seite>.resx) *@
+@inject IViewLocalizer L

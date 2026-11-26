@@ -1,0 +1,10 @@
+@page "/error"
+@{
+    ViewData["Title"] = S["Error.Title"];
+}
+
+<div class="container page-header">
+    <h1>@S["Error.Heading"]</h1>
+    <p class="lead">@S["Error.Text"]</p>
+    <a class="btn btn-primary" asp-page="/Index" asp-route-culture="@Lang.Code">@S["Common.BackHome"]</a>
+</div>

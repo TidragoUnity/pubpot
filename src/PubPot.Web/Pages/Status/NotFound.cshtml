@@ -1,0 +1,12 @@
+@page "/not-found"
+@{
+    ViewData["Title"] = S["NotFound.Title"];
+    // Direkter Aufruf von /not-found soll ebenfalls 404 liefern, nicht 200.
+    Response.StatusCode = StatusCodes.Status404NotFound;
+}
+
+<div class="container page-header">
+    <h1>@S["NotFound.Heading"]</h1>
+    <p class="lead">@S["NotFound.Text"]</p>
+    <a class="btn btn-primary" asp-page="/Index" asp-route-culture="@Lang.Code">@S["Common.BackHome"]</a>
+</div>

@@ -1,17 +1,12 @@
 @page
 @{
-    ViewData["Title"] = "Indie-Game-Marketing ohne Vorabkosten";
-    ViewData["Description"] = "PubPot verbindet Indie-Entwickler mit kleinen Creatorn.";
+    ViewData["Title"] = L["Page.Title"];
+    ViewData["Description"] = L["Page.Description"].Value;
 }
 
 <section class="hero">
     <div class="container">
-        <span class="eyebrow">Design-Vorschau</span>
-        <h1>Indie-Spiele groß machen – mit kleinen Creatorn.</h1>
-        <p class="lead">Platzhalter: Die echten Inhalte folgen in Schritt 2.3.</p>
-        <div class="btn-group">
-            <a class="btn btn-primary" href="#">Als Entwickler anmelden</a>
-            <a class="btn btn-secondary" href="#">Als Creator anmelden</a>
-        </div>
+        <span class="eyebrow">@L["Hero.Eyebrow"]</span>
+        <h1>@L["Hero.Title"]</h1>
     </div>
 </section>

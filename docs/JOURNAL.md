@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 2.2 – Deutsch und Englisch
+- Sprachpräfix per Konvention, Weiterleitung von `/`, Umschalter mit Cookie, Sprachvorschlag, hreflang/canonical, lokalisierte Fehler- und 404-Seiten (E-017).
+- Mit curl geprüft: Weiterleitung für de/en/fr/leer, Cookie hat Vorrang, `/fr` und `/DE` → 404, Open Redirect über `returnPath=//evil.com` blockiert.
+- Im Browser geprüft: Vorschlagsleiste → Klick → `/en` ohne Leiste → zurück auf `/de` ohne Leiste.
+- **Für die Datenschutzerklärung notiert:** Cookie `pubpot_lang` (nur nach Klick, 1 Jahr), `localStorage` `pubpot-theme` (nur im Browser, wird nicht übertragen).
+
 ## 2026-11-26 · Schritt 2.1 – Web-Projekt und Design-Grundlage
 - `src/PubPot.Web` von Hand angelegt (ohne Bootstrap/jQuery aus der Vorlage, E-015). Layout mit Kopfzeile, Wortmarke „Pub**Pot**“, Navigation (ab 960 px sichtbar), Hell/Dunkel-Schalter und Fußzeile.
 - Schriften Inter und Space Grotesk (Fontsource 5.3.0, Latin-Teilmenge mit Umlauten und €) selbst gehostet.

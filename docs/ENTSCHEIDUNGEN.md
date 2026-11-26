@@ -70,6 +70,19 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Warum:** Ab .NET 9 werden CSS, JS und Schriften beim Build komprimiert (gzip/Brotli) und bekommen einen Fingerprint im Namen (`site.1mu24v7f3n.css`). Dadurch dürfen Browser sie dauerhaft cachen, und nach einer Änderung lädt trotzdem jeder die neue Version. Das zahlt direkt auf die Lighthouse-Performance ein.
 **Stolperstein:** Die Fingerprint-URLs funktionieren nur im Modus `Development` oder in einem veröffentlichten Build (`dotnet publish`). Zum Starten deshalb `ASPNETCORE_ENVIRONMENT=Development` setzen. Achtung: `dotnet run --environment X` setzt in .NET 10 eine **Umgebungsvariable** mit dem Namen X, nicht die ASP.NET-Umgebung.
 
+## E-017 · Sprachen über das URL-Präfix, Cookie nur nach Klick
+**Entscheidung:**
+- Jede Seite hat ein Sprachpräfix (`/de/...`, `/en/...`). Gesetzt wird es zentral über eine Razor-Pages-Konvention (`CultureRouteConvention`). Erlaubt sind nur `de` und `en` in Kleinbuchstaben.
+- `/` leitet weiter: gewählte Sprache (Cookie) → Browsersprache (`Accept-Language`) → Deutsch.
+- Der Umschalter (`/lang/{de|en}?returnPath=…`) setzt das Cookie `pubpot_lang` **nur beim Klick**.
+- Sprachvorschlag: Ohne Cookie und bei abweichender Browsersprache erscheint eine Leiste in der vorgeschlagenen Sprache.
+- Texte liegen in `Resources/SharedResource(.en).resx` (Layout) und `Resources/Pages/<Seite>(.en).resx`. Deutsch ist die neutrale Grundsprache.
+- `hreflang` für de, en und `x-default` (= `/`), dazu `canonical`. Fehlerseiten bekommen `noindex`.
+
+**Warum:** Eigene URLs pro Sprache sind für Suchmaschinen eindeutig, und Links lassen sich in einer festen Sprache teilen. Ein Cookie, das erst nach einem Klick gesetzt wird, dient einer ausdrücklich gewünschten Funktion. Ein Banner ist dafür nicht nötig (für die Datenschutzerklärung notiert, anwaltlich prüfen lassen).
+**Sicherheit:** `returnPath` akzeptiert nur lokale Pfade mit Sprachpräfix, alles andere führt zur Startseite. Das verhindert Open Redirects wie `?returnPath=//evil.com`.
+**Alternative:** Sprache nur per Cookie oder Header, ohne eigene URL. Das ist schlechter für SEO, und Links lassen sich nicht sprachgenau teilen.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
