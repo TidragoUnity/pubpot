@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.7 – CSV-Export
+- Button „CSV exportieren“ in der Liste. Er exportiert genau die gefilterte Liste (gleiche Filter, gleicher Suchtext) als `pubpot-anmeldungen-JJJJ-MM-TT.csv`.
+- `SignupCsv`: UTF-8 mit BOM, Semikolon, CRLF, 27 Spalten. Formeln werden entschärft, Sonderzeichen in Anführungszeichen (E-029). `GET /admin/export` führt zurück zur Liste.
+- **Neu gelernt:** `formaction` an einem Button schickt dasselbe Formular an ein anderes Ziel. Das Antiforgery-Token des Formulars geht mit.
+- 16 neue Tests (`AdminExportTests`), darunter Formel-Namen wie `=HYPERLINK(…)`, Zeilenumbrüche und Anführungszeichen in Nachrichten.
+- **Als Nächstes:** 4.8 Benachrichtigung bei neuer bestätigter Anmeldung.
+
 ## 2026-11-26 · Schritt 4.6 – Löschen (DSGVO)
 - Auf der Detailseite gibt es „Anmeldung löschen …“. Das führt zur Rückfrage `/admin/signups/{id}/delete`, und erst „Endgültig löschen“ (POST) löscht. Danach geht es zurück zur Liste mit dem Hinweis „Die Anmeldung wurde gelöscht“.
 - Gelöscht werden die Anmeldung, ihre Bestätigungslinks und alle Mails an diese Adresse, auch versendete. Gibt es unter derselben Adresse eine zweite Anmeldung (andere Rolle), bleiben die Mails erhalten, und die Rückfrage verlinkt die andere Anmeldung (E-028).

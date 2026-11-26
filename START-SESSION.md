@@ -28,8 +28,8 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 
 ## Stand (2026-11-26)
 - **Phasen 0–3 fertig:** alle Seiten auf DE/EN, Formulare für Entwickler und Creator, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks.
-- 318 Tests grün, 4 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
-- **Phase 4 läuft:** 4.1–4.6 sind fertig (Hash-Befehl, Login mit Sperre, Pipeline-Felder, Liste, Detailseite, Löschen, E-025–E-028). Weiter geht es mit **4.7 CSV-Export**. **Keine offenen Rückfragen.**
+- 334 Tests grün, 4 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
+- **Phase 4 läuft:** 4.1–4.7 sind fertig (Hash-Befehl, Login mit Sperre, Pipeline-Felder, Liste, Detailseite, Löschen, CSV-Export, E-025–E-029). Weiter geht es mit **4.8 Benachrichtigung**. **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
 ### Phase 4 – Admin-Bereich: weiter mit dem nächsten ⬜-Schritt in `docs/ROADMAP.md`

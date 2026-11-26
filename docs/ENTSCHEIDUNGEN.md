@@ -186,6 +186,16 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **Grenze:** In Backups (Phase 7) bleiben die Daten bis zur Rotation erhalten. Das muss in der Datenschutzerklärung stehen (anwaltlich prüfen lassen).
 **Alternative:** Anonymisieren (Name und Adresse überschreiben, Rest behalten), z. B. für Statistiken. Für V1 gibt es keine Statistik, die das bräuchte.
 
+## E-029 · CSV-Export für Excel, mit Schutz vor CSV-Injection
+**Entscheidungen:**
+- **Export der gefilterten Liste:** Der Button „CSV exportieren“ sitzt im Filterformular der Liste und schickt es per `formaction` an `/admin/export`. Filter und Suchtext kommen so mit, ohne dass der Suchtext in einer URL steht (E-027).
+- **Format für deutsches Excel:** UTF-8 **mit BOM** (ohne BOM zeigt Excel Umlaute falsch an), **Semikolon** als Trenner (Excel mit deutscher Einstellung erwartet es so), Zeilenende CRLF, Felder mit `;`, `"` oder Zeilenumbruch in Anführungszeichen (RFC 4180). Datumsangaben deutsch und in der Zeitzone Europe/Berlin.
+- **CSV-Injection:** Beginnt eine Zelle mit `=`, `+`, `-`, `@`, Tab oder CR, kommt ein `'` davor. Sonst würde Excel einen Namen wie `=HYPERLINK("https://boese.example")` als Formel ausführen. Die Daten stammen aus einem öffentlichen Formular, also von Fremden. Der Preis: Eine Telefonnummer wie `+49…` erscheint als `'+49…`.
+- **Alle Spalten** inklusive Notiz und Einwilligung (Version und Zeitpunkt). Damit lässt sich auch eine DSGVO-Auskunft beantworten.
+- **Dateiname ohne persönliche Daten:** `pubpot-anmeldungen-JJJJ-MM-TT.csv`. Ins Log kommt nur die Anzahl der Zeilen.
+- **Ohne Bibliothek:** Ein Paket wie CsvHelper wäre für 27 Spalten zu viel. Das Maskieren ist in einer kleinen, getesteten Methode (`SignupCsv.Cell`).
+**Alternative:** Excel-Datei (`.xlsx`). Das bräuchte eine Bibliothek, ist schwerer zu prüfen, und CSV öffnet jedes Programm.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
