@@ -9,15 +9,15 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 - [ ] Token-Ablauf: ca. **24.02.2027** bei 90 Tagen. Das ist mitten im Next Fest, deshalb **vorher** erneuern (GitHub → Settings → Developer settings → Fine-grained tokens → Regenerate)
 - [ ] GitHub → Settings → Emails: „Keep my email addresses private“ und „Block command line pushes that expose my email“ aktivieren
 
-## Bis Phase 6/7 (CI/CD)
+## Bis Phase 6 (CI) bzw. 8 (CD)
 - [x] GitHub-Repo angelegt (öffentlich) und gepusht: https://github.com/TidragoUnity/pubpot
 - [ ] GitHub Environments `staging` und `production` anlegen
-- [ ] GitHub-Secrets eintragen (genaue Liste folgt in Phase 7)
+- [ ] GitHub-Secrets eintragen (genaue Liste folgt in Phase 8)
 - [ ] Branch-Schutz für `main`: PR mit grüner CI erforderlich
 
-## Bis Phase 7 (Server)
+## Bis Phase 8 (Server) – vorher F-008 klären
 - [ ] Hetzner VPS anlegen (F-008), SSH-Schlüssel hinterlegen
-- [ ] VPS nach der Härtungsanleitung absichern (kommt in Phase 7)
+- [ ] VPS nach der Härtungsanleitung absichern (kommt in Phase 8)
 - [ ] Domain `pubpot.games` registrieren
 - [ ] DNS: A/AAAA-Einträge für `pubpot.games`, `www` und `staging` auf den VPS
 
@@ -25,4 +25,4 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 - [ ] SMTP-Anbieter in der EU wählen, Absenderdomain mit SPF, DKIM und DMARC einrichten
 - [ ] Impressum und Datenschutzerklärung erstellen und **anwaltlich prüfen lassen**
 - [ ] Einwilligungstext für die Formulare prüfen lassen
-- [ ] Backup-Ziel buchen (F-008) und einen Restore-Test selbst einmal durchführen
+- [ ] Backup-Ziel wählen und buchen (F-008, noch offen) und einen Restore-Test selbst einmal durchführen

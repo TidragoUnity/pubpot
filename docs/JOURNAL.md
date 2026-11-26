@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Rückfragen F-006 bis F-010 beantwortet
+- F-006: getrennte Datenbanken für Web und Worker (E-011). F-007: kein externer Check (E-012). F-010: nur E-Mail (E-014).
+- F-008/F-009: Einen VPS gibt es noch nicht. Erst läuft alles lokal, Monitoring, Alarme und Backups eingeschlossen, danach kommt der VPS. Die Phasen 7 und 8 sind in der Roadmap getauscht (E-013).
+- `RUECKFRAGEN.md` neu gegliedert in „Offen“ und „Beantwortet“. Dabei einen Fehler von mir behoben: Der ursprüngliche Text von F-004 war unter F-011 gerutscht.
+- Zurzeit sind keine Fragen offen.
+- **Als Nächstes:** Phase 2, sobald du OK gibst.
+
 ## 2026-11-26 · Erster Push nach GitHub
 - `gh` mit Fine-grained-Token angemeldet. Der Token hat nur Zugriff auf `pubpot` (Least Privilege).
 - Vor dem Push die gesamte Historie geprüft: keine Twitch-Zugangsdaten, kein altes DB-Passwort, keine echte E-Mail-Adresse, keine `.env`, keine `AUFTRAG.md`.

@@ -44,6 +44,22 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Warum:** xUnit v2 (das noch in der `dotnet new`-Vorlage steckt) wird nur noch gewartet. xUnit v3 setzt auf MTP, und ab SDK 10 lehnt `dotnet test` den alten VSTest-Weg für solche Projekte ab. Mit MTP braucht es nur noch ein einziges Paket.
 **Achtung:** Mit MTP lautet der Aufruf `dotnet test --solution PubPot.slnx` statt `dotnet test PubPot.slnx`. Testabdeckung kommt bei Bedarf in Phase 6 über `Microsoft.Testing.Extensions.CodeCoverage`.
 
+## E-011 · Getrennte Datenbanken für Web und Worker
+**Entscheidung (F-006):** Eine Postgres-Instanz mit zwei Datenbanken, `pubpot` (Web) und `twitch` (Worker). Jede hat einen eigenen DB-Benutzer, der nur auf seine Datenbank zugreifen darf. Die Web-App migriert per EF-Bundle. Der Worker bekommt ein versioniertes SQL-Skript statt `CREATE TABLE` im Code.
+**Warum:** Prinzip der geringsten Rechte. Eine Sicherheitslücke in der Web-App kommt nicht an die Worker-Daten heran und umgekehrt. Getrennte Datenbanken lassen sich außerdem einzeln sichern und wiederherstellen. EF lohnt sich im Worker nicht, weil er nur zwei Tabellen hat und per `COPY` schreibt.
+
+## E-012 · Kein externer Erreichbarkeits-Check
+**Entscheidung (F-007):** Nur Uptime Kuma, kein Drittanbieter.
+**Bewusst in Kauf genommen:** Fällt der ganze VPS aus (Hardware, Netz, Kernel-Panik), kommt kein Alarm, weil Uptime Kuma selbst mit ausfällt. Das lässt sich später mit einem externen Check nachrüsten.
+
+## E-013 · Erst alles lokal, dann der VPS
+**Entscheidung (F-008, F-009):** Monitoring, Alarme und Backups werden zuerst lokal auf dem PC gebaut und getestet, **vor** dem Deploy auf den VPS. In der Roadmap sind die Phasen 7 und 8 deshalb gegenüber dem Auftrag getauscht. Lokal gehen Alarm-Mails an Mailpit und Backups in einen lokalen Ordner. Auf dem VPS sind die Monitoring-Oberflächen später nur per SSH-Tunnel erreichbar.
+**Warum das funktioniert:** Genau dafür gibt es Docker. Dieselben Compose-Dateien laufen lokal und auf dem Server, nur die Umgebungsvariablen unterscheiden sich. Die CI auf GitHub braucht keinen VPS.
+**Einschränkung lokal:** Unter Docker Desktop misst node-exporter die Linux-VM von Docker, nicht Windows selbst. Für die Festplatten-Warnung ist das zum Üben in Ordnung, echte Werte gibt es erst auf dem VPS.
+
+## E-014 · Alarme und Benachrichtigungen nur per E-Mail
+**Entscheidung (F-010):** Alarme und Hinweise auf neue Anmeldungen kommen per E-Mail. Den Discord-Webhook aus dem Auftrag („optional“) baue ich trotzdem ein. Er bleibt aber aus, bis eine Umgebungsvariable gesetzt ist.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

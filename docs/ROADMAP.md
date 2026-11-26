@@ -52,13 +52,15 @@ Grob: EF Core + erste Migration · Formular Entwickler · Formular Creator · Ei
 Grob: Login mit Hash aus Umgebungsvariable + Sperre · Hilfsbefehl zum Erzeugen des Hashes · Liste mit Filter und Suche · Pipeline-Status, Notiz, nächster Schritt · CSV-Export · Löschen (DSGVO) · Benachrichtigung per E-Mail / Discord.
 
 ## Phase 5 – Docker und Compose lokal ⬜
-Grob: Multi-Stage-Dockerfiles (Nicht-Root, Healthcheck) · Migrations-Bundle als einmaliger Container · `compose.yaml` (web, worker, db, caddy, migrate) · `compose.override.yaml` (mailpit, adminer an 127.0.0.1) · DB-Init mit zwei Datenbanken und eigenen Benutzern · `.env.example` · Abnahme: `docker compose up` + Double-Opt-in mit Mailpit.
+Grob: Multi-Stage-Dockerfiles (Nicht-Root, Healthcheck) · Migrations-Bundle als einmaliger Container · `compose.yaml` (web, worker, db, caddy, migrate) · `compose.override.yaml` (mailpit, adminer an 127.0.0.1) · DB-Init mit zwei Datenbanken und eigenen Benutzern (E-011) · Worker-Schema als SQL-Skript · `.env.example` · Abnahme: `docker compose up` + Double-Opt-in mit Mailpit.
 
 ## Phase 6 – CI ⬜
-Grob: PR-Workflow (restore, build, format, Tests mit Postgres, Images bauen) · Dependabot (NuGet, Docker, Actions).
+Grob: PR-Workflow (restore, build, format, Tests mit Postgres, Images bauen) · Push nach GHCR mit SHA-Tag bei Merge auf `main` · Dependabot (NuGet, Docker, Actions; keine 11.x-Pakete, E-007) · Secret Scanning.
 
-## Phase 7 – CD: Staging, dann Production ⬜
-Grob: Anleitung VPS-Härtung · Compose-Konfiguration für staging/production · Push nach GHCR mit SHA-Tag · Deploy-Skript (pull, migrate, up, Smoke-Test, automatischer Rollback) · Staging bei Merge auf `main` · Production über Tag `v*` mit manueller Freigabe.
+> **Phasen 7 und 8 sind gegenüber dem Auftrag getauscht** (E-013): Erst läuft alles lokal, dann kommt der VPS.
 
-## Phase 8 – Monitoring, Alarme, Backups ⬜
-Grob: JSON-Logs ohne personenbezogene Daten · OpenTelemetry + `/metrics` · Prometheus, Grafana mit Start-Dashboard, node-exporter, cAdvisor · Uptime Kuma + Push-URL im Worker · Alarme · nächtliche Backups mit Rotation, Restore-Skript, dokumentierter Restore-Test · README fertig.
+## Phase 7 – Monitoring, Alarme, Backups (lokal) ⬜
+Grob: JSON-Logs ohne personenbezogene Daten · OpenTelemetry + `/metrics` · Prometheus, Grafana mit Start-Dashboard, node-exporter, cAdvisor · Uptime Kuma + Push-URL im Worker · Alarme per E-Mail, lokal an Mailpit (E-014) · nächtliche Backups mit Rotation in einen lokalen Ordner, Restore-Skript, dokumentierter Restore-Test. Alle Oberflächen nur an `127.0.0.1`.
+
+## Phase 8 – VPS und CD: Staging, dann Production ⬜
+Grob: vorher F-008 klären (VPS, Backup-Ziel, Domain, SMTP) · Anleitung VPS-Härtung · Compose-Konfiguration für staging/production · Deploy-Skript (pull, migrate, up, Smoke-Test, automatischer Rollback) · Staging bei Merge auf `main` · Production über Tag `v*` mit manueller Freigabe · Monitoring auf dem VPS, Zugang per SSH-Tunnel (F-009) · Backups auf externen Speicher · README fertig.
