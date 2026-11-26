@@ -35,17 +35,18 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 
 > Reihenfolge von 1.1 und 1.2 getauscht: Mit zentraler Paketverwaltung wäre die unveränderte `.csproj` nicht baubar, und jeder Commit soll lauffähig sein.
 
-## Phase 2 – Web-Projekt mit allen Seiten, DE/EN, ohne Formulare 🔄
+## Phase 2 – Web-Projekt mit allen Seiten, DE/EN, ohne Formulare ✅
 | # | Schritt | Status |
 |---|---|---|
 | 2.1 | Razor-Pages-Projekt, Layout, Design-Grundlage (CSS-Variablen, Hell/Dunkel, mobil zuerst), selbst gehostete Schrift, Wortmarke | ✅ |
 | 2.2 | Lokalisierung: Routen `/de` und `/en`, `.resx`, Sprachumschalter, Vorschlag nach Browsersprache, `hreflang` | ✅ |
 | 2.3 | Restliche Seiten als Gerüst: Anmeldung (ohne Formular), Danke, Bestätigung, Impressum/Datenschutz (Platzhalter mit TODO), `robots.txt` | ✅ |
 | 2.4 | Startseite: Hero, 3 Schritte, Rechenbeispiel, Entwickler, Creator, Pilot/Next Fest, FAQ, Buttons | ✅ |
+| 2.5 | Security-Header und strikte CSP von Anfang an, `/health` | ✅ |
+| 2.6 | Tests (`WebApplicationFactory`): Seiten, Links (Crawler), Sprachen, Header, keine externen Quellen, Übersetzungen, Kontraste | ✅ |
 
 > 2.3 und 2.4 getauscht: Die Startseite verlinkt auf die Anmeldeseiten, die deshalb zuerst existieren müssen.
-| 2.5 | Security-Header und strikte CSP von Anfang an, `/health` | ✅ |
-| 2.6 | Erste Tests (`WebApplicationFactory`): Seiten liefern 200, Header vorhanden, hreflang korrekt | ⬜ |
+> Ergebnis Lighthouse (Release-Build, `/de`): mobil 99/100/100/100, Desktop 100/100/100/100.
 
 ## Phase 3 – Formulare, Datenbank, Double-Opt-in, Spam-Schutz ⬜
 Grob: EF Core + erste Migration · Formular Entwickler · Formular Creator · Einwilligung mit Version/Zeitstempel · Zusammenführen bei gleicher E-Mail · Double-Opt-in mit gehashtem Token · SMTP (lokal Mailpit) · Honeypot, Mindestzeit, Rate-Limit, Antiforgery · Löschjob für Unbestätigte > 30 Tage · `/health/ready` · Integrationstests mit Testcontainers.

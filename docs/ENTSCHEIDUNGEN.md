@@ -90,6 +90,13 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Noch offen (Phase 5):** HSTS und `upgrade-insecure-requests` greifen nur, wenn die App HTTPS erkennt. Hinter Caddy kommt das über `X-Forwarded-Proto`, dafür braucht es die Forwarded-Headers-Middleware.
 **Warum kein `preload`:** Ein Eintrag in die HSTS-Preload-Liste der Browser lässt sich kaum rückgängig machen. Das entscheiden wir, wenn die Domain sicher feststeht.
 
+## E-019 · Was die Tests absichern (und warum so)
+**Entscheidung:** Integrationstests mit `WebApplicationFactory`: Die echte App läuft im Speicher, ohne Port und ohne Browser. Dazu kommen Tests, die Quelldateien direkt prüfen (`.resx`, `site.css`).
+**Die Leitidee:** Was ich einmal von Hand geprüft habe (curl, Screenshots, Kontrast-Rechnung), wird ein Test. Dann prüft die CI es bei jedem Pull Request erneut.
+**Gegenprobe:** Zwei Fehler absichtlich eingebaut (Kontrast zu niedrig, englischer Text fehlt). Beide Tests wurden rot.
+**Lernpunkt:** Fehlt ein englischer Text, zeigt .NET still den deutschen an, ohne Fehler und ohne sichtbaren Schlüssel. Nur der Paritätstest (`ResourceTests`) findet das.
+**Nicht automatisiert:** Lighthouse. Dafür braucht es Chrome in der CI, das kommt in Phase 6 als eigener, optionaler Schritt dazu.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

@@ -9,7 +9,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Startet die komplette Web-App im Speicher (TestServer), ohne echten Port. -->
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="xunit.v3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PubPot.Web\PubPot.Web.csproj" />
   </ItemGroup>
 
   <ItemGroup>

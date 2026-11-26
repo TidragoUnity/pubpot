@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 2.6 – Tests, Phase 2 abgeschlossen
+- 132 Tests in 5 Klassen: `PageTests` (alle Seiten, kein Roh-Schlüssel, Crawler über alle internen Links), `LocalizationTests` (Weiterleitung, Umschalter, Open Redirect, 404, hreflang, noindex, Vorschlag), `SecurityTests` (Header auch auf CSS-Dateien, kein Inline-JS/-CSS, keine fremden Hosts, HSTS nur über HTTPS in Production, `/health`), `ResourceTests` (DE/EN-Parität, keine Steuerzeichen, jeder View-Schlüssel existiert), `ContrastTests` (WCAG AA hell und dunkel aus `site.css`).
+- Gegenprobe mit zwei absichtlichen Fehlern: Beide wurden erkannt (E-019).
+- Der Build läuft auch mit `CI=true` (Warnungen = Fehler) sauber.
+- Platzhalter-Test aus 1.4 entfernt.
+- **Als Nächstes:** Phase 3 (Formulare, Datenbank, Double-Opt-in). Vorher fein planen.
+
 ## 2026-11-26 · Schritt 2.5 – Security-Header und /health
 - Security-Header-Middleware mit strikter CSP, HSTS (nur außerhalb von Development und nur bei HTTPS), Cookie-Policy, kein `Server`-Header (E-018).
 - `/health` (Liveness) über ASP.NET HealthChecks. `/health/ready` mit Datenbank folgt in Phase 3.
