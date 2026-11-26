@@ -2,11 +2,164 @@
 @{
     ViewData["Title"] = L["Page.Title"];
     ViewData["Description"] = L["Page.Description"].Value;
+
+    string[] steps = ["Step1", "Step2", "Step3"];
+    string[] exampleRows = ["Row1", "Row2", "Row3"];
+    string[] devPoints = ["Point1", "Point2", "Point3", "Point4"];
+    string[] creatorPoints = ["Point1", "Point2", "Point3", "Point4", "Point5"];
+    string[] faqs = ["Cost", "Publisher", "Who", "Positive", "Split", "Earn", "Ad", "Data", "Live"];
 }
 
-<section class="hero">
+@* ---------- Hero ---------- *@
+<section class="hero" aria-labelledby="hero-title">
     <div class="container">
         <span class="eyebrow">@L["Hero.Eyebrow"]</span>
-        <h1>@L["Hero.Title"]</h1>
+        <h1 id="hero-title">@L["Hero.Title"]</h1>
+        <p class="lead">@L["Hero.Lead"]</p>
+
+        <div class="hero__audiences">
+            <div class="card">
+                <h2 class="card-title">@L["Hero.Dev.Title"]</h2>
+                <p>@L["Hero.Dev.Text"]</p>
+                <a class="btn btn-primary" asp-page="/Signup/Developer" asp-route-culture="@Lang.Code">@L["Cta.Developer"]</a>
+            </div>
+            <div class="card">
+                <h2 class="card-title">@L["Hero.Creator.Title"]</h2>
+                <p>@L["Hero.Creator.Text"]</p>
+                <a class="btn btn-primary" asp-page="/Signup/Creator" asp-route-culture="@Lang.Code">@L["Cta.Creator"]</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* ---------- So funktioniert's ---------- *@
+<section id="how" class="section section--alt" aria-labelledby="how-title">
+    <div class="container">
+        <div class="section__intro">
+            <h2 id="how-title">@L["How.Title"]</h2>
+            <p class="lead">@L["How.Lead"]</p>
+        </div>
+        <ol class="grid grid--3 steps">
+            @for (var i = 0; i < steps.Length; i++)
+            {
+                <li class="card">
+                    <span class="step-number" aria-hidden="true">@(i + 1)</span>
+                    <h3>@L[$"How.{steps[i]}.Title"]</h3>
+                    <p>@L[$"How.{steps[i]}.Text"]</p>
+                </li>
+            }
+        </ol>
+    </div>
+</section>
+
+@* ---------- Rechenbeispiel ---------- *@
+<section id="example" class="section" aria-labelledby="example-title">
+    <div class="container grid grid--2 grid--center">
+        <div>
+            <h2 id="example-title">@L["Example.Title"]</h2>
+            <p class="lead">@L["Example.Text1"]</p>
+            <p>@L["Example.Text2"]</p>
+        </div>
+        <div class="card example">
+            <span class="example__badge">@L["Example.Badge"]</span>
+            <dl class="example__rows">
+                @foreach (var row in exampleRows)
+                {
+                    <div class="example__row">
+                        <dt>@L[$"Example.{row}.Label"]</dt>
+                        <dd>@L[$"Example.{row}.Value"]</dd>
+                    </div>
+                }
+            </dl>
+            <p class="example__note">@L["Example.Note"]</p>
+        </div>
+    </div>
+</section>
+
+@* ---------- Für Entwickler ---------- *@
+<section id="developers" class="section section--alt" aria-labelledby="dev-title">
+    <div class="container">
+        <div class="section__intro">
+            <span class="eyebrow">@L["Dev.Eyebrow"]</span>
+            <h2 id="dev-title">@L["Dev.Title"]</h2>
+            <p class="lead">@L["Dev.Lead"]</p>
+        </div>
+        <ul class="check-list">
+            @foreach (var point in devPoints)
+            {
+                <li>@L[$"Dev.{point}"]</li>
+            }
+        </ul>
+        <a class="btn btn-primary" asp-page="/Signup/Developer" asp-route-culture="@Lang.Code">@L["Cta.Developer"]</a>
+    </div>
+</section>
+
+@* ---------- Für Creator ---------- *@
+<section id="creators" class="section" aria-labelledby="creator-title">
+    <div class="container">
+        <div class="section__intro">
+            <span class="eyebrow">@L["Creator.Eyebrow"]</span>
+            <h2 id="creator-title">@L["Creator.Title"]</h2>
+            <p class="lead">@L["Creator.Lead"]</p>
+        </div>
+        <ul class="check-list">
+            @foreach (var point in creatorPoints)
+            {
+                <li>@L[$"Creator.{point}"]</li>
+            }
+        </ul>
+        <a class="btn btn-primary" asp-page="/Signup/Creator" asp-route-culture="@Lang.Code">@L["Cta.Creator"]</a>
+    </div>
+</section>
+
+@* ---------- Pilot ---------- *@
+<section id="pilot" class="section section--alt" aria-labelledby="pilot-title">
+    <div class="container">
+        <div class="pilot">
+            <div>
+                <span class="eyebrow">@L["Pilot.Eyebrow"]</span>
+                <h2 id="pilot-title">@L["Pilot.Title"]</h2>
+                <p>@L["Pilot.Text"]</p>
+            </div>
+            <div>
+                <p class="pilot__event">@L["Pilot.Event"]</p>
+                <p class="pilot__date">@L["Pilot.Date"]</p>
+                <p class="pilot__seats">@L["Pilot.Seats"]</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* ---------- FAQ (aufklappbar ohne JavaScript) ---------- *@
+<section id="faq" class="section" aria-labelledby="faq-title">
+    <div class="container">
+        <h2 id="faq-title">@L["Faq.Title"]</h2>
+        <div class="faq">
+            @foreach (var faq in faqs)
+            {
+                <details>
+                    <summary>@L[$"Faq.{faq}.Q"]</summary>
+                    <div>
+                        <p>@L[$"Faq.{faq}.A"]</p>
+                        @if (faq == "Data")
+                        {
+                            <p><a asp-page="/Legal/Privacy" asp-route-culture="@Lang.Code">@L["Faq.Data.Link"]</a></p>
+                        }
+                    </div>
+                </details>
+            }
+        </div>
+    </div>
+</section>
+
+@* ---------- Abschluss ---------- *@
+<section id="join" class="section section--alt cta-final" aria-labelledby="join-title">
+    <div class="container">
+        <h2 id="join-title">@L["Join.Title"]</h2>
+        <p class="lead">@L["Join.Lead"]</p>
+        <div class="btn-group">
+            <a class="btn btn-primary" asp-page="/Signup/Developer" asp-route-culture="@Lang.Code">@L["Cta.Developer"]</a>
+            <a class="btn btn-secondary" asp-page="/Signup/Creator" asp-route-culture="@Lang.Code">@L["Cta.Creator"]</a>
+        </div>
     </div>
 </section>

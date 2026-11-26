@@ -34,7 +34,7 @@
   --primary: #5b21b6;
   --primary-hover: #4c1d95;
   --on-primary: #ffffff;
-  --accent: #b45309;
+  --accent: #92400e;
   --accent-soft: #fef3c7;
   --focus: #2563eb;
   --glow-1: rgb(124 58 237 / 0.16);
@@ -500,6 +500,23 @@ main {
   }
 }
 
+@media (min-width: 48rem) {
+  .grid--center {
+    align-items: center;
+  }
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
 .card {
   padding: 1.5rem;
   background: var(--surface);
@@ -535,6 +552,7 @@ main {
 }
 
 .check-list {
+  max-width: 48rem;
   margin: 0 0 1.5rem;
   padding: 0;
   list-style: none;
@@ -625,6 +643,17 @@ main {
     align-items: center;
     padding: 3rem;
   }
+}
+
+.pilot__event {
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pilot__seats {
+  margin: 0;
+  color: var(--text-muted);
 }
 
 .pilot__date {

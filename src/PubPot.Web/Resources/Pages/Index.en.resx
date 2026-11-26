@@ -16,12 +16,219 @@
     <value>Indie game marketing with no upfront cost</value>
   </data>
   <data name="Page.Description" xml:space="preserve">
-    <value>PubPot connects indie developers with small creators: a share of Steam revenue during the launch window instead of upfront costs.</value>
+    <value>PubPot connects indie developers with small creators: a share of net Steam revenue during the launch window instead of upfront costs. Sign up for the Steam Next Fest 2027 pilot.</value>
   </data>
   <data name="Hero.Eyebrow" xml:space="preserve">
-    <value>Design preview</value>
+    <value>Pilot for Steam Next Fest · February 2027</value>
   </data>
   <data name="Hero.Title" xml:space="preserve">
-    <value>Make indie games big – with small creators.</value>
+    <value>Getting indie games seen – with small creators.</value>
+  </data>
+  <data name="Hero.Lead" xml:space="preserve">
+    <value>Developers put a share of their net Steam revenue from a launch window into a shared pool. Small streamers and YouTubers play the game and split the pool by reach. No upfront costs and no publisher deal.</value>
+  </data>
+  <data name="Hero.Dev.Title" xml:space="preserve">
+    <value>Making a game?</value>
+  </data>
+  <data name="Hero.Dev.Text" xml:space="preserve">
+    <value>More visibility at launch without paying anything upfront. Your IP stays yours.</value>
+  </data>
+  <data name="Hero.Creator.Title" xml:space="preserve">
+    <value>Streaming or making videos?</value>
+  </data>
+  <data name="Hero.Creator.Text" xml:space="preserve">
+    <value>Discover new indie games and get a share of the revenue – depending on sales and your reach.</value>
+  </data>
+  <data name="Cta.Developer" xml:space="preserve">
+    <value>Sign up as a developer</value>
+  </data>
+  <data name="Cta.Creator" xml:space="preserve">
+    <value>Sign up as a creator</value>
+  </data>
+  <data name="How.Title" xml:space="preserve">
+    <value>How it works</value>
+  </data>
+  <data name="How.Lead" xml:space="preserve">
+    <value>From game to stream in three steps.</value>
+  </data>
+  <data name="How.Step1.Title" xml:space="preserve">
+    <value>Register your game</value>
+  </data>
+  <data name="How.Step1.Text" xml:space="preserve">
+    <value>You register your game. By default, 25% of your net Steam revenue from a 3-month launch window goes into the pool.</value>
+  </data>
+  <data name="How.Step2.Title" xml:space="preserve">
+    <value>Creators play</value>
+  </data>
+  <data name="How.Step2.Text" xml:space="preserve">
+    <value>Small streamers and YouTubers play your game and show it to their audience – honestly, criticism included, and labelled as advertising.</value>
+  </data>
+  <data name="How.Step3.Title" xml:space="preserve">
+    <value>The pool is split</value>
+  </data>
+  <data name="How.Step3.Text" xml:space="preserve">
+    <value>The pool is split among the participating creators by reach. During the pilot, we handle payouts manually.</value>
+  </data>
+  <data name="Example.Title" xml:space="preserve">
+    <value>A worked example</value>
+  </data>
+  <data name="Example.Text1" xml:space="preserve">
+    <value>The more reach a creator brings to the game, the bigger their share of the pool.</value>
+  </data>
+  <data name="Example.Text2" xml:space="preserve">
+    <value>Developers only pay out of actual revenue: if the game barely sells, the pool is small too.</value>
+  </data>
+  <data name="Example.Badge" xml:space="preserve">
+    <value>Example – not a forecast</value>
+  </data>
+  <data name="Example.Row1.Label" xml:space="preserve">
+    <value>Net Steam revenue in the launch window (3 months)</value>
+  </data>
+  <data name="Example.Row1.Value" xml:space="preserve">
+    <value>€20,000</value>
+  </data>
+  <data name="Example.Row2.Label" xml:space="preserve">
+    <value>Going into the pool (25%)</value>
+  </data>
+  <data name="Example.Row2.Value" xml:space="preserve">
+    <value>€5,000</value>
+  </data>
+  <data name="Example.Row3.Label" xml:space="preserve">
+    <value>Share for a creator with 4% of the total reach</value>
+  </data>
+  <data name="Example.Row3.Value" xml:space="preserve">
+    <value>€200</value>
+  </data>
+  <data name="Example.Note" xml:space="preserve">
+    <value>These numbers are made up for illustration only. How much actually goes into the pool depends entirely on the game's sales.</value>
+  </data>
+  <data name="Dev.Eyebrow" xml:space="preserve">
+    <value>For developers</value>
+  </data>
+  <data name="Dev.Title" xml:space="preserve">
+    <value>Reach at launch – with no upfront cost</value>
+  </data>
+  <data name="Dev.Lead" xml:space="preserve">
+    <value>Marketing usually costs money before a game earns any. PubPot flips that around: you share part of the revenue with the creators who show your game.</value>
+  </data>
+  <data name="Dev.Point1" xml:space="preserve">
+    <value>No upfront costs: you only give a share of net Steam revenue during the launch window.</value>
+  </data>
+  <data name="Dev.Point2" xml:space="preserve">
+    <value>No publisher deal: your IP and your decisions stay with you.</value>
+  </data>
+  <data name="Dev.Point3" xml:space="preserve">
+    <value>Honest impressions: critical reviews count too. Creators aren't paid for good reviews.</value>
+  </data>
+  <data name="Dev.Point4" xml:space="preserve">
+    <value>No platform fee during the pilot.</value>
+  </data>
+  <data name="Creator.Eyebrow" xml:space="preserve">
+    <value>For creators</value>
+  </data>
+  <data name="Creator.Title" xml:space="preserve">
+    <value>Play new indie games – and share in the revenue</value>
+  </data>
+  <data name="Creator.Lead" xml:space="preserve">
+    <value>Sponsorships usually only start once a channel reaches a certain size. PubPot is deliberately aimed at small channels: you play indie games and get a share of the pool that matches your reach.</value>
+  </data>
+  <data name="Creator.Point1" xml:space="preserve">
+    <value>Made for small channels: mainly Twitch streams with fewer than 50 average viewers and small YouTube channels.</value>
+  </data>
+  <data name="Creator.Point2" xml:space="preserve">
+    <value>Your opinion stays yours: critical reviews count too.</value>
+  </data>
+  <data name="Creator.Point3" xml:space="preserve">
+    <value>Transparent: your content about the game is labelled as advertising.</value>
+  </data>
+  <data name="Creator.Point4" xml:space="preserve">
+    <value>No guaranteed amount: what you get depends on sales and your reach.</value>
+  </data>
+  <data name="Creator.Point5" xml:space="preserve">
+    <value>You must be 18 or older.</value>
+  </data>
+  <data name="Pilot.Eyebrow" xml:space="preserve">
+    <value>Pilot</value>
+  </data>
+  <data name="Pilot.Title" xml:space="preserve">
+    <value>The Steam Next Fest pilot</value>
+  </data>
+  <data name="Pilot.Text" xml:space="preserve">
+    <value>We're starting small: with 3 to 5 games and 20 to 30 creators. There's no platform fee during the pilot, and we handle payouts by hand. That way we find out together what works.</value>
+  </data>
+  <data name="Pilot.Event" xml:space="preserve">
+    <value>Steam Next Fest</value>
+  </data>
+  <data name="Pilot.Date" xml:space="preserve">
+    <value>22 February – 1 March 2027</value>
+  </data>
+  <data name="Pilot.Seats" xml:space="preserve">
+    <value>Places in the pilot are limited.</value>
+  </data>
+  <data name="Faq.Title" xml:space="preserve">
+    <value>Frequently asked questions</value>
+  </data>
+  <data name="Faq.Cost.Q" xml:space="preserve">
+    <value>What does PubPot cost developers?</value>
+  </data>
+  <data name="Faq.Cost.A" xml:space="preserve">
+    <value>Nothing upfront. You put a share of your net Steam revenue from the launch window into the pool, by default 25% for 3 months. There's no platform fee during the pilot.</value>
+  </data>
+  <data name="Faq.Publisher.Q" xml:space="preserve">
+    <value>Do I have to sign a publisher deal?</value>
+  </data>
+  <data name="Faq.Publisher.A" xml:space="preserve">
+    <value>No. PubPot isn't a publisher. Your IP and all decisions about your game stay with you.</value>
+  </data>
+  <data name="Faq.Who.Q" xml:space="preserve">
+    <value>Who can join as a creator?</value>
+  </data>
+  <data name="Faq.Who.A" xml:space="preserve">
+    <value>We're mainly looking for small channels: Twitch streamers with fewer than 50 average viewers and small YouTubers. You must be at least 18.</value>
+  </data>
+  <data name="Faq.Positive.Q" xml:space="preserve">
+    <value>Do I have to review the game positively?</value>
+  </data>
+  <data name="Faq.Positive.A" xml:space="preserve">
+    <value>No. Critical reviews count too. All that matters is that you show the game honestly.</value>
+  </data>
+  <data name="Faq.Split.Q" xml:space="preserve">
+    <value>How is the pool split?</value>
+  </data>
+  <data name="Faq.Split.A" xml:space="preserve">
+    <value>By reach: whoever reaches more people gets a bigger share. During the pilot, we handle payouts by hand.</value>
+  </data>
+  <data name="Faq.Earn.Q" xml:space="preserve">
+    <value>How much will I earn as a creator?</value>
+  </data>
+  <data name="Faq.Earn.A" xml:space="preserve">
+    <value>We can't predict that. The size of the pool depends on the game's sales, and your share depends on your reach. Think of it as a little extra on the side, not an income.</value>
+  </data>
+  <data name="Faq.Ad.Q" xml:space="preserve">
+    <value>Do I have to label my content as advertising?</value>
+  </data>
+  <data name="Faq.Ad.A" xml:space="preserve">
+    <value>Yes. Because you get a share of the revenue, you label your content about the game as advertising.</value>
+  </data>
+  <data name="Faq.Data.Q" xml:space="preserve">
+    <value>What happens to my data?</value>
+  </data>
+  <data name="Faq.Data.A" xml:space="preserve">
+    <value>We only use your details to get in touch with you. Your sign-up only counts once you confirm it by email. We delete unconfirmed sign-ups after 30 days. You can ask us to delete your data at any time.</value>
+  </data>
+  <data name="Faq.Data.Link" xml:space="preserve">
+    <value>Read the privacy policy</value>
+  </data>
+  <data name="Faq.Live.Q" xml:space="preserve">
+    <value>Has PubPot launched yet?</value>
+  </data>
+  <data name="Faq.Live.A" xml:space="preserve">
+    <value>Not yet. We're preparing a pilot with a small number of games and creators. Signing up lets us know you're interested. Places in the pilot are limited.</value>
+  </data>
+  <data name="Join.Title" xml:space="preserve">
+    <value>Interested in the pilot?</value>
+  </data>
+  <data name="Join.Lead" xml:space="preserve">
+    <value>Signing up is free and doesn't commit you to anything.</value>
   </data>
 </root>

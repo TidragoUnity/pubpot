@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 2.4 – Startseite
+- Abschnitte: Hero mit zwei Zielgruppen-Karten, „So funktioniert's“ (3 Schritte), Rechenbeispiel (als „Beispiel – keine Prognose“ markiert), Für Entwickler, Für Creator, Pilot mit Next-Fest-Termin, FAQ (9 Fragen, `<details>` ohne JavaScript), Abschluss-CTA.
+- Texte aus dem Auftrag abgeleitet, ohne Einnahmeversprechen („Rechne mit einem kleinen Zuverdienst, nicht mit einem Einkommen“). Bitte inhaltlich prüfen → F-012.
+- **Lighthouse (Release-Build, `/de`):** mobil 99/100/100/100, Desktop 100/100/100/100 (Performance/Accessibility/Best Practices/SEO).
+- Kontraste zusätzlich selbst berechnet, weil Lighthouse nur den hellen Modus prüft. Dabei gefunden: Der Akzentton im hellen Modus hatte in grauen Abschnitten 4,36:1 (< 4,5). Er ist jetzt dunkler (`#92400e`, 6,16:1).
+- Stolperstein: Ein eigenes Ersetzungsskript (geschützte Leerzeichen vor % und €) hat durch einen Escaping-Fehler Steuerzeichen in die Texte geschrieben. Der Build hat die ungültige `.resx` sofort abgelehnt, die sieben Stellen sind repariert und geprüft.
+
 ## 2026-11-26 · Schritt 2.3 – Restliche Seiten
 - Reihenfolge mit 2.4 getauscht, damit die Links der Startseite sofort funktionieren.
 - Neue Seiten jeweils unter `/de` und `/en`: `signup/developer`, `signup/creator`, `signup/thanks`, `signup/confirm`, `legal/imprint`, `legal/privacy`. URLs werden klein geschrieben (`LowercaseUrls`).

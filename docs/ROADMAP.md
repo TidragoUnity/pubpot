@@ -41,7 +41,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 2.1 | Razor-Pages-Projekt, Layout, Design-Grundlage (CSS-Variablen, Hell/Dunkel, mobil zuerst), selbst gehostete Schrift, Wortmarke | ✅ |
 | 2.2 | Lokalisierung: Routen `/de` und `/en`, `.resx`, Sprachumschalter, Vorschlag nach Browsersprache, `hreflang` | ✅ |
 | 2.3 | Restliche Seiten als Gerüst: Anmeldung (ohne Formular), Danke, Bestätigung, Impressum/Datenschutz (Platzhalter mit TODO), `robots.txt` | ✅ |
-| 2.4 | Startseite: Hero, 3 Schritte, Rechenbeispiel, Entwickler, Creator, Pilot/Next Fest, FAQ, Buttons | ⬜ |
+| 2.4 | Startseite: Hero, 3 Schritte, Rechenbeispiel, Entwickler, Creator, Pilot/Next Fest, FAQ, Buttons | ✅ |
 
 > 2.3 und 2.4 getauscht: Die Startseite verlinkt auf die Anmeldeseiten, die deshalb zuerst existieren müssen.
 | 2.5 | Security-Header und strikte CSP von Anfang an, `/health` | ⬜ |
