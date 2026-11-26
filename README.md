@@ -44,6 +44,18 @@ Stoppen: `docker compose down`. Alles inklusive Daten löschen: `docker compose 
 
 ## Website lokal starten
 
+Einmalig die Verbindung zur lokalen Datenbank hinterlegen. Das Passwort ist `PUBPOT_DB_PASSWORD` aus `deploy/.env`.
+Die User Secrets liegen in deinem Benutzerprofil, nicht im Repo:
+
+```bash
+cd src/PubPot.Web
+dotnet user-secrets set "ConnectionStrings:Default" "Host=localhost;Port=5432;Database=pubpot;Username=pubpot;Password=<PUBPOT_DB_PASSWORD>"
+dotnet tool restore            # installiert dotnet-ef in der Version aus dotnet-tools.json
+dotnet ef database update      # legt die Tabellen an bzw. bringt sie auf den neuesten Stand
+```
+
+Dann starten:
+
 ```bash
 dotnet run --project src/PubPot.Web
 ```

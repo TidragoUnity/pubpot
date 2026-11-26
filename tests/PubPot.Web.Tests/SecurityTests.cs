@@ -1,13 +1,12 @@
 using System.Net;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using PubPot.Web.Security;
 using static PubPot.Web.Tests.TestSupport;
 
 namespace PubPot.Web.Tests;
 
 /// <summary>Security-Header, keine externen Einbindungen, Health-Endpunkt.</summary>
-public class SecurityTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class SecurityTests(PubPotWebFactory factory) : IClassFixture<PubPotWebFactory>
 {
     private readonly HttpClient _client = CreateClient(factory);
 

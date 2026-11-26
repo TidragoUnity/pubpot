@@ -1,13 +1,30 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
+using Microsoft.EntityFrameworkCore;
 using PubPot.Web;
+using PubPot.Web.Data;
 using PubPot.Web.Localization;
 using PubPot.Web.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<SiteOptions>(builder.Configuration.GetSection("Site"));
+
+// --- Datenbank ---
+// Lokal aus den User Secrets, in Docker aus der Umgebungsvariable ConnectionStrings__Default.
+// Fehlt sie, bricht die App sofort ab ("fail fast") statt erst bei der ersten Anmeldung.
+var connectionString = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrWhiteSpace(connectionString))
+{
+    throw new InvalidOperationException(
+        "ConnectionStrings:Default fehlt. Lokal: siehe README (dotnet user-secrets), in Docker: ConnectionStrings__Default.");
+}
+
+builder.Services.AddDbContext<AppDbContext>(o => o
+    .UseNpgsql(connectionString)
+    .UseSnakeCaseNamingConvention());
+builder.Services.AddSingleton(TimeProvider.System);
 
 // --- Sprachen ---
 builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");

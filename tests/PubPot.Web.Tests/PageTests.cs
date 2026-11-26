@@ -1,12 +1,11 @@
 using System.Net;
 using System.Text.RegularExpressions;
-using Microsoft.AspNetCore.Mvc.Testing;
 using static PubPot.Web.Tests.TestSupport;
 
 namespace PubPot.Web.Tests;
 
 /// <summary>Alle Seiten sind erreichbar, vollständig übersetzt und untereinander richtig verlinkt.</summary>
-public partial class PageTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public partial class PageTests(PubPotWebFactory factory) : IClassFixture<PubPotWebFactory>
 {
     private readonly HttpClient _client = CreateClient(factory);
 

@@ -1,11 +1,10 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
 using static PubPot.Web.Tests.TestSupport;
 
 namespace PubPot.Web.Tests;
 
 /// <summary>Sprachauswahl, Umschalter, hreflang und Sprachvorschlag.</summary>
-public class LocalizationTests(WebApplicationFactory<Program> factory) : IClassFixture<WebApplicationFactory<Program>>
+public class LocalizationTests(PubPotWebFactory factory) : IClassFixture<PubPotWebFactory>
 {
     private readonly HttpClient _client = CreateClient(factory);
 

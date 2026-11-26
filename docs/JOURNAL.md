@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.2 – EF Core und Datenmodell
+- Pakete: Npgsql.EntityFrameworkCore.PostgreSQL 10.0.4, EFCore.NamingConventions 10.0.1 (snake_case), EF Design 10.0.15 (nur für `dotnet ef`, nicht in der veröffentlichten App).
+- `dotnet-ef` 10.0.15 als lokales Tool (`dotnet-tools.json`, ab SDK 10 im Wurzelordner statt `.config/`).
+- Modell: `signups` (Entwickler und Creator in einer Tabelle, Spalte `kind`, eindeutig pro Rolle und E-Mail), `signup_confirmations` (nur Token-Hash, Änderungen als `jsonb`), `outbox_emails` (Mail-Ausgang). IDs sind UUIDv7 (zeitlich sortierbar, nicht erratbar).
+- Die App bricht ohne `ConnectionStrings:Default` sofort ab (fail fast). Lokal liegt die Verbindung in den User Secrets, die Tests verwenden eine Factory mit Schein-Verbindung.
+- Migration `Initial` erzeugt und lokal angewendet, Tabellen mit `\d signups` geprüft.
+
 ## 2026-11-26 · Schritt 3.1 – Hilfsdienste in Docker
 - `deploy/compose.yaml` (Basis für alle Umgebungen, Projektname `pubpot`, Postgres ohne offene Ports) und `deploy/compose.override.yaml` (nur lokal: Postgres, Mailpit und Adminer auf `127.0.0.1`). Images mit fester Version: `postgres:16.16`, `axllent/mailpit:v1.34.0`, `adminer:5.5.1`.
 - Init-Skript legt `pubpot` und `twitch` mit eigenen Benutzern an, `REVOKE ALL … FROM PUBLIC` sperrt den Zugriff über Kreuz.
