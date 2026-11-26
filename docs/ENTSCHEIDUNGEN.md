@@ -34,6 +34,11 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Warum:** Das **SDK** ist das Werkzeug zum Bauen, die **Laufzeit** führt das Programm aus. Ein neueres SDK baut problemlos für eine ältere Zielversion. Wichtig ist nur, dass überall dasselbe SDK verwendet wird, sonst verhalten sich `dotnet format` und die Analyzer lokal anders als in der CI.
 **Folge:** Dependabot darf Microsoft-, EF-Core- und Npgsql-Pakete nicht auf 11.x heben. Dafür kommt in Phase 6 eine Ignore-Regel.
 
+## E-009 · Gemeinsame Build-Einstellungen im Repo-Wurzelordner
+**Entscheidung:** `Directory.Build.props` (Einstellungen für alle Projekte), `Directory.Packages.props` (alle Paketversionen an einer Stelle), `.editorconfig` (Code-Stil), `.gitattributes` (Zeilenenden LF), `global.json` (SDK-Version).
+**Warum:** Jedes neue Projekt (Web, Tests) übernimmt die Regeln automatisch. In der CI sind Warnungen Fehler (`CI=true`), lokal nicht. Mit LF-Zeilenenden laufen Shell-Skripte im Linux-Container, mit CRLF aus Windows brechen sie ab (`/bin/sh^M: not found`).
+**Alternative:** Einstellungen pro `.csproj`. Das wird schnell uneinheitlich.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

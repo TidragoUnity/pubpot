@@ -1,0 +1,24 @@
+<!--
+  Gilt automatisch für jedes Projekt unterhalb dieses Ordners.
+  So stehen gemeinsame Einstellungen an einer Stelle statt in jeder .csproj.
+-->
+<Project>
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+
+    <!-- Analyzer und Code-Stil (.editorconfig) schon beim Build prüfen, nicht erst in der IDE. -->
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1591 = "fehlender XML-Kommentar". Nicht jede öffentliche Methode braucht einen. -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!--
+      In der CI (GitHub Actions setzt CI=true) sind Warnungen Fehler.
+      Lokal bleiben es Warnungen, damit man beim Ausprobieren nicht blockiert wird.
+    -->
+    <TreatWarningsAsErrors Condition="'$(CI)' == 'true'">true</TreatWarningsAsErrors>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

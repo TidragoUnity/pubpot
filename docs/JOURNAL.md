@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 1.2 – Grundgerüst
+- `PubPot.slnx` (neues XML-Solution-Format), `global.json` auf SDK 11.0.100, zentrale Paketverwaltung, `.editorconfig`, `.gitattributes` (E-009).
+- Der Worker nutzt die zentralen Versionen (Npgsql steht fest auf 8.0.9 statt `8.0.*`, weil Wildcards bei zentraler Verwaltung nicht erlaubt sind).
+- `dotnet build` ohne Warnungen, `dotnet format --verify-no-changes` sauber.
+
 ## 2026-11-26 · Schritt 1.1 – Worker übernommen
 - Quellcode aus `C:\Timo\Docker\twitch-worker` nach `src/TwitchWorker` kopiert. Das Original und der laufende Container bleiben unberührt.
 - Vor dem Commit geprüft: Die Werte aus der alten `.env.example` stehen in keiner Datei im Repo. Die neue `.env.example` enthält nur Platzhalter.

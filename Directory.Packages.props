@@ -1,0 +1,15 @@
+<!--
+  Zentrale Paketverwaltung (Central Package Management):
+  Jede Paketversion steht nur hier. In den .csproj-Dateien steht nur noch der Paketname.
+  Vorteil: Alle Projekte nutzen dieselbe Version, und Dependabot ändert genau eine Datei.
+-->
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
+    <PackageVersion Include="Npgsql" Version="8.0.9" />
+  </ItemGroup>
+</Project>

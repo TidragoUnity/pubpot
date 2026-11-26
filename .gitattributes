@@ -1,0 +1,15 @@
+# Einheitliche Zeilenenden: LF im Repo und im Arbeitsordner.
+# Wichtig für Docker: Shell-Skripte mit Windows-Zeilenenden (CRLF) brechen im Linux-Container ab.
+* text=auto eol=lf
+
+# Windows-Skripte brauchen CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binärdateien nie verändern.
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
+*.woff binary
