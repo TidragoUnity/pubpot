@@ -65,6 +65,21 @@ dotnet run --project src/PubPot.Web
 
 Danach http://localhost:5080 öffnen. `/` leitet je nach Browsersprache auf `/de` oder `/en` weiter.
 
+### Admin-Zugang (optional)
+
+Der Admin-Bereich ist aus, solange kein Passwort-Hash gesetzt ist. Hash erzeugen (das Passwort wird verdeckt abgefragt,
+mindestens 12 Zeichen) und als User Secret hinterlegen. Der Befehl gibt die passende Zeile gleich mit aus:
+
+```bash
+dotnet run --project src/PubPot.Web -- hash-password
+dotnet user-secrets set "Admin:PasswordHash" "<HASH>" --project src/PubPot.Web
+```
+
+| Einstellung | Umgebungsvariable | Bedeutung |
+|---|---|---|
+| `Admin:Username` | `Admin__Username` | Benutzername, Standard `admin` |
+| `Admin:PasswordHash` | `Admin__PasswordHash` | Hash aus `hash-password`. Leer = Admin-Bereich aus. Ein ungültiger Wert verhindert den Start. |
+
 > Ohne Startprofil muss die Umgebung über die Variable gesetzt werden: `ASPNETCORE_ENVIRONMENT=Development`.
 > Nicht `dotnet run --environment Development` verwenden. Das setzt in .NET 10 eine Umgebungsvariable namens „Development“
 > und startet die App im Production-Modus, ohne CSS (siehe `docs/ENTSCHEIDUNGEN.md`, E-016).

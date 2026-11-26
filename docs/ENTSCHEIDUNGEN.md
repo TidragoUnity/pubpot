@@ -143,6 +143,15 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Warum:** Ihn nutzt nur eine Person. Eine zweite Sprache würde die Arbeit in Phase 4 um etwa ein Drittel erhöhen, ohne dass jemand davon etwas hat. Der Paritätstest gilt weiter für alle öffentlichen Seiten.
 **Alternative:** Wie die öffentlichen Seiten über `.resx` in DE/EN. Das lohnt sich erst, wenn weitere Admins dazukommen, die kein Deutsch sprechen.
 
+## E-025 · Admin-Passwort als PBKDF2-Hash, Hilfsbefehl in der Web-App
+**Entscheidungen:**
+- **Nur der Hash steht in der Konfiguration** (`Admin__PasswordHash`), nie das Passwort. Wer die Umgebungsvariablen oder ein Backup der `.env` sieht, kennt das Passwort damit noch nicht.
+- **Verfahren:** `PasswordHasher` aus ASP.NET Core Identity (PBKDF2 mit HMAC-SHA512, 100 000 Runden, zufälliges Salt). Er ist schon in ASP.NET Core enthalten, also kommt kein neues Paket dazu. Das Verfahren ist absichtlich langsam, damit ein gestohlener Hash nicht schnell durchprobiert werden kann. Das Salt sorgt dafür, dass dasselbe Passwort jedes Mal einen anderen Hash ergibt.
+- **Der Hash ist Base64**, also ohne `$`. Andere Formate (bcrypt, Argon2) beginnen mit `$2b$…` bzw. `$argon2id$…`. Docker Compose würde das `$` in einer `.env` als Variable lesen und den Wert still verstümmeln.
+- **Hilfsbefehl in der Web-App** (`dotnet run --project src/PubPot.Web -- hash-password`) statt eines eigenen Tools. So funktioniert er später auch im Container (`docker compose run --rm web hash-password`). Das Passwort wird verdeckt abgefragt und landet nicht in der Shell-Historie.
+- **Kein Hash, kein Admin:** Fehlt `Admin__PasswordHash`, ist der Bereich aus (404). Ein **kaputter** Hash (etwa beim Kopieren abgeschnitten) verhindert dagegen den Start (fail fast), sonst würde jeder Login scheitern, ohne dass man den Grund sieht.
+**Alternative:** ASP.NET Core Identity komplett mit Benutzertabelle. Das ist für ein einziges Konto zu groß: Es bräuchte Migrationen, Registrierung und Passwort-Reset, die wir nicht wollen.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

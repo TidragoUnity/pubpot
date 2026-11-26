@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.1 – Admin-Konfiguration und Hash-Befehl
+- `AdminOptions` (`Admin__Username`, Standard `admin`, und `Admin__PasswordHash`). Ohne Hash ist der Admin-Bereich aus, dazu gibt es eine Warnung im Log. Ein ungültiger Hash oder ein leerer Benutzername verhindern den Start.
+- `AdminPassword`: Hashen und Prüfen mit dem `PasswordHasher` aus ASP.NET Core Identity (PBKDF2/HMAC-SHA512, 100 000 Runden). Ein kaputter Hash ergibt `false` statt einer Ausnahme.
+- Befehl `dotnet run --project src/PubPot.Web -- hash-password`: Im Terminal wird das Passwort verdeckt und zweimal abgefragt (mindestens 12 Zeichen), dann kommen die fertigen Zeilen für `.env` und User Secrets. Über eine Pipe wird nur der Hash ausgegeben. Begründung in E-025.
+- README: Abschnitt „Admin-Zugang“ mit den neuen Einstellungen.
+- 14 neue Tests (`AdminPasswordTests`): Hash, Salt, kaputte Hashes, Befehl im Terminal und über eine Pipe, Start mit und ohne gültige Einstellungen.
+- **Als Nächstes:** 4.2 Login, Logout und Sperre.
+
 ## 2026-11-26 · Phase 4 geplant, F-014 und F-015 beantwortet
 - Phase 4 in zehn Schritte aufgeteilt (4.1 bis 4.10), siehe `ROADMAP.md`. Den Plan hast du freigegeben.
 - **F-014:** Der Admin-Bereich ist nur auf Deutsch (E-024).

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PubPot.Web;
+using PubPot.Web.Admin;
 using PubPot.Web.Data;
 using PubPot.Web.Email;
 using PubPot.Web.Forms;
@@ -15,6 +16,12 @@ using PubPot.Web.Localization;
 using PubPot.Web.Security;
 using PubPot.Web.Signups;
 using PubPot.Web.Spam;
+
+// Hilfsbefehl statt Webserver: dotnet run --project src/PubPot.Web -- hash-password
+if (args is [HashPasswordCommand.Name, ..])
+{
+    return HashPasswordCommand.RunWithConsole();
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -110,6 +117,13 @@ if (builder.Configuration.GetValue("Cleanup:Enabled", defaultValue: true))
     builder.Services.AddHostedService<DataCleanupService>();
 }
 
+// --- Admin-Bereich ---
+// Ein Konto, Passwort nur als Hash aus der Umgebungsvariable Admin__PasswordHash. Ohne Hash ist der Bereich aus.
+// Ein kaputter Hash (z. B. beim Kopieren abgeschnitten) bricht den Start ab, statt später jeden Login abzulehnen.
+builder.Services.AddOptions<AdminOptions>().Bind(builder.Configuration.GetSection(AdminOptions.SectionName))
+    .Validate(AdminOptions.IsValid, "Admin:Username fehlt oder Admin:PasswordHash ist kein gültiger Hash (neu erzeugen mit: hash-password).")
+    .ValidateOnStart();
+
 // --- Sicherheit ---
 // Kein "Server: Kestrel"-Header: verrät unnötig, welche Software läuft.
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
@@ -151,6 +165,11 @@ builder.Services.AddHealthChecks()
     .AddCheck<MigrationsHealthCheck>("migrations", tags: ["ready"]);
 
 var app = builder.Build();
+
+if (!app.Services.GetRequiredService<IOptions<AdminOptions>>().Value.IsEnabled)
+{
+    app.Logger.LogWarning("Admin-Bereich ist aus, weil Admin:PasswordHash fehlt.");
+}
 
 app.UseSecurityHeaders();
 
@@ -199,3 +218,4 @@ app.MapGet("/lang/{culture}", (string culture, string? returnPath, HttpContext c
 app.MapRazorPages().WithStaticAssets();
 
 app.Run();
+return 0;

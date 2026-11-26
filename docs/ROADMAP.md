@@ -61,10 +61,10 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 3.8 | Aufräum-Job: unbestätigte Anmeldungen nach 30 Tagen löschen, versendete Mails nach 7 Tagen | ✅ |
 | 3.9 | Abnahme: kompletter Ablauf im Browser mit Mailpit, Lighthouse auf den Formularen, Datenschutz-Fakten aktualisieren | ✅ |
 
-## Phase 4 – Admin-Bereich ⬜
+## Phase 4 – Admin-Bereich 🔄
 | # | Schritt | Status |
 |---|---|---|
-| 4.1 | **Admin-Konfiguration und Hash-Befehl:** `AdminOptions` (`Admin__Username`, `Admin__PasswordHash`). Ohne Hash ist der Admin-Bereich aus (404) und es gibt eine Warnung im Log. Befehl `dotnet run --project src/PubPot.Web -- hash-password` liest das Passwort verdeckt ein und gibt den Hash aus. Hashing mit `PasswordHasher` aus ASP.NET Core Identity (PBKDF2, E-025) | ⬜ |
+| 4.1 | **Admin-Konfiguration und Hash-Befehl:** `AdminOptions` (`Admin__Username`, `Admin__PasswordHash`). Ohne Hash ist der Admin-Bereich aus (404) und es gibt eine Warnung im Log. Befehl `dotnet run --project src/PubPot.Web -- hash-password` liest das Passwort verdeckt ein und gibt den Hash aus. Hashing mit `PasswordHasher` aus ASP.NET Core Identity (PBKDF2, E-025) | ✅ |
 | 4.2 | **Login, Logout, Sperre:** eigenes Cookie-Schema nur für `/admin` (`__Host-`-Cookie, HttpOnly, Secure, SameSite=Strict, 8 h gleitend). Login-Seite, Logout per POST. Sperre nach 5 Fehlversuchen für 15 Minuten, dazu Rate-Limit auf den Login-POST pro IP. Admin-Layout, `X-Robots-Tag: noindex`, leere Startseite `/admin` | ⬜ |
 | 4.3 | **Datenmodell Pipeline:** neue Spalten `pipeline_status` (neu, kontaktiert, Gespräch, Pilot, abgesagt), `admin_note`, `next_step_on`, `admin_updated_at`. Migration 4, bestehende Einträge bekommen „neu“ | ⬜ |
 | 4.4 | **Liste:** alle Anmeldungen als Tabelle, Filter (Entwickler/Creator, bestätigt, Status, Sprache), Suche in Name, E-Mail, Studio, Spiel und Kanal, 50 pro Seite. Die Suche geht per POST, damit keine E-Mail-Adressen in URLs und Logs landen | ⬜ |
