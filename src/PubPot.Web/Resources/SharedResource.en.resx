@@ -87,4 +87,94 @@
   <data name="NotFound.Text" xml:space="preserve">
     <value>There may be a typo in the address, or the link is out of date.</value>
   </data>
+  <data name="Form.RequiredNote" xml:space="preserve">
+    <value>All fields are required unless marked as optional.</value>
+  </data>
+  <data name="Form.ErrorSummary" xml:space="preserve">
+    <value>Please check the highlighted fields.</value>
+  </data>
+  <data name="Form.PleaseChoose" xml:space="preserve">
+    <value>Please choose</value>
+  </data>
+  <data name="Form.Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Form.No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Form.Submit" xml:space="preserve">
+    <value>Send sign-up</value>
+  </data>
+  <data name="Form.Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Form.Email" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="Form.Studio" xml:space="preserve">
+    <value>Studio</value>
+  </data>
+  <data name="Form.Studio.Hint" xml:space="preserve">
+    <value>Solo developer? Just enter your name.</value>
+  </data>
+  <data name="Form.GameTitle" xml:space="preserve">
+    <value>Game title</value>
+  </data>
+  <data name="Form.SteamLink" xml:space="preserve">
+    <value>Steam store link</value>
+  </data>
+  <data name="Form.SteamLink.Hint" xml:space="preserve">
+    <value>For example https://store.steampowered.com/app/123456/</value>
+  </data>
+  <data name="Form.Release" xml:space="preserve">
+    <value>Planned release</value>
+  </data>
+  <data name="Form.Release.Released" xml:space="preserve">
+    <value>Already released</value>
+  </data>
+  <data name="Form.HasDemo" xml:space="preserve">
+    <value>Is there a demo or a playtest?</value>
+  </data>
+  <data name="Form.NextFestPilot" xml:space="preserve">
+    <value>Interested in the Steam Next Fest pilot?</value>
+  </data>
+  <data name="Form.HasPublisher" xml:space="preserve">
+    <value>Do you already have a publisher?</value>
+  </data>
+  <data name="Form.Message" xml:space="preserve">
+    <value>Message (optional)</value>
+  </data>
+  <data name="Validation.Required" xml:space="preserve">
+    <value>Please fill in this field.</value>
+  </data>
+  <data name="Validation.Choose" xml:space="preserve">
+    <value>Please choose an option.</value>
+  </data>
+  <data name="Validation.MaxLength" xml:space="preserve">
+    <value>Please use no more than {1} characters.</value>
+  </data>
+  <data name="Validation.Email" xml:space="preserve">
+    <value>Please enter a valid email address.</value>
+  </data>
+  <data name="Validation.Invalid" xml:space="preserve">
+    <value>Please check this entry.</value>
+  </data>
+  <data name="Validation.SteamLink" xml:space="preserve">
+    <value>Please enter a link in the format https://store.steampowered.com/app/123456.</value>
+  </data>
+  <data name="Validation.Release" xml:space="preserve">
+    <value>Please choose an entry from the list.</value>
+  </data>
+  <data name="Validation.Consent" xml:space="preserve">
+    <value>We can't contact you without your consent.</value>
+  </data>
+  <data name="Consent.Text" xml:space="preserve">
+    <value>I agree that PubPot may store my details and contact me by email about the pilot. I can withdraw this consent at any time.</value>
+  </data>
+  <data name="Consent.More" xml:space="preserve">
+    <value>More details in the</value>
+  </data>
+  <data name="Consent.PrivacyLink" xml:space="preserve">
+    <value>privacy policy</value>
+  </data>
 </root>

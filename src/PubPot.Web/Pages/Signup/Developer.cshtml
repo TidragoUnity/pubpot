@@ -1,7 +1,9 @@
 @page
+@model PubPot.Web.Pages.Signup.DeveloperModel
 @{
     ViewData["Title"] = L["Page.Title"];
     ViewData["Description"] = L["Page.Description"].Value;
+    var hasErrors = !ViewData.ModelState.IsValid;
 }
 
 <div class="container page-header">
@@ -11,8 +13,121 @@
 </div>
 
 <div class="container prose">
-    @* Phase 3: Hier kommt das Formular hin. *@
-    <div class="todo-box">
-        <p>@L["Placeholder"]</p>
-    </div>
+    <form method="post" class="form">
+        @if (hasErrors)
+        {
+            <div class="form-summary" role="alert">
+                <p>@S["Form.ErrorSummary"]</p>
+            </div>
+        }
+
+        <p class="form-note">@S["Form.RequiredNote"]</p>
+
+        <fieldset class="form-group">
+            <legend>@L["Group.You"]</legend>
+
+            <div class="field">
+                <label asp-for="Input.Name"></label>
+                <input asp-for="Input.Name" autocomplete="name" maxlength="100" required />
+                <field-error for="Input.Name" />
+            </div>
+
+            <div class="field">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" type="email" autocomplete="email" maxlength="254" required />
+                <field-error for="Input.Email" />
+            </div>
+
+            <div class="field">
+                <label asp-for="Input.Studio"></label>
+                <input asp-for="Input.Studio" autocomplete="organization" maxlength="100" required aria-describedby="Input_Studio-hint" />
+                <p id="Input_Studio-hint" class="field-hint">@S["Form.Studio.Hint"]</p>
+                <field-error for="Input.Studio" />
+            </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+            <legend>@L["Group.Game"]</legend>
+
+            <div class="field">
+                <label asp-for="Input.GameTitle"></label>
+                <input asp-for="Input.GameTitle" maxlength="150" required />
+                <field-error for="Input.GameTitle" />
+            </div>
+
+            <div class="field">
+                <label asp-for="Input.SteamLink"></label>
+                @* type="text" statt "url": Der Browser würde Links ohne https:// ablehnen, der Server akzeptiert sie bewusst. *@
+                <input asp-for="Input.SteamLink" type="text" inputmode="url" autocomplete="url" maxlength="300" required
+                       placeholder="https://store.steampowered.com/app/…" aria-describedby="Input_SteamLink-hint" />
+                <p id="Input_SteamLink-hint" class="field-hint">@S["Form.SteamLink.Hint"]</p>
+                <field-error for="Input.SteamLink" />
+            </div>
+
+            <div class="field">
+                <label asp-for="Input.Release"></label>
+                <select asp-for="Input.Release" required>
+                    <option value="">@S["Form.PleaseChoose"]</option>
+                    <option value="@ReleaseChoice.Released">@S["Form.Release.Released"]</option>
+                    @foreach (var (value, label) in Model.ReleaseMonths)
+                    {
+                        <option value="@value">@label</option>
+                    }
+                </select>
+                <field-error for="Input.Release" />
+            </div>
+
+            <fieldset class="choice-group">
+                <legend>@S["Form.HasDemo"]</legend>
+                <div class="choices">
+                    <label class="choice"><input type="radio" asp-for="Input.HasDemo" value="true" id="HasDemo-yes" required /> @S["Form.Yes"]</label>
+                    <label class="choice"><input type="radio" asp-for="Input.HasDemo" value="false" id="HasDemo-no" /> @S["Form.No"]</label>
+                </div>
+                <field-error for="Input.HasDemo" />
+            </fieldset>
+        </fieldset>
+
+        <fieldset class="form-group">
+            <legend>@L["Group.Pilot"]</legend>
+
+            <fieldset class="choice-group">
+                <legend>@S["Form.NextFestPilot"]</legend>
+                <div class="choices">
+                    <label class="choice"><input type="radio" asp-for="Input.NextFestPilot" value="true" id="NextFestPilot-yes" required /> @S["Form.Yes"]</label>
+                    <label class="choice"><input type="radio" asp-for="Input.NextFestPilot" value="false" id="NextFestPilot-no" /> @S["Form.No"]</label>
+                </div>
+                <field-error for="Input.NextFestPilot" />
+            </fieldset>
+
+            <fieldset class="choice-group">
+                <legend>@S["Form.HasPublisher"]</legend>
+                <div class="choices">
+                    <label class="choice"><input type="radio" asp-for="Input.HasPublisher" value="true" id="HasPublisher-yes" required /> @S["Form.Yes"]</label>
+                    <label class="choice"><input type="radio" asp-for="Input.HasPublisher" value="false" id="HasPublisher-no" /> @S["Form.No"]</label>
+                </div>
+                <field-error for="Input.HasPublisher" />
+            </fieldset>
+
+            <div class="field">
+                <label asp-for="Input.Message"></label>
+                <textarea asp-for="Input.Message" rows="5" maxlength="2000"></textarea>
+                <field-error for="Input.Message" />
+            </div>
+        </fieldset>
+
+        <div class="field consent">
+            <label class="choice">
+                <input asp-for="Input.Consent" required />
+                <span>
+                    @S["Consent.Text"]
+                    @S["Consent.More"] <a asp-page="/Legal/Privacy" asp-route-culture="@Lang.Code" target="_blank">@S["Consent.PrivacyLink"]</a>.
+                </span>
+            </label>
+            <field-error for="Input.Consent" />
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">@S["Form.Submit"]</button>
+        </div>
+    </form>
 </div>

@@ -24,7 +24,13 @@
   <data name="Intro" xml:space="preserve">
     <value>Erzähl uns von deinem Spiel. Die Anmeldung ist unverbindlich und kostet nichts.</value>
   </data>
-  <data name="Placeholder" xml:space="preserve">
-    <value>Das Anmeldeformular folgt in Kürze.</value>
+  <data name="Group.You" xml:space="preserve">
+    <value>Über dich</value>
+  </data>
+  <data name="Group.Game" xml:space="preserve">
+    <value>Dein Spiel</value>
+  </data>
+  <data name="Group.Pilot" xml:space="preserve">
+    <value>Pilot und Nachricht</value>
   </data>
 </root>

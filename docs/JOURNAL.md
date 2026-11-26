@@ -5,6 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.4 – Entwickler-Formular
+- Aufbau: `Signups/` (Geschäftslogik: `DeveloperSubmission`, `SignupService` mit Zusammenführen, `SteamLink`, `ReleaseChoice`, `ConsentText`) getrennt von der Razor Page. Post/Redirect/Get zur Danke-Seite.
+- Validierung: Der Browser prüft vorab ohne JavaScript, maßgeblich ist der Server. Meldungen und Feldnamen sind übersetzt (`Validation.*`, `Form.*` in SharedResource). Eigene Tag-Helper setzen `aria-invalid` und verknüpfen die Fehlermeldung mit dem Feld.
+- Neue Farb-Tokens `--input-border` (Feldrahmen ≥ 3:1, WCAG 1.4.11) und `--danger`, beide im Kontrast-Test.
+- Einwilligung: Version `2026-11-26` wird mit jeder Anmeldung gespeichert. Ein Test vergleicht den Hash des Textes (DE+EN) mit der Version. Wer den Text ändert, ohne die Version zu erhöhen, bekommt einen roten Test.
+- **Im Browser gefunden und behoben:**
+  1. `type="url"` beim Steam-Link hat Links ohne `https://` im Browser blockiert, obwohl der Server sie akzeptiert. Jetzt `type="text"` mit `inputmode="url"`.
+  2. Eigene Validierungsattribute zeigten ihren Schlüssel („Validation.Consent“) statt des Textes. ASP.NET übersetzt nur Attribute mit „Adapter“, deshalb gibt es jetzt `LocalizedValidationAdapterProvider`.
+- **Lernpunkt:** Ein komplett leerer POST (nur von Bots) bindet `Input` gar nicht. Dann gibt es keine Feldfehler, aber auch keine Speicherung. Der Test bildet jetzt echtes Browser-Verhalten nach, der Bot-Fall ist separat abgesichert.
+- Tests: 184 grün (neu: Formular gegen echte DB inkl. Zusammenführen, Sprachwahl, ungültige Werte, fehlender Antiforgery-Token → 400; Regeln für Steam-Link, E-Mail, Release, Einwilligungs-Hash).
+
 ## 2026-11-26 · Schritt 3.3 – Readiness und Tests mit echter Datenbank
 - `/health` ist reine Liveness (keine Prüfungen). `/health/ready` prüft, dass die Datenbank erreichbar ist **und** keine Migration fehlt (`MigrationsHealthCheck`). Der Smoke-Test nach dem Deploy erkennt so auch eine vergessene Migration.
 - Testcontainers 4.17.0: `DatabaseWebFactory` startet `postgres:16.16` einmal pro Testlauf und legt das Schema über die echten Migrationen an. `ResetAsync()` leert die Tabellen zwischen Tests.

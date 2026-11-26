@@ -32,6 +32,14 @@ public partial class ContrastTests
         { "text", "accent-soft", 4.5, "TODO-Box und Beispiel-Badge" },
         { "focus", "bg", 3.0, "Fokusrahmen" },
         { "focus", "surface-2", 3.0, "Fokusrahmen in grauen Abschnitten" },
+        { "focus", "surface", 3.0, "Fokusrahmen in Formularen" },
+        // Formulare: Rahmen von Eingabefeldern brauchen 3:1 (WCAG 1.4.11), Fehlertexte 4,5:1.
+        { "input-border", "surface", 3.0, "Rahmen von Eingabefeldern" },
+        { "input-border", "bg", 3.0, "Rahmen von Eingabefeldern auf Seitenhintergrund" },
+        { "danger", "surface", 4.5, "Fehlermeldung im Formular" },
+        { "danger", "bg", 4.5, "Fehlermeldung auf Seitenhintergrund" },
+        { "danger", "surface", 3.0, "Roter Rahmen fehlerhafter Felder" },
+        { "text", "danger-soft", 4.5, "Fehler-Zusammenfassung" },
     };
 
     [Theory]

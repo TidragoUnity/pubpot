@@ -2,11 +2,16 @@ using System.Globalization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using PubPot.Web;
 using PubPot.Web.Data;
+using PubPot.Web.Forms;
 using PubPot.Web.Localization;
 using PubPot.Web.Security;
+using PubPot.Web.Signups;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,7 +66,18 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentLanguage>();
 
 builder.Services.AddRazorPages(o => o.Conventions.Add(new CultureRouteConvention()))
-    .AddViewLocalization();
+    .AddViewLocalization()
+    // Fehlermeldungen und Feldnamen der Formulare ([Required(ErrorMessage = "Validation.Required")] usw.)
+    // sind Schlüssel in SharedResource.resx.
+    .AddDataAnnotationsLocalization(o =>
+        o.DataAnnotationLocalizerProvider = (_, factory) => factory.Create(typeof(SharedResource)))
+    // Keine data-val-*-Attribute: Wir prüfen ohne jQuery-Validation (Browser + Server).
+    .AddViewOptions(o => o.HtmlHelperOptions.ClientValidationEnabled = false);
+builder.Services.AddSingleton<IConfigureOptions<MvcOptions>, LocalizedModelBindingMessages>();
+builder.Services.AddSingleton<IValidationAttributeAdapterProvider, LocalizedValidationAdapterProvider>();
+
+// --- Anmeldungen ---
+builder.Services.AddScoped<SignupService>();
 
 // --- Sicherheit ---
 // Kein "Server: Kestrel"-Header: verrät unnötig, welche Software läuft.

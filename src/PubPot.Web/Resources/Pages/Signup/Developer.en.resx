@@ -24,7 +24,13 @@
   <data name="Intro" xml:space="preserve">
     <value>Tell us about your game. Signing up is free and doesn't commit you to anything.</value>
   </data>
-  <data name="Placeholder" xml:space="preserve">
-    <value>The sign-up form is coming soon.</value>
+  <data name="Group.You" xml:space="preserve">
+    <value>About you</value>
+  </data>
+  <data name="Group.Game" xml:space="preserve">
+    <value>Your game</value>
+  </data>
+  <data name="Group.Pilot" xml:space="preserve">
+    <value>Pilot and message</value>
   </data>
 </root>

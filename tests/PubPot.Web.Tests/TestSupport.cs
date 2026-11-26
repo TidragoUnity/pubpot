@@ -68,6 +68,31 @@ internal static partial class TestSupport
         return await response.Content.ReadAsStringAsync(Ct);
     }
 
+    /// <summary>
+    /// Schickt ein Formular ab wie ein Browser: erst die Seite laden (Antiforgery-Token und -Cookie holen),
+    /// dann mit Token und Cookie per POST absenden.
+    /// </summary>
+    public static async Task<HttpResponseMessage> PostFormAsync(
+        HttpClient client, string path, IEnumerable<KeyValuePair<string, string>> fields)
+    {
+        using var page = await GetAsync(client, path);
+        var html = await page.Content.ReadAsStringAsync(Ct);
+        var token = AntiforgeryToken().Match(html).Groups[1].Value;
+        var cookie = page.Headers.GetValues("Set-Cookie")
+            .First(c => c.StartsWith(".AspNetCore.Antiforgery", StringComparison.Ordinal))
+            .Split(';')[0];
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, path)
+        {
+            Content = new FormUrlEncodedContent(fields.Append(new("__RequestVerificationToken", token))),
+        };
+        request.Headers.Add("Cookie", cookie);
+        return await client.SendAsync(request, Ct);
+    }
+
+    [GeneratedRegex(@"name=""__RequestVerificationToken""[^>]*value=""([^""]+)""")]
+    private static partial Regex AntiforgeryToken();
+
     /// <summary>Repo-Wurzel (dort liegt PubPot.slnx), um Quelldateien wie .resx und .css zu prüfen.</summary>
     public static string RepoRoot { get; } = FindRepoRoot();
 
