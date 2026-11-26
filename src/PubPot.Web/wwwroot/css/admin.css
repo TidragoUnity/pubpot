@@ -194,8 +194,13 @@
 }
 
 /* ---------- Löschen ---------- */
-.admin-narrow {
+/* Schmale Spalte, aber linksbündig wie die anderen Admin-Seiten. */
+.admin-narrow > * {
   max-width: 44rem;
+}
+
+.admin-narrow > .form-group {
+  margin-bottom: 1.25rem;
 }
 
 .btn-danger {

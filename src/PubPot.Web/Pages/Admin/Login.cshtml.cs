@@ -76,6 +76,9 @@ public sealed class LoginModel(
             ? url
             : AdminAuth.PathPrefix;
 
-    private static string LockedMessage(TimeSpan remaining) =>
-        $"Zu viele Fehlversuche. Der Login ist für {Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes))} Minuten gesperrt.";
+    private static string LockedMessage(TimeSpan remaining)
+    {
+        var minutes = Math.Max(1, (int)Math.Ceiling(remaining.TotalMinutes));
+        return $"Zu viele Fehlversuche. Der Login ist für {(minutes == 1 ? "1 Minute" : $"{minutes} Minuten")} gesperrt.";
+    }
 }

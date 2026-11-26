@@ -27,16 +27,15 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Texte** stehen immer in `.resx`, Deutsch und Englisch (`*.en.resx`). Der Paritätstest meldet fehlende Übersetzungen.
 
 ## Stand (2026-11-26)
-- **Phasen 0–3 fertig:** alle Seiten auf DE/EN, Formulare für Entwickler und Creator, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks.
-- 364 Tests grün, 5 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
-- **Phase 4 läuft:** 4.1–4.9 sind fertig (Admin-Bereich komplett, Benachrichtigung, Aufbewahrungsfrist, E-025–E-031). Weiter geht es mit **4.10 Abnahme**. **Keine offenen Rückfragen.**
+- **Phasen 0–4 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks. Dazu der **Admin-Bereich** (`/admin`, nur Deutsch): Login mit Sperre, Liste mit Filter und Suche, Detailseite mit Pipeline, CSV-Export, Löschen (DSGVO), Hinweis-Mail bei neuer Anmeldung (Discord optional) und die **Aufbewahrungsfrist** mit Warnmail und Link „Ich möchte dabei bleiben“.
+- 365 Tests grün, 5 Migrationen. Lighthouse auf allen Seiten 100 (Performance, Barrierefreiheit, Best Practices).
+- Entscheidungen der Phase 4: E-024 bis E-031. **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
-### Phase 4 – Admin-Bereich: weiter mit dem nächsten ⬜-Schritt in `docs/ROADMAP.md`
-- Der Plan mit allen Schritten steht in `docs/ROADMAP.md`. Die Anforderungen stehen in `docs/AUFTRAG.md` im Abschnitt „Admin-Bereich“.
-- Der Admin-Bereich ist **nur auf Deutsch**: Die Texte stehen direkt in Razor, nicht in `.resx`, und es gibt keine Sprach-Route (E-024).
-- Benachrichtigungen enthalten keine persönlichen Daten. Discord ist aus, solange die Umgebungsvariable fehlt (E-014).
-- Aufbewahrungsfrist (4.9): Nur eine **Änderung** im Admin-Bereich zählt als Aktivität, auch „Pilot“ bekommt nach 12 Monaten die Warnmail (E-023).
+### Phase 5 – Docker und Compose lokal ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt
+1. Phase 5 in `docs/ROADMAP.md` in Schritte 5.1, 5.2 … aufteilen, dem Nutzer vorlegen und auf das OK warten.
+2. Grobe Inhalte stehen in der Roadmap: Dockerfiles (Nicht-Root, Healthcheck), Migrations-Bundle, Compose mit web, worker, db, caddy und migrate, Forwarded Headers hinter Caddy (E-022).
+3. Aus Phase 4 mitnehmen: In die `.env.example` kommen `Admin__PasswordHash`, `Notifications__Email` und `Notifications__DiscordWebhookUrl`. `hash-password` muss im Container laufen (`docker compose run --rm web hash-password`). `Site__BaseUrl` ist Pflicht, denn der Aufbewahrungs-Job baut Links ohne Anfrage (E-031).
 
 **Hilfreich zu wissen:** Die Data-Protection-Schlüssel liegen schon in der Datenbank, Admin-Cookies überleben also einen Neustart. Mails sind nur Text und laufen über die Outbox, Links kommen aus `Site:BaseUrl` (E-021). Das Rate-Limiting gibt es schon in `Spam/RateLimits.cs`.
 

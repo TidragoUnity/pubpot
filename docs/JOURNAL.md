@@ -5,6 +5,15 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.10 – Abnahme, Phase 4 abgeschlossen
+- **Lokal mit echtem Postgres und Mailpit**, Migrationen 4 und 5 auf die Entwicklungsdatenbank angewendet. Admin-Passwort nur als Umgebungsvariable für den Testlauf, die User Secrets sind unverändert.
+- **Durchlauf im Browser:** Anmeldung als Creator → Bestätigungsmail in Mailpit → Bestätigung → **Hinweis-Mail ans Team über echtes SMTP** (ohne Name und Adresse). Danach im Admin-Bereich: Weiterleitung zum Login, 5 Fehlversuche → Sperre (auch mit richtigem Passwort), nach Ablauf Login. Cookie ist `HttpOnly`, `Secure`, `SameSite=Strict` und ein Sitzungscookie. Filter landet in der URL (`/admin?kind=Creator`), der Suchtext nicht. CSV-Export mit BOM und passendem Dateinamen. Status, Datum und Notiz bearbeitet. Logout, danach wieder Login nötig. Test-Anmeldung über die Oberfläche gelöscht, ihre Mails sind aus dem Ausgang verschwunden.
+- **Lighthouse:** alle Admin-Seiten und die Keep-Seite (DE/EN) mobil und Desktop 100/100/100. SEO-Abzug nur durch das gewollte `noindex`.
+- **Gefunden und behoben:** „für 1 Minuten gesperrt“ heißt jetzt „für 1 Minute gesperrt“ (mit Test). Die Rückfrage-Seite zum Löschen war mittig statt linksbündig und hatte keinen Abstand unter dem Kasten.
+- Für Phase 5 vorgemerkt: Die neuen Variablen kommen in die `.env.example`, und `hash-password` muss im Container laufen.
+- Stand: 365 Tests grün, 5 Migrationen (`Initial`, `DataProtectionKeys`, `CleanupIndex`, `AdminPipeline`, `Retention`).
+- **Als Nächstes:** Phase 5 (Docker und Compose). Vorher fein planen und deine Bestätigung abwarten.
+
 ## 2026-11-26 · Schritt 4.9 – Aufbewahrungsfrist (E-023)
 - Bestätigte Anmeldungen: Nach 12 Monaten ohne Aktivität geht eine Warnmail raus (Sprache der Anmeldung, mit Löschdatum). Der Link „Ich möchte dabei bleiben“ führt zu `/{sprache}/signup/keep`, und erst der Button dort zählt. Danach kommt die Mail „Deine Anmeldung bleibt bestehen“. Ohne Klick wird 30 Tage nach der Warnmail gelöscht (E-031).
 - Als Aktivität zählen die erste Bestätigung, der Klick und jede Änderung im Admin-Bereich. Ein erneut abgeschicktes Formular zählt nicht, auch nicht, wenn die Änderung bestätigt wird (F-013, F-015). Die Detailseite zeigt die letzte Aktivität und eine laufende Warnung.

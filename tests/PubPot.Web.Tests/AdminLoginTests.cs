@@ -189,6 +189,17 @@ public class AdminLoginTests(DatabaseWebFactory factory)
         await LoginAsAdminAsync(client);
     }
 
+    /// <summary>Gefunden bei der Abnahme: Es hieß „für 1 Minuten gesperrt“.</summary>
+    [Fact]
+    public async Task Short_lockout_uses_singular_minute()
+    {
+        await using var app = App(("Admin:MaxFailedLogins", "1"), ("Admin:LockoutDuration", "00:00:30"));
+
+        using var locked = await PostFormAsync(CreateClient(app), "/admin/login", [new("Username", "admin"), new("Password", "falsch")]);
+
+        Assert.Contains("für 1 Minute gesperrt", WebUtility.HtmlDecode(await locked.Content.ReadAsStringAsync(Ct)), StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task Successful_login_resets_the_failure_counter()
     {
