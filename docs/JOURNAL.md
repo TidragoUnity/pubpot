@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Startdatei für neue Sitzungen
+- Neue Datei `START-SESSION.md` im Repo-Wurzelordner: Überblick, Regeln, Stand, nächste Aufgabe, Wegweiser zu den Dateien. Zu Beginn einer Sitzung wird nur sie gelesen, das hält den Kontext klein.
+- `CLAUDE.md` angepasst: Sitzungsstart über `START-SESSION.md`, die am Ende jeder Sitzung aktualisiert wird.
+- **Als Nächstes:** Phase 4 (Admin-Bereich), erst nach deiner Bestätigung.
+
 ## 2026-11-26 · F-013 beantwortet
 - Bestätigte Anmeldungen: 12 Monate ohne Aktivität → Warnmail mit Link „Ich möchte dabei bleiben“ → ohne Klick nach 30 Tagen gelöscht. Mit Klick gibt es eine Bestätigungsmail, und die Frist beginnt neu. Aktiver Admin-Status zählt ebenfalls als Aktivität (E-023).
 - Wird nach Phase 4 gebaut. In der Roadmap vermerkt.

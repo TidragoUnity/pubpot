@@ -2,10 +2,12 @@
 
 Auftrag: `docs/AUFTRAG.md`. Sprache im Projekt: Deutsch (Code-Bezeichner Englisch).
 
-## Zu Beginn jeder Sitzung lesen
-1. `docs/ROADMAP.md`: Status, nächster Schritt
-2. `docs/JOURNAL.md`: letzter Eintrag
-3. `docs/RUECKFRAGEN.md`: neue Antworten übernehmen, daraus folgende Entscheidungen in `docs/ENTSCHEIDUNGEN.md` festhalten
+## Zu Beginn jeder Sitzung
+Nur `START-SESSION.md` lesen: Überblick, Stand und nächste Aufgabe. Weitere Dateien unter `docs/` nur öffnen, wenn die Aufgabe sie braucht. Das hält den Kontext klein.
+Beantwortet der Nutzer eine Rückfrage, die Antwort in `docs/RUECKFRAGEN.md` übernehmen und die Entscheidung in `docs/ENTSCHEIDUNGEN.md` festhalten.
+
+## Am Ende jeder Sitzung
+In `START-SESSION.md` die Abschnitte „Stand“ und „Nächste Aufgabe“ aktualisieren.
 
 ## Arbeitsweise
 - Ein Roadmap-Schritt = ein lauffähiger Commit. Commit-Nachricht: `<Schritt>: <Was>`, z. B. `1.3: Worker auf .NET 10 gehoben`.
