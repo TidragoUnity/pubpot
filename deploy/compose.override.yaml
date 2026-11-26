@@ -1,0 +1,28 @@
+# Nur für die lokale Entwicklung. Wird von "docker compose" automatisch zusätzlich zu compose.yaml geladen,
+# solange beide im selben Ordner liegen. Auf dem Server gibt es diese Datei nicht.
+#
+# Alle Ports sind an 127.0.0.1 gebunden: erreichbar nur von deinem Rechner, nicht aus dem Netzwerk.
+
+services:
+  db:
+    ports:
+      # Damit "dotnet run" und Werkzeuge wie DBeaver die Datenbank lokal erreichen.
+      - "127.0.0.1:5432:5432"
+
+  # Fängt alle Mails ab, die die App lokal verschickt. Oberfläche: http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:v1.34.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"   # Weboberfläche
+      - "127.0.0.1:1025:1025"   # SMTP für die App
+
+  # Datenbank im Browser ansehen: http://localhost:8081 (System: PostgreSQL, Server: db)
+  # Port 8081 statt 8080, weil 8080 noch vom Adminer der laufenden Twitch-Studie belegt ist.
+  adminer:
+    image: adminer:5.5.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8080"
+    depends_on:
+      - db

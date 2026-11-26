@@ -23,6 +23,25 @@ dotnet test --solution PubPot.slnx
 dotnet format PubPot.slnx --verify-no-changes
 ```
 
+## Lokale Hilfsdienste (Docker)
+
+Datenbank, Mail-Fänger und Datenbank-Oberfläche laufen in Docker:
+
+```bash
+cd deploy
+cp .env.example .env        # einmalig, dann Passwörter eintragen
+docker compose up -d
+```
+
+| Dienst | Adresse | Zweck |
+|---|---|---|
+| PostgreSQL 16 | `127.0.0.1:5432` | Datenbanken `pubpot` (Web) und `twitch` (Worker) mit eigenen Benutzern |
+| Mailpit | http://localhost:8025 | fängt alle Mails ab, die die App lokal verschickt (SMTP auf Port 1025) |
+| Adminer | http://localhost:8081 | Datenbank im Browser ansehen (Server: `db`) |
+
+Alle Ports sind nur auf `127.0.0.1` gebunden, also nur vom eigenen Rechner aus erreichbar.
+Stoppen: `docker compose down`. Alles inklusive Daten löschen: `docker compose down -v`.
+
 ## Website lokal starten
 
 ```bash

@@ -1,0 +1,39 @@
+# PubPot – Docker Compose
+#
+# Diese Datei gilt in ALLEN Umgebungen (lokal, staging, production).
+# Lokal lädt Docker Compose automatisch zusätzlich compose.override.yaml (Mailpit, Adminer, lokale Ports).
+#
+# Starten (aus diesem Ordner):   docker compose up -d
+# Status:                        docker compose ps
+# Logs:                          docker compose logs -f db
+#
+# Die Passwörter kommen aus der Datei .env in diesem Ordner (Vorlage: .env.example, nie committen).
+#
+# Phase 3: nur die Datenbank. Phase 5 ergänzt web, worker, migrate und caddy.
+
+name: pubpot
+
+services:
+  db:
+    image: postgres:16.16
+    restart: unless-stopped
+    environment:
+      # Superuser – nur für Verwaltung und das Init-Skript, nicht für die Anwendungen.
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD in deploy/.env setzen}
+      # Eigene Benutzer für Web und Worker (siehe db/init/01-databases.sh).
+      PUBPOT_DB_PASSWORD: ${PUBPOT_DB_PASSWORD:?PUBPOT_DB_PASSWORD in deploy/.env setzen}
+      TWITCH_DB_PASSWORD: ${TWITCH_DB_PASSWORD:?TWITCH_DB_PASSWORD in deploy/.env setzen}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Skripte in diesem Ordner laufen genau einmal: beim allerersten Start mit leerem Volume.
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    # Bewusst kein "ports:" – die Datenbank ist nur im internen Docker-Netz erreichbar, nie aus dem Internet.
+
+volumes:
+  pgdata:

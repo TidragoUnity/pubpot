@@ -51,7 +51,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 ## Phase 3 – Formulare, Datenbank, Double-Opt-in, Spam-Schutz 🔄
 | # | Schritt | Status |
 |---|---|---|
-| 3.1 | Docker für die lokalen Hilfsdienste: `deploy/compose.yaml` (Postgres 16, Init-Skript mit zwei Datenbanken und eigenen Benutzern, E-011), `deploy/compose.override.yaml` (Mailpit, Adminer, nur `127.0.0.1`), `deploy/.env.example` | ⬜ |
+| 3.1 | Docker für die lokalen Hilfsdienste: `deploy/compose.yaml` (Postgres 16, Init-Skript mit zwei Datenbanken und eigenen Benutzern, E-011), `deploy/compose.override.yaml` (Mailpit, Adminer, nur `127.0.0.1`), `deploy/.env.example` | ✅ |
 | 3.2 | EF Core: `AppDbContext`, Datenmodell (Anmeldungen, Bestätigungen, Mail-Ausgang), snake_case-Namen, erste Migration, `dotnet-ef` als lokales Tool | ⬜ |
 | 3.3 | `/health/ready` mit Datenbank-Prüfung, Test-Basis mit Testcontainers (echtes Postgres im Test) | ⬜ |
 | 3.4 | Formular Entwickler: Felder, serverseitige Validierung (Steam-Link), Einwilligung mit Version und Zeitstempel, Speichern, Zusammenführen bei gleicher E-Mail | ⬜ |

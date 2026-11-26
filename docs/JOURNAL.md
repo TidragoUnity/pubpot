@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.1 – Hilfsdienste in Docker
+- `deploy/compose.yaml` (Basis für alle Umgebungen, Projektname `pubpot`, Postgres ohne offene Ports) und `deploy/compose.override.yaml` (nur lokal: Postgres, Mailpit und Adminer auf `127.0.0.1`). Images mit fester Version: `postgres:16.16`, `axllent/mailpit:v1.34.0`, `adminer:5.5.1`.
+- Init-Skript legt `pubpot` und `twitch` mit eigenen Benutzern an, `REVOKE ALL … FROM PUBLIC` sperrt den Zugriff über Kreuz.
+- Lokale `deploy/.env` mit Zufallspasswörtern erzeugt. Sie ist nicht im Repo (`git check-ignore` geprüft).
+- Adminer auf Port 8081, weil 8080 vom Adminer der laufenden Studie belegt ist. Kein Konflikt mit der Studie, eigene Volumes (`pubpot_pgdata`).
+- Geprüft: Rechtetrennung (pubpot ↔ twitch gesperrt), Passwortprüfung über das Docker-Netz, Mailpit und Adminer erreichbar.
+- **Lernpunkt:** Innerhalb des Postgres-Containers gilt für `localhost` `trust`, also kein Passwort. Ein Test **im** Container sagt deshalb nichts über die Passwortprüfung aus. Richtig testet man so, wie die App sich verbindet: aus einem anderen Container über das Netzwerk.
+
 ## 2026-11-26 · Schritt 2.6 – Tests, Phase 2 abgeschlossen
 - 132 Tests in 5 Klassen: `PageTests` (alle Seiten, kein Roh-Schlüssel, Crawler über alle internen Links), `LocalizationTests` (Weiterleitung, Umschalter, Open Redirect, 404, hreflang, noindex, Vorschlag), `SecurityTests` (Header auch auf CSS-Dateien, kein Inline-JS/-CSS, keine fremden Hosts, HSTS nur über HTTPS in Production, `/health`), `ResourceTests` (DE/EN-Parität, keine Steuerzeichen, jeder View-Schlüssel existiert), `ContrastTests` (WCAG AA hell und dunkel aus `site.css`).
 - Gegenprobe mit zwei absichtlichen Fehlern: Beide wurden erkannt (E-019).
