@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using PubPot.Web.Data;
 using PubPot.Web.Localization;
+using PubPot.Web.Notifications;
 using PubPot.Web.Spam;
 
 namespace PubPot.Web.Signups;
@@ -31,6 +32,7 @@ public sealed class SignupService(
     LinkBuilder links,
     IStringLocalizer<SharedResource> text,
     IOptions<SpamOptions> spam,
+    SignupNotifier notifier,
     ILogger<SignupService> log)
 {
     public async Task SubmitAsync(SignupSubmission submission, CancellationToken ct)
@@ -149,7 +151,17 @@ public sealed class SignupService(
         signup.ConfirmedAt ??= now;
         signup.UpdatedAt = now;
         db.SignupConfirmations.Remove(confirmation);
+        if (firstConfirmation)
+        {
+            // Hinweis ans Team nur bei der ersten Bestätigung, nicht bei bestätigten Änderungen (E-030).
+            notifier.AddEmail(signup, now);
+        }
+
         await db.SaveChangesAsync(ct);
+        if (firstConfirmation)
+        {
+            notifier.QueueDiscord(signup);
+        }
 
         log.LogInformation("Anmeldung {SignupId} bestätigt{Kind}.", signup.Id,
             firstConfirmation ? "" : " (Änderungen übernommen)");

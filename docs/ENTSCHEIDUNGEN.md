@@ -196,6 +196,17 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **Ohne Bibliothek:** Ein Paket wie CsvHelper wäre für 27 Spalten zu viel. Das Maskieren ist in einer kleinen, getesteten Methode (`SignupCsv.Cell`).
 **Alternative:** Excel-Datei (`.xlsx`). Das bräuchte eine Bibliothek, ist schwerer zu prüfen, und CSV öffnet jedes Programm.
 
+## E-030 · Hinweise auf neue Anmeldungen: Mail über die Outbox, Discord optional
+**Entscheidungen:**
+- **Auslöser** ist nur die **erste** Bestätigung einer Anmeldung, nicht die Bestätigung einer Änderung.
+- **Mail über die Outbox** an `Notifications__Email`, gespeichert im **selben** `SaveChanges` wie die Bestätigung. Entweder klappt beides oder nichts, und eine Bestätigung ohne Hinweis gibt es nicht. Der Versand hat dieselben Wiederholungen wie jede andere Mail (E-021).
+- **Keine persönlichen Daten in den Hinweisen:** nur Art (Entwickler/Creator), Sprache und der Link zur Detailseite. Name und Adresse sieht man nach dem Login. So liegen sie nicht zusätzlich in einem Postfach oder bei Discord (US-Anbieter).
+- **Discord nur mit `Notifications__DiscordWebhookUrl`.** Die URL ist ein Geheimnis, denn wer sie kennt, kann in den Kanal schreiben. Beim Start wird geprüft, dass es eine `https://discord.com/api/webhooks/…`-Adresse ist. `allowed_mentions` ist leer, damit nie jemand angepingt wird.
+- **Die Webhook-URL steht nie im Log:** `IHttpClientFactory` loggt standardmäßig jede aufgerufene URL. Für den Discord-Client ist das mit `RemoveAllLoggers()` abgeschaltet. Ein Test prüft das, und ohne die Zeile stünde die URL viermal im Log.
+- **Discord-Warteschlange im Arbeitsspeicher** (höchstens 100, 3 Versuche nach 2 und 4 Sekunden). Nach einem Neustart sind offene Discord-Hinweise verloren. Das ist vertretbar, weil die Mail der verlässliche Weg ist.
+- **Ohne `Notifications__Email`** gibt es keine Hinweis-Mail, dafür eine Warnung beim Start. Die App startet trotzdem: Lokal braucht man keine Hinweise.
+**Alternative:** Discord ebenfalls über eine Tabelle in der Datenbank (verlässlich auch über Neustarts). Das wäre eine weitere Migration für einen optionalen Kanal, der laut E-014 standardmäßig aus ist.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

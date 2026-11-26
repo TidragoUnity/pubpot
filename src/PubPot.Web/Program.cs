@@ -13,6 +13,7 @@ using PubPot.Web.Data;
 using PubPot.Web.Email;
 using PubPot.Web.Forms;
 using PubPot.Web.Localization;
+using PubPot.Web.Notifications;
 using PubPot.Web.Security;
 using PubPot.Web.Signups;
 using PubPot.Web.Spam;
@@ -115,6 +116,20 @@ if (builder.Configuration.GetValue("Outbox:Enabled", defaultValue: true))
     builder.Services.AddHostedService<OutboxSenderService>();
 }
 
+// Hinweise ans Team bei neuen bestätigten Anmeldungen: Mail über die Outbox, Discord nur mit Webhook-URL (E-030).
+builder.Services.AddOptions<NotificationOptions>().Bind(builder.Configuration.GetSection(NotificationOptions.SectionName))
+    .Validate(NotificationOptions.IsValid, "Notifications:Email ist keine gültige Adresse oder Notifications:DiscordWebhookUrl keine https://discord.com/api/webhooks/…-Adresse.")
+    .ValidateOnStart();
+builder.Services.AddScoped<SignupNotifier>();
+builder.Services.AddSingleton<DiscordQueue>();
+// RemoveAllLoggers: Sonst schreibt HttpClient jede URL ins Log, und die Webhook-URL ist ein Geheimnis.
+builder.Services.AddHttpClient(DiscordSenderService.HttpClientName, c => c.Timeout = TimeSpan.FromSeconds(10))
+    .RemoveAllLoggers();
+if (!string.IsNullOrWhiteSpace(builder.Configuration["Notifications:DiscordWebhookUrl"]))
+{
+    builder.Services.AddHostedService<DiscordSenderService>();
+}
+
 // Aufräumen nach Aufbewahrungsfristen (unbestätigte Anmeldungen nach 30 Tagen, versendete Mails nach 7 Tagen).
 builder.Services.AddOptions<CleanupOptions>().Bind(builder.Configuration.GetSection("Cleanup")).ValidateOnStart();
 builder.Services.AddScoped<DataCleanup>();
@@ -179,6 +194,11 @@ var app = builder.Build();
 if (!app.Services.GetRequiredService<IOptions<AdminOptions>>().Value.IsEnabled)
 {
     app.Logger.LogWarning("Admin-Bereich ist aus, weil Admin:PasswordHash fehlt.");
+}
+
+if (!app.Services.GetRequiredService<IOptions<NotificationOptions>>().Value.EmailEnabled)
+{
+    app.Logger.LogWarning("Keine Hinweis-Mails bei neuen Anmeldungen, weil Notifications:Email fehlt.");
 }
 
 app.UseSecurityHeaders();

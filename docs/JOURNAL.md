@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.8 – Benachrichtigung
+- Bei der ersten Bestätigung einer Anmeldung geht eine Hinweis-Mail an `Notifications__Email`, über die Outbox und in derselben Transaktion wie die Bestätigung. Inhalt: Art, Sprache und der Link zur Detailseite, ohne Name und Adresse (E-030).
+- Discord (`Notifications__DiscordWebhookUrl`) mit eigener Warteschlange und Hintergrunddienst, 3 Versuche. Ohne die Variable ist der Dienst gar nicht registriert. Beide Einstellungen werden beim Start geprüft.
+- **Gefunden:** `IHttpClientFactory` schreibt jede URL ins Log, und damit stünde die geheime Webhook-URL im Log. Behoben mit `RemoveAllLoggers()`. Ich habe nachgeprüft, dass der Test ohne die Zeile wirklich fehlschlägt.
+- 9 neue Tests (`NotificationTests`), mit einem nachgebauten Discord-Server und einem Log-Mitschnitt.
+- **Als Nächstes:** 4.9 Aufbewahrungsfrist bestätigter Anmeldungen (E-023).
+
 ## 2026-11-26 · Schritt 4.7 – CSV-Export
 - Button „CSV exportieren“ in der Liste. Er exportiert genau die gefilterte Liste (gleiche Filter, gleicher Suchtext) als `pubpot-anmeldungen-JJJJ-MM-TT.csv`.
 - `SignupCsv`: UTF-8 mit BOM, Semikolon, CRLF, 27 Spalten. Formeln werden entschärft, Sonderzeichen in Anführungszeichen (E-029). `GET /admin/export` führt zurück zur Liste.

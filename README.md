@@ -85,6 +85,13 @@ dotnet user-secrets set "Admin:PasswordHash" "<HASH>" --project src/PubPot.Web
 
 Danach ist der Admin-Bereich unter http://localhost:5080/admin erreichbar.
 
+### Hinweise auf neue Anmeldungen (optional)
+
+| Einstellung | Umgebungsvariable | Bedeutung |
+|---|---|---|
+| `Notifications:Email` | `Notifications__Email` | Bekommt bei jeder neu bestätigten Anmeldung eine kurze Mail (ohne Name und Adresse). Leer = keine Mail. |
+| `Notifications:DiscordWebhookUrl` | `Notifications__DiscordWebhookUrl` | Discord-Webhook (`https://discord.com/api/webhooks/…`). **Geheim**, nur in `.env` oder User Secrets. Leer = Discord aus. |
+
 > Ohne Startprofil muss die Umgebung über die Variable gesetzt werden: `ASPNETCORE_ENVIRONMENT=Development`.
 > Nicht `dotnet run --environment Development` verwenden. Das setzt in .NET 10 eine Umgebungsvariable namens „Development“
 > und startet die App im Production-Modus, ohne CSS (siehe `docs/ENTSCHEIDUNGEN.md`, E-016).
