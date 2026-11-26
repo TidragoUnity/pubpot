@@ -153,6 +153,8 @@ public sealed class SignupService(
         db.SignupConfirmations.Remove(confirmation);
         if (firstConfirmation)
         {
+            // Ab hier läuft die Aufbewahrungsfrist (E-023). Bestätigte Änderungen zählen nicht als Aktivität (F-013).
+            signup.RecordActivity(now);
             // Hinweis ans Team nur bei der ersten Bestätigung, nicht bei bestätigten Änderungen (E-030).
             notifier.AddEmail(signup, now);
         }

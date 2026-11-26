@@ -129,6 +129,16 @@
                 <dd>@(s.ConfirmedAt is { } confirmed ? AdminText.DateTime(confirmed) : "nein")</dd>
                 <dt>Einwilligung</dt>
                 <dd>Version @s.ConsentVersion, am @AdminText.DateTime(s.ConsentGivenAt)</dd>
+                @if (s.LastActivityAt is { } activity)
+                {
+                    <dt>Letzte Aktivität</dt>
+                    <dd>@AdminText.DateTime(activity)</dd>
+                }
+                @if (s.RetentionWarningSentAt is { } warned)
+                {
+                    <dt>Warnmail</dt>
+                    <dd>am @AdminText.DateTime(warned). Ohne Rückmeldung wird gelöscht. Speichern oben verhindert das.</dd>
+                }
             </dl>
 
             <h2>Löschen</h2>

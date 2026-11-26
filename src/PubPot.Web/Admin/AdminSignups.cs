@@ -43,7 +43,7 @@ public sealed record DeleteResult(int RemovedMails);
 public sealed record RelatedSignup(Guid Id, SignupKind Kind);
 
 /// <summary>Abfragen und Änderungen für den Admin-Bereich: Liste, Filter, Suche, Pipeline, Löschen.</summary>
-public sealed class AdminSignups(AppDbContext db, TimeProvider time, ILogger<AdminSignups> log)
+public sealed class AdminSignups(AppDbContext db, SignupDeletion deletion, TimeProvider time, ILogger<AdminSignups> log)
 {
     public const int PageSize = 50;
 
@@ -124,26 +124,33 @@ public sealed class AdminSignups(AppDbContext db, TimeProvider time, ILogger<Adm
         db.SignupConfirmations.AnyAsync(c => c.SignupId == id && c.PendingChanges != null, ct);
 
     /// <summary>
-    /// Speichert Status, Notiz und nächsten Schritt. Setzt <see cref="Signup.AdminUpdatedAt"/> (zählt als Aktivität,
-    /// E-023), aber nicht <see cref="Signup.UpdatedAt"/>: Das ist die letzte Einreichung der Person selbst, und
+    /// Speichert Status, Notiz und nächsten Schritt. Das zählt als Aktivität (E-023): Bei bestätigten Anmeldungen
+    /// beginnt die 12-Monats-Frist neu, und eine laufende Warnung vor dem Löschen ist erledigt.
+    /// <see cref="Signup.UpdatedAt"/> bleibt unverändert: Das ist die letzte Einreichung der Person selbst, und
     /// danach richtet sich die Löschfrist unbestätigter Anmeldungen.
     /// </summary>
     /// <returns><c>false</c>, wenn es die Anmeldung nicht (mehr) gibt.</returns>
     public async Task<bool> UpdatePipelineAsync(Guid id, PipelineUpdate update, CancellationToken ct)
     {
-        var note = string.IsNullOrWhiteSpace(update.Note) ? null : update.Note.Trim().ReplaceLineEndings("\n");
-        var changed = await db.Signups.Where(s => s.Id == id).ExecuteUpdateAsync(u => u
-            .SetProperty(s => s.PipelineStatus, update.Status)
-            .SetProperty(s => s.AdminNote, note)
-            .SetProperty(s => s.NextStepOn, update.NextStepOn)
-            .SetProperty(s => s.AdminUpdatedAt, time.GetUtcNow()), ct);
-
-        if (changed == 1)
+        var signup = await db.Signups.SingleOrDefaultAsync(s => s.Id == id, ct);
+        if (signup is null)
         {
-            log.LogInformation("Admin hat Anmeldung {SignupId} geändert (Status {Status}).", id, update.Status);
+            return false;
         }
 
-        return changed == 1;
+        var now = time.GetUtcNow();
+        signup.PipelineStatus = update.Status;
+        signup.AdminNote = string.IsNullOrWhiteSpace(update.Note) ? null : update.Note.Trim().ReplaceLineEndings("\n");
+        signup.NextStepOn = update.NextStepOn;
+        signup.AdminUpdatedAt = now;
+        if (signup.IsConfirmed)
+        {
+            signup.RecordActivity(now);
+        }
+
+        await db.SaveChangesAsync(ct);
+        log.LogInformation("Admin hat Anmeldung {SignupId} geändert (Status {Status}).", id, update.Status);
+        return true;
     }
 
     /// <summary>Andere Anmeldungen mit derselben E-Mail-Adresse (z. B. als Entwickler und als Creator).</summary>
@@ -153,32 +160,14 @@ public sealed class AdminSignups(AppDbContext db, TimeProvider time, ILogger<Adm
             .Select(s => new RelatedSignup(s.Id, s.Kind))
             .ToListAsync(ct);
 
-    /// <summary>
-    /// Löscht eine Anmeldung endgültig (DSGVO-Löschanfrage, E-028): die Anmeldung, ihre Bestätigungslinks
-    /// (per ON DELETE CASCADE) und alle Mails an diese Adresse im Mail-Ausgang, sofern es keine weitere Anmeldung
-    /// mit derselben Adresse gibt. Deren Mails könnten sonst zur anderen Anmeldung gehören.
-    /// </summary>
+    /// <summary>Löscht eine Anmeldung endgültig (DSGVO-Löschanfrage, E-028), siehe <see cref="SignupDeletion"/>.</summary>
     /// <returns><c>null</c>, wenn es die Anmeldung nicht (mehr) gibt.</returns>
     public async Task<DeleteResult?> DeleteAsync(Guid id, CancellationToken ct)
     {
-        await using var transaction = await db.Database.BeginTransactionAsync(ct);
-
-        var email = await db.Signups.Where(s => s.Id == id).Select(s => s.NormalizedEmail).SingleOrDefaultAsync(ct);
-        if (email is null)
+        if (await deletion.DeleteAsync(id, ct) is not { } removedMails)
         {
             return null;
         }
-
-        await db.Signups.Where(s => s.Id == id).ExecuteDeleteAsync(ct);
-
-        var removedMails = 0;
-        if (!await db.Signups.AnyAsync(s => s.NormalizedEmail == email, ct))
-        {
-            // Auch schon versendete Mails: Sie enthalten die Adresse und würden sonst noch 7 Tage gespeichert.
-            removedMails = await db.OutboxEmails.Where(m => m.To.ToLower() == email).ExecuteDeleteAsync(ct);
-        }
-
-        await transaction.CommitAsync(ct);
 
         // Nur die ID ins Log, keine Adresse.
         log.LogInformation("Admin hat Anmeldung {SignupId} gelöscht, {Mails} Mails aus dem Mail-Ausgang entfernt.", id, removedMails);

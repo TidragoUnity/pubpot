@@ -58,11 +58,12 @@ public static class AdminText
         _ => language,
     };
 
-    public static string Date(DateTimeOffset value) =>
-        TimeZoneInfo.ConvertTime(value, Berlin).ToString("dd.MM.yyyy", German);
+    /// <summary>Gespeichert wird UTC, angezeigt deutsche Zeit (auch in Mails an die Angemeldeten).</summary>
+    public static DateTimeOffset InBerlin(DateTimeOffset value) => TimeZoneInfo.ConvertTime(value, Berlin);
 
-    public static string DateTime(DateTimeOffset value) =>
-        TimeZoneInfo.ConvertTime(value, Berlin).ToString("dd.MM.yyyy HH:mm", German);
+    public static string Date(DateTimeOffset value) => InBerlin(value).ToString("dd.MM.yyyy", German);
+
+    public static string DateTime(DateTimeOffset value) => InBerlin(value).ToString("dd.MM.yyyy HH:mm", German);
 
     public static string Date(DateOnly value) => value.ToString("dd.MM.yyyy", German);
 

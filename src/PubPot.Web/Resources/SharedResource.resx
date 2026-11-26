@@ -270,4 +270,25 @@
   <data name="TooMany.Text" xml:space="preserve">
     <value>Von deiner Verbindung kamen gerade sehr viele Anmeldungen. Bitte versuche es in ein paar Minuten noch einmal.</value>
   </data>
+  <data name="Mail.Retention.Subject" xml:space="preserve">
+    <value>Deine Anmeldung bei PubPot wird in 30 Tagen gelöscht</value>
+  </data>
+  <data name="Mail.Retention.Intro" xml:space="preserve">
+    <value>du hast dich {0} bei PubPot angemeldet. Seit 12 Monaten ist bei deiner Anmeldung nichts passiert. Damit wir Daten nicht länger als nötig speichern, löschen wir deine Anmeldung am {1}.</value>
+  </data>
+  <data name="Mail.Retention.Action" xml:space="preserve">
+    <value>Möchtest du dabei bleiben? Dann öffne diesen Link und bestätige mit einem Klick:</value>
+  </data>
+  <data name="Mail.Retention.Note" xml:space="preserve">
+    <value>Wenn du nichts tust, löschen wir deine Angaben automatisch. Du musst dafür nichts weiter tun.</value>
+  </data>
+  <data name="Mail.Kept.Subject" xml:space="preserve">
+    <value>Deine Anmeldung bei PubPot bleibt bestehen</value>
+  </data>
+  <data name="Mail.Kept.Intro" xml:space="preserve">
+    <value>danke für deine Rückmeldung! Deine Anmeldung {0} bleibt bestehen, wir löschen sie nicht.</value>
+  </data>
+  <data name="Mail.Kept.Note" xml:space="preserve">
+    <value>Falls wieder 12 Monate lang nichts passiert, fragen wir dich noch einmal.</value>
+  </data>
 </root>

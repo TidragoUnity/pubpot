@@ -133,6 +133,9 @@ if (!string.IsNullOrWhiteSpace(builder.Configuration["Notifications:DiscordWebho
 // Aufräumen nach Aufbewahrungsfristen (unbestätigte Anmeldungen nach 30 Tagen, versendete Mails nach 7 Tagen).
 builder.Services.AddOptions<CleanupOptions>().Bind(builder.Configuration.GetSection("Cleanup")).ValidateOnStart();
 builder.Services.AddScoped<DataCleanup>();
+builder.Services.AddScoped<SignupDeletion>();
+// Bestätigte Anmeldungen: Warnmail nach 12 Monaten ohne Aktivität, Löschen 30 Tage später (E-023, E-031).
+builder.Services.AddScoped<SignupRetention>();
 if (builder.Configuration.GetValue("Cleanup:Enabled", defaultValue: true))
 {
     builder.Services.AddHostedService<DataCleanupService>();

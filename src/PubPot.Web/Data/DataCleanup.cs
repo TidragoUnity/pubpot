@@ -19,6 +19,15 @@ public sealed class CleanupOptions
 
     /// <summary>Endgültig gescheiterte Mails bleiben etwas länger – zur Fehlersuche.</summary>
     public TimeSpan FailedMailRetention { get; set; } = TimeSpan.FromDays(30);
+
+    /// <summary>Bestätigte Anmeldungen: Warnmail, wenn so lange keine Aktivität war (E-023: 12 Monate).</summary>
+    public TimeSpan InactiveRetention { get; set; } = TimeSpan.FromDays(365);
+
+    /// <summary>So lange nach der Warnmail wird gelöscht, wenn niemand „Ich möchte dabei bleiben“ klickt.</summary>
+    public TimeSpan DeletionNotice { get; set; } = TimeSpan.FromDays(30);
+
+    /// <summary>Höchstens so viele Warnmails pro Durchlauf, damit der Mailanbieter nicht auf einmal überrollt wird.</summary>
+    public int MaxWarningsPerRun { get; set; } = 200;
 }
 
 public sealed record CleanupResult(int UnconfirmedSignups, int ExpiredLinks, int SentMails, int FailedMails);
@@ -86,6 +95,7 @@ public sealed class DataCleanupService(
             {
                 using var scope = scopes.CreateScope();
                 await scope.ServiceProvider.GetRequiredService<DataCleanup>().RunAsync(stoppingToken);
+                await scope.ServiceProvider.GetRequiredService<Signups.SignupRetention>().RunAsync(stoppingToken);
             }
             catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
             {

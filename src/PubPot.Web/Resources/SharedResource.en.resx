@@ -270,4 +270,25 @@
   <data name="TooMany.Text" xml:space="preserve">
     <value>We've just received a lot of sign-ups from your connection. Please try again in a few minutes.</value>
   </data>
+  <data name="Mail.Retention.Subject" xml:space="preserve">
+    <value>Your PubPot sign-up will be deleted in 30 days</value>
+  </data>
+  <data name="Mail.Retention.Intro" xml:space="preserve">
+    <value>you signed up with PubPot {0}. Nothing has happened with your sign-up for 12 months. So that we don't keep data longer than necessary, we'll delete your sign-up on {1}.</value>
+  </data>
+  <data name="Mail.Retention.Action" xml:space="preserve">
+    <value>Would you like to stay? Then open this link and confirm with one click:</value>
+  </data>
+  <data name="Mail.Retention.Note" xml:space="preserve">
+    <value>If you do nothing, we'll delete your details automatically. You don't need to do anything else.</value>
+  </data>
+  <data name="Mail.Kept.Subject" xml:space="preserve">
+    <value>Your PubPot sign-up stays active</value>
+  </data>
+  <data name="Mail.Kept.Intro" xml:space="preserve">
+    <value>thanks for getting back to us! Your sign-up {0} stays active, we won't delete it.</value>
+  </data>
+  <data name="Mail.Kept.Note" xml:space="preserve">
+    <value>If nothing happens for another 12 months, we'll ask you again.</value>
+  </data>
 </root>

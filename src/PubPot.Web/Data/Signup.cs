@@ -70,6 +70,28 @@ public abstract class Signup
     /// <summary>Letzte Änderung im Admin-Bereich. Zählt für die Aufbewahrungsfrist als Aktivität (E-023).</summary>
     public DateTimeOffset? AdminUpdatedAt { get; set; }
 
+    // --- Aufbewahrungsfrist bestätigter Anmeldungen (E-023, E-031) ---
+
+    /// <summary>
+    /// Letzte Aktivität: erste Bestätigung, Klick auf „Ich möchte dabei bleiben“ oder Änderung im Admin-Bereich.
+    /// Ein erneut abgeschicktes Formular zählt bewusst nicht (F-013). Nach 12 Monaten ohne Aktivität kommt die Warnmail.
+    /// </summary>
+    public DateTimeOffset? LastActivityAt { get; set; }
+
+    /// <summary>Wann die Warnmail verschickt wurde. 30 Tage danach wird gelöscht, außer es gab vorher Aktivität.</summary>
+    public DateTimeOffset? RetentionWarningSentAt { get; set; }
+
+    /// <summary>SHA-256 des Tokens im Link „Ich möchte dabei bleiben“ (wie beim Bestätigungslink nur der Hash).</summary>
+    public byte[]? RetentionTokenHash { get; set; }
+
+    /// <summary>Zählt als Aktivität: Frist beginnt neu, eine laufende Warnung ist erledigt.</summary>
+    public void RecordActivity(DateTimeOffset now)
+    {
+        LastActivityAt = now;
+        RetentionWarningSentAt = null;
+        RetentionTokenHash = null;
+    }
+
     public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 }
 

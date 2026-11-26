@@ -17,6 +17,7 @@ internal static partial class TestSupport
         "/signup/creator",
         "/signup/thanks",
         "/signup/confirm",
+        "/signup/keep",
         "/legal/imprint",
         "/legal/privacy",
     ];

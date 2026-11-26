@@ -5,6 +5,16 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.9 – Aufbewahrungsfrist (E-023)
+- Bestätigte Anmeldungen: Nach 12 Monaten ohne Aktivität geht eine Warnmail raus (Sprache der Anmeldung, mit Löschdatum). Der Link „Ich möchte dabei bleiben“ führt zu `/{sprache}/signup/keep`, und erst der Button dort zählt. Danach kommt die Mail „Deine Anmeldung bleibt bestehen“. Ohne Klick wird 30 Tage nach der Warnmail gelöscht (E-031).
+- Als Aktivität zählen die erste Bestätigung, der Klick und jede Änderung im Admin-Bereich. Ein erneut abgeschicktes Formular zählt nicht, auch nicht, wenn die Änderung bestätigt wird (F-013, F-015). Die Detailseite zeigt die letzte Aktivität und eine laufende Warnung.
+- Fünfte Migration `Retention` mit drei Spalten und dem Nachtragen der letzten Aktivität für bestehende Daten (getestet wie in 4.3).
+- `SignupDeletion` ist jetzt der eine Baustein zum Löschen, für den Admin-Bereich und für den Job.
+- **Gefunden:** Lokalisierte Texte müssen innerhalb von `InCulture` gelesen werden. Im ersten Entwurf wären die Warnmails aus dem Hintergrund-Job in der Sprache des Servers gekommen. Außerdem braucht der Job `Site:BaseUrl`, weil es keine Anfrage gibt, aus der er den Link ableiten könnte. Deshalb steht es jetzt auch lokal und in Tests.
+- Datenschutzerklärung (DE/EN) beschreibt die Frist. Die Checkliste hat einen neuen Punkt für die anwaltliche Prüfung der Mailtexte.
+- 13 neue Tests (`RetentionTests`). Die Keep-Seite ist außerdem automatisch in den Seiten-, CSP- und Link-Tests (beide Sprachen).
+- **Als Nächstes:** 4.10 Abnahme von Phase 4.
+
 ## 2026-11-26 · Schritt 4.8 – Benachrichtigung
 - Bei der ersten Bestätigung einer Anmeldung geht eine Hinweis-Mail an `Notifications__Email`, über die Outbox und in derselben Transaktion wie die Bestätigung. Inhalt: Art, Sprache und der Link zur Detailseite, ohne Name und Adresse (E-030).
 - Discord (`Notifications__DiscordWebhookUrl`) mit eigener Warteschlange und Hintergrunddienst, 3 Versuche. Ohne die Variable ist der Dienst gar nicht registriert. Beide Einstellungen werden beim Start geprüft.

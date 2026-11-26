@@ -207,6 +207,18 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **Ohne `Notifications__Email`** gibt es keine Hinweis-Mail, dafür eine Warnung beim Start. Die App startet trotzdem: Lokal braucht man keine Hinweise.
 **Alternative:** Discord ebenfalls über eine Tabelle in der Datenbank (verlässlich auch über Neustarts). Das wäre eine weitere Migration für einen optionalen Kanal, der laut E-014 standardmäßig aus ist.
 
+## E-031 · Aufbewahrungsfrist umgesetzt: Spalten, Job, Link „Ich möchte dabei bleiben“
+Umsetzung von E-023 (F-013, F-015).
+**Entscheidungen:**
+- **Drei neue Spalten** (Migration `Retention`): `last_activity_at`, `retention_warning_sent_at` und `retention_token_hash`. Bestehende bestätigte Anmeldungen bekommen als letzte Aktivität den späteren Zeitpunkt von Bestätigung und Admin-Änderung (`GREATEST`, in der Migration von Hand ergänzt und getestet).
+- **Was als Aktivität zählt** (`Signup.RecordActivity`): die **erste** Bestätigung, ein Klick auf „Ich möchte dabei bleiben“ und jede Änderung im Admin-Bereich (F-015). **Nicht** dazu gehören ein erneut abgeschicktes Formular und auch dessen bestätigte Änderung (F-013). Eine Aktivität setzt eine laufende Warnung zurück, dann wird auch nicht gelöscht.
+- **Job im vorhandenen Aufräum-Dienst** (stündlich): zuerst löschen (Warnmail mindestens 30 Tage alt), dann warnen (12 Monate ohne Aktivität, die ältesten zuerst, höchstens 200 pro Durchlauf). Gelöscht wird über denselben Baustein wie im Admin-Bereich (`SignupDeletion`), also inklusive der Mails an die Adresse.
+- **Link wie beim Double-Opt-in:** zufälliges Token, in der Datenbank nur der SHA-256-Hash, und die Seite `/{sprache}/signup/keep` bestätigt erst per Button (POST). Mail-Scanner öffnen Links vorab und würden sonst die Löschung verhindern, ohne dass die Person etwas getan hat. Der Link gilt nur einmal.
+- **Mails in der Sprache der Anmeldung**, als Text wie alle Mails (E-021), mit dem Löschdatum in deutscher Zeit. Die Texte werden erst innerhalb von `InCulture` gelesen, sonst kämen sie im Hintergrund-Job in der Sprache des Servers.
+- **`Site:BaseUrl` auch lokal gesetzt** (`appsettings.Development.json`, `http://localhost:5080`): Der Job läuft ohne Anfrage im Hintergrund und kann den Link sonst nicht bauen. In Tests steht `http://localhost`.
+- **Datenschutzerklärung** beschreibt die Frist jetzt (DE/EN). Die Aufbewahrung in Backups ergänze ich in Phase 7 (TODO, anwaltlich prüfen lassen).
+**Alternative:** Ein eigener Hintergrunddienst nur für die Frist. Der vorhandene Aufräum-Dienst läuft ohnehin stündlich, ein zweiter Timer bringt nichts.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

@@ -155,6 +155,10 @@ namespace PubPot.Web.Data.Migrations
                         .HasColumnType("character varying(5)")
                         .HasColumnName("language");
 
+                    b.Property<DateTimeOffset?>("LastActivityAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_activity_at");
+
                     b.Property<string>("Message")
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)")
@@ -182,12 +186,25 @@ namespace PubPot.Web.Data.Migrations
                         .HasColumnType("character varying(20)")
                         .HasColumnName("pipeline_status");
 
+                    b.Property<byte[]>("RetentionTokenHash")
+                        .HasMaxLength(32)
+                        .HasColumnType("bytea")
+                        .HasColumnName("retention_token_hash");
+
+                    b.Property<DateTimeOffset?>("RetentionWarningSentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("retention_warning_sent_at");
+
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
                     b.HasKey("Id")
                         .HasName("pk_signups");
+
+                    b.HasIndex("RetentionTokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_signups_retention_token_hash");
 
                     b.HasIndex("ConfirmedAt", "UpdatedAt")
                         .HasDatabaseName("ix_signups_confirmed_at_updated_at");

@@ -1,0 +1,39 @@
+@page
+@model PubPot.Web.Pages.Signup.KeepModel
+@using static PubPot.Web.Pages.Signup.KeepModel
+@{
+    var key = Model.Result switch
+    {
+        View.Prompt => "Prompt",
+        View.Kept => "Kept",
+        _ => "Invalid",
+    };
+    ViewData["Title"] = L[$"{key}.Title"];
+    ViewData["NoIndex"] = true;
+}
+
+<div class="container page-header">
+    <h1>@L[$"{key}.Heading"]</h1>
+    <p class="lead">@L[$"{key}.Text"]</p>
+
+    @switch (Model.Result)
+    {
+        case View.Prompt:
+            <form method="post">
+                <input type="hidden" asp-for="Token" />
+                <button type="submit" class="btn btn-primary">@L["Prompt.Button"]</button>
+            </form>
+            break;
+
+        case View.Kept:
+            <a class="btn btn-primary" asp-page="/Index" asp-route-culture="@Lang.Code">@S["Common.BackHome"]</a>
+            break;
+
+        default:
+            <div class="btn-group">
+                <a class="btn btn-primary" asp-page="/Signup/Developer" asp-route-culture="@Lang.Code">@L["Again.Developer"]</a>
+                <a class="btn btn-secondary" asp-page="/Signup/Creator" asp-route-culture="@Lang.Code">@L["Again.Creator"]</a>
+            </div>
+            break;
+    }
+</div>

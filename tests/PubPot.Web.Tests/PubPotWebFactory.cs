@@ -32,6 +32,8 @@ internal static class TestSettings
 {
     public static void Apply(IWebHostBuilder builder)
     {
+        // Links in Mails auch ohne laufende Anfrage (Hintergrund-Jobs) bauen können, wie in Produktion.
+        builder.UseSetting("Site:BaseUrl", "http://localhost");
         builder.UseSetting("Smtp:Host", "smtp.invalid");
         builder.UseSetting("Smtp:FromAddress", "pubpot@example.test");
         // Kein Hintergrundversand im Test – Tests stoßen den Mail-Ausgang selbst an.

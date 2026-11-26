@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Prompt.Title" xml:space="preserve">
+    <value>Keep your sign-up</value>
+  </data>
+  <data name="Prompt.Heading" xml:space="preserve">
+    <value>Would you like to stay with PubPot?</value>
+  </data>
+  <data name="Prompt.Text" xml:space="preserve">
+    <value>One click on the button is all it takes. Then we won't delete your sign-up.</value>
+  </data>
+  <data name="Prompt.Button" xml:space="preserve">
+    <value>I'd like to stay</value>
+  </data>
+  <data name="Kept.Title" xml:space="preserve">
+    <value>Sign-up stays active</value>
+  </data>
+  <data name="Kept.Heading" xml:space="preserve">
+    <value>Thanks, your sign-up stays active!</value>
+  </data>
+  <data name="Kept.Text" xml:space="preserve">
+    <value>We won't delete it. You'll also get a short confirmation by email in a moment.</value>
+  </data>
+  <data name="Invalid.Title" xml:space="preserve">
+    <value>Invalid link</value>
+  </data>
+  <data name="Invalid.Heading" xml:space="preserve">
+    <value>This link is invalid.</value>
+  </data>
+  <data name="Invalid.Text" xml:space="preserve">
+    <value>It may have been used already, not copied completely, or the sign-up has already been deleted. You can sign up again at any time.</value>
+  </data>
+  <data name="Again.Developer" xml:space="preserve">
+    <value>Sign up as a developer</value>
+  </data>
+  <data name="Again.Creator" xml:space="preserve">
+    <value>Sign up as a creator</value>
+  </data>
+</root>

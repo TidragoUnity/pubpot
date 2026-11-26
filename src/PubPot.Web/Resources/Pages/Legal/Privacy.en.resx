@@ -55,6 +55,6 @@
     <value>Spam protection: when a form is sent, the IP address is used briefly in memory to limit too many requests from the same address (at most 10 minutes). It is neither stored in the database nor logged.</value>
   </data>
   <data name="Facts.Retention" xml:space="preserve">
-    <value>Retention: unconfirmed sign-ups are deleted 30 days after the last submission, sent confirmation emails 7 days after sending, undeliverable ones after 30 days. Confirmed sign-ups are kept until deleted (TODO: define retention period).</value>
+    <value>Retention: unconfirmed sign-ups are deleted 30 days after the last submission, sent confirmation emails 7 days after sending, undeliverable ones after 30 days. Confirmed sign-ups: if nothing has happened for 12 months (no response from you, no processing by us), you'll receive an email with the link "I'd like to stay". Without a click, we delete the sign-up 30 days after that email. TODO: add retention in backups (phase 7), have it reviewed by a lawyer.</value>
   </data>
 </root>

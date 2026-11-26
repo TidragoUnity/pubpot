@@ -47,6 +47,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             e.HasIndex(s => new { s.Kind, s.NormalizedEmail }).IsUnique();
             // Für den Aufräum-Job: unbestätigt und letzte Einreichung älter als 30 Tage.
             e.HasIndex(s => new { s.ConfirmedAt, s.UpdatedAt });
+            e.Property(s => s.RetentionTokenHash).HasMaxLength(32);
+            e.HasIndex(s => s.RetentionTokenHash).IsUnique();
             e.Ignore(s => s.IsConfirmed);
         });
 
