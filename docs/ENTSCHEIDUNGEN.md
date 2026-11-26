@@ -39,6 +39,11 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Warum:** Jedes neue Projekt (Web, Tests) übernimmt die Regeln automatisch. In der CI sind Warnungen Fehler (`CI=true`), lokal nicht. Mit LF-Zeilenenden laufen Shell-Skripte im Linux-Container, mit CRLF aus Windows brechen sie ab (`/bin/sh^M: not found`).
 **Alternative:** Einstellungen pro `.csproj`. Das wird schnell uneinheitlich.
 
+## E-010 · xUnit v3 auf der Microsoft Testing Platform
+**Entscheidung:** Für Tests nutzen wir `xunit.v3`, ausgeführt über die Microsoft Testing Platform (MTP). Eingeschaltet wird sie in `global.json` unter `"test": { "runner": "Microsoft.Testing.Platform" }`.
+**Warum:** xUnit v2 (das noch in der `dotnet new`-Vorlage steckt) wird nur noch gewartet. xUnit v3 setzt auf MTP, und ab SDK 10 lehnt `dotnet test` den alten VSTest-Weg für solche Projekte ab. Mit MTP braucht es nur noch ein einziges Paket.
+**Achtung:** Mit MTP lautet der Aufruf `dotnet test --solution PubPot.slnx` statt `dotnet test PubPot.slnx`. Testabdeckung kommt bei Bedarf in Phase 6 über `Microsoft.Testing.Extensions.CodeCoverage`.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

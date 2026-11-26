@@ -12,4 +12,9 @@
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.15" />
     <PackageVersion Include="Npgsql" Version="10.0.4" />
   </ItemGroup>
+
+  <!-- Tests -->
+  <ItemGroup>
+    <PackageVersion Include="xunit.v3" Version="4.0.3" />
+  </ItemGroup>
 </Project>

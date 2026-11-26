@@ -2,4 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/TwitchWorker/TwitchWorker.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PubPot.Web.Tests/PubPot.Web.Tests.csproj" />
+  </Folder>
 </Solution>

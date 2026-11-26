@@ -25,13 +25,13 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 |---|---|---|
 | 0.1 | Git-Repo, Plan-Dateien, Rückfragen, Journal, Entscheidungslog, Checkliste | ✅ |
 
-## Phase 1 – Repo-Struktur und Worker 🔄
+## Phase 1 – Repo-Struktur und Worker ✅
 | # | Schritt | Status |
 |---|---|---|
 | 1.1 | Worker **unverändert** nach `src/TwitchWorker` kopieren, ohne Secrets (bereinigte `.env.example`). Eigener Commit, damit der Umbau danach im Diff sichtbar ist | ✅ |
 | 1.2 | Grundgerüst: `PubPot.slnx`, `global.json` (SDK 11), `Directory.Build.props` (gemeinsame Einstellungen, Analyzer), `Directory.Packages.props` (zentrale Paketversionen), `.editorconfig`, `.gitattributes`. Worker eingebunden, noch auf .NET 8 | ✅ |
 | 1.3 | Worker auf .NET 10 und Npgsql 10 heben, `dotnet format`, Build grün, kurzer Lauf lokal gegen eine Test-DB | ✅ |
-| 1.4 | Leeres Testprojekt `tests/PubPot.Web.Tests` (xUnit) als Platzhalter, `dotnet test` läuft | ⬜ |
+| 1.4 | Leeres Testprojekt `tests/PubPot.Web.Tests` (xUnit v3, Microsoft Testing Platform) als Platzhalter, `dotnet test` läuft | ✅ |
 
 > Reihenfolge von 1.1 und 1.2 getauscht: Mit zentraler Paketverwaltung wäre die unveränderte `.csproj` nicht baubar, und jeder Commit soll lauffähig sein.
 
