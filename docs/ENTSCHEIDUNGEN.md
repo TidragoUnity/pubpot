@@ -97,6 +97,16 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Lernpunkt:** Fehlt ein englischer Text, zeigt .NET still den deutschen an, ohne Fehler und ohne sichtbaren Schlüssel. Nur der Paritätstest (`ResourceTests`) findet das.
 **Nicht automatisiert:** Lighthouse. Dafür braucht es Chrome in der CI, das kommt in Phase 6 als eigener, optionaler Schritt dazu.
 
+## E-020 · Datenmodell und Ablauf der Anmeldung (Phase 3)
+**Entscheidungen:**
+1. **Eine Anmeldung pro E-Mail und Rolle.** Meldet sich dieselbe Adresse noch einmal als Entwickler an, wird der bestehende Eintrag aktualisiert und kein zweiter angelegt (Zusammenführen, wie im Auftrag). Meldet sich jemand als Entwickler **und** als Creator an, gibt es zwei Einträge, weil das zwei verschiedene Akquise-Vorgänge sind. Die E-Mail wird für den Vergleich normalisiert (Leerzeichen weg, Kleinschreibung).
+2. **Änderungen an bestätigten Einträgen erst nach erneuter Bestätigung.** Sonst könnte jeder, der eine fremde E-Mail-Adresse kennt, deren Daten überschreiben. Die neuen Angaben warten deshalb, bis der Link in der neuen Mail angeklickt wurde.
+3. **Bestätigungs-Token:** 32 Zufallsbytes im Link, in der Datenbank steht nur der SHA-256-Hash. Wer die Datenbank liest, kann damit keine Anmeldung bestätigen. Gültigkeit: 30 Tage, passend zur automatischen Löschung.
+4. **Bestätigen per Button (POST), nicht schon beim Öffnen des Links (GET).** Viele Mail-Programme und Virenscanner öffnen Links in Mails automatisch vorab. Ein reiner GET würde Anmeldungen bestätigen, ohne dass ein Mensch geklickt hat.
+5. **Mail-Ausgang (Outbox) in der Datenbank.** Das Formular speichert die Mail in einer Tabelle, ein Hintergrunddienst verschickt sie mit Wiederholungen. Ist der SMTP-Server kurz weg, geht die Anmeldung trotzdem nicht verloren, und das Formular wartet nicht auf den Mailserver.
+6. **Keine IP-Adressen in der Datenbank.** Das Rate-Limiting arbeitet nur im Arbeitsspeicher (Datensparsamkeit).
+7. **Spam wird still verworfen.** Füllt ein Bot den Honeypot aus oder ist er zu schnell, sieht er trotzdem die Danke-Seite. So lernt er nicht, was ihn verraten hat.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

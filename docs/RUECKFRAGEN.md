@@ -10,15 +10,7 @@ So funktioniert es:
 
 ## Offen
 
-### F-012 · Texte der Website prüfen · offen (kein Zeitdruck, aber vor dem Go-live)
-**Kontext:** Die Texte der Startseite und der Anmeldeseiten habe ich aus dem Auftrag abgeleitet (Deutsch und Englisch). Bitte lies sie einmal durch: `/de` und `/en` lokal starten, oder direkt in `src/PubPot.Web/Resources/Pages/Index.resx` bzw. `Index.en.resx`.
-**Worauf ich besonders achten würde:**
-1. **Ablauf des Pilots:** Ich habe nur geschrieben, dass der Pilot auf das Steam Next Fest „ausgerichtet“ ist, nicht, was dort genau passiert (spielen Creator die Demos, und wann startet das Launch-Fenster?). Soll das konkreter werden?
-2. **„Steam-Nettoerlös“:** Ich habe den Begriff nicht genauer definiert (z. B. nach Steam-Anteil, Steuern, Rückerstattungen). Soll er auf der Seite erklärt werden?
-3. **„Reichweite“:** Wie sie gemessen wird (Zuschauer, Views, Watchtime …), steht bewusst nicht da. Ergänzen?
-4. **Rechenbeispiel:** 20.000 € Nettoerlös → 5.000 € Pool → 200 € für 4 % Reichweite. Passt die Größenordnung?
-5. **Hinweis zu Marken:** Soll in die Fußzeile ein Satz wie „Kein offizielles Angebot von Valve, Twitch oder YouTube“? Das wäre ein Fall für die anwaltliche Prüfung.
-**Antwort:**
+*Zurzeit keine offenen Fragen.*
 
 ---
 
@@ -89,3 +81,8 @@ So funktioniert es:
 3. Was einmal gepusht ist, bleibt in der Git-Historie. Deshalb prüfe ich vor jedem Push auf Secrets und richte in Phase 6 zusätzlich GitHub Secret Scanning ein.
 **Antwort (26.11.):** 1. Anonym klingt gut. 2. `AUFTRAG.md` gehört in `.gitignore`.
 **Umgesetzt:** Für dieses Repo ist `54796926+TidragoUnity@users.noreply.github.com` eingestellt (gilt nur hier). Die Historie wurde vor dem ersten Push umgeschrieben. `gh` ist mit einem Fine-grained-Token angemeldet, der nur für `pubpot` gilt.
+
+### F-012 · Texte der Website prüfen · beantwortet
+**Kontext:** Die Texte der Startseite und der Anmeldeseiten habe ich aus dem Auftrag abgeleitet (Deutsch und Englisch).
+**Offene Punkte, die ich bewusst nicht erfunden habe:** Ablauf des Pilots rund um das Next Fest, Definition „Steam-Nettoerlös“, Messung der „Reichweite“, Größenordnung im Rechenbeispiel, Marken-Hinweis in der Fußzeile.
+**Antwort (26.11.):** Die Texte passen erst einmal so. Die fünf Punkte können bei Bedarf später ergänzt werden, spätestens bei der anwaltlichen Prüfung vor dem Go-live.
