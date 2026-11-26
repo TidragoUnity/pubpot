@@ -32,7 +32,7 @@ So funktioniert es:
 - **B:** Komplett auf `net11.0` umsteigen. Seit .NET 9 hat auch die STS-Version (Standard Term Support) 24 Monate Support. .NET 11 und .NET 10 laufen deshalb beide etwa im November 2028 aus. Die Pakete (EF Core 11, Npgsql 11.0.0) gibt es schon. Das wäre aber eine Abweichung vom Auftrag, und .NET 11 ist erst wenige Wochen alt, mit weniger Erfahrungsberichten und Beispielen.
 **Antwort (26.11.):** Version A.
 
-### F-011 · GitHub-Zugang und öffentliches Repo · beantwortet (Login über `gh` steht noch aus)
+### F-011 · GitHub-Zugang und öffentliches Repo · beantwortet
 **Kontext:** Du hast angeboten, mir einen Schlüssel zu geben.
 **Vorschlag:** Bitte **keinen Token in den Chat** kopieren, denn dort landet er im Verlauf. Besser: Du installierst die GitHub CLI (`winget install GitHub.cli`) und meldest dich einmal selbst an, indem du in den Prompt `! gh auth login` eingibst (Login im Browser). Danach kann ich das Repo anlegen und pushen, ohne dass ich den Schlüssel je sehe. Den SSH-Schlüssel für den Deploy auf den VPS (Phase 7) trägst du später selbst als GitHub-Secret ein.
 **Bei einem öffentlichen Repo zu beachten:**

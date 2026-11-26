@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Erster Push nach GitHub
+- `gh` mit Fine-grained-Token angemeldet. Der Token hat nur Zugriff auf `pubpot` (Least Privilege).
+- Vor dem Push die gesamte Historie geprüft: keine Twitch-Zugangsdaten, kein altes DB-Passwort, keine echte E-Mail-Adresse, keine `.env`, keine `AUFTRAG.md`.
+- Stolperstein: `git push` scheiterte mit `unable to get local issuer certificate`. Git nutzte OpenSSL mit eigener Zertifikatsliste, `gh` dagegen den Windows-Speicher. Lösung: `git config http.sslBackend schannel`, nur für dieses Repo. Die Zertifikate werden weiter geprüft, nur eben gegen den Windows-Speicher.
+- Repo: https://github.com/TidragoUnity/pubpot
+
 ## 2026-11-26 · Schritt 1.4 – Testprojekt, Phase 1 abgeschlossen
 - `tests/PubPot.Web.Tests` mit xUnit v3 und einem Platzhalter-Test. `dotnet test --solution PubPot.slnx` ist grün.
 - Stolperstein: Die Vorlage nutzt noch xUnit v2/VSTest. Mit xUnit v3 verlangt SDK 10+ die Microsoft Testing Platform, die jetzt in `global.json` eingeschaltet ist (E-010).

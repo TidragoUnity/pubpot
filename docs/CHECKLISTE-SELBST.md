@@ -5,11 +5,12 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 
 ## Sofort
 - [ ] Twitch Client Secret neu erzeugen, falls die alte `.env.example` irgendwo geteilt wurde (F-002)
-- [ ] GitHub CLI installieren (`winget install GitHub.cli`) und mit `! gh auth login` anmelden (F-011)
+- [x] GitHub CLI installiert, Anmeldung mit Fine-grained-Token nur für `pubpot`
+- [ ] Token-Ablauf: ca. **24.02.2027** bei 90 Tagen. Das ist mitten im Next Fest, deshalb **vorher** erneuern (GitHub → Settings → Developer settings → Fine-grained tokens → Regenerate)
 - [ ] GitHub → Settings → Emails: „Keep my email addresses private“ und „Block command line pushes that expose my email“ aktivieren
 
 ## Bis Phase 6/7 (CI/CD)
-- [ ] GitHub-Repo anlegen (öffentlich) und pushen. Das übernehme ich, sobald `gh` angemeldet ist (F-003, F-011)
+- [x] GitHub-Repo angelegt (öffentlich) und gepusht: https://github.com/TidragoUnity/pubpot
 - [ ] GitHub Environments `staging` und `production` anlegen
 - [ ] GitHub-Secrets eintragen (genaue Liste folgt in Phase 7)
 - [ ] Branch-Schutz für `main`: PR mit grüner CI erforderlich
