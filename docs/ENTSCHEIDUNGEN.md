@@ -83,6 +83,13 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Sicherheit:** `returnPath` akzeptiert nur lokale Pfade mit Sprachpräfix, alles andere führt zur Startseite. Das verhindert Open Redirects wie `?returnPath=//evil.com`.
 **Alternative:** Sprache nur per Cookie oder Header, ohne eigene URL. Das ist schlechter für SEO, und Links lassen sich nicht sprachgenau teilen.
 
+## E-018 · Strikte CSP und Security-Header von Anfang an
+**Entscheidung:** Eine Middleware (`Security/SecurityHeaders.cs`) setzt auf jede Antwort: CSP nur mit `'self'` (kein `unsafe-inline`, kein `unsafe-eval`, keine Inline-Styles), `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`, `Permissions-Policy` und `Cross-Origin-Opener/Resource-Policy`. Dazu kommt HSTS für ein Jahr inklusive Subdomains, aber ohne `preload`. Der `Server`-Header ist abgeschaltet. Die Cookie-Policy gilt für alle Cookies: HttpOnly, SameSite=Lax, Secure bei HTTPS.
+**Warum jetzt:** Eine CSP nachträglich einzuführen ist mühsam, weil dann überall Inline-Skripte und -Styles auffallen. Von Anfang an strikt heißt: Jede Verletzung zeigt sich sofort im Browser.
+**Folge für die Entwicklung:** Kein `style="…"` und kein `<script>…</script>` im Markup. Styles gehören nach `site.css`, Skripte als Datei nach `wwwroot/js`.
+**Noch offen (Phase 5):** HSTS und `upgrade-insecure-requests` greifen nur, wenn die App HTTPS erkennt. Hinter Caddy kommt das über `X-Forwarded-Proto`, dafür braucht es die Forwarded-Headers-Middleware.
+**Warum kein `preload`:** Ein Eintrag in die HSTS-Preload-Liste der Browser lässt sich kaum rückgängig machen. Das entscheiden wir, wenn die Domain sicher feststeht.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

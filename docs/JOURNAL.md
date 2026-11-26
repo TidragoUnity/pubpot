@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 2.5 – Security-Header und /health
+- Security-Header-Middleware mit strikter CSP, HSTS (nur außerhalb von Development und nur bei HTTPS), Cookie-Policy, kein `Server`-Header (E-018).
+- `/health` (Liveness) über ASP.NET HealthChecks. `/health/ready` mit Datenbank folgt in Phase 3.
+- Geprüft: Header mit curl, im Browser keine CSP-Verletzung auf Startseite, Rechtsseiten, Danke- und 404-Seite. Schrift und Theme-Skript laden trotz CSP.
+
 ## 2026-11-26 · Schritt 2.4 – Startseite
 - Abschnitte: Hero mit zwei Zielgruppen-Karten, „So funktioniert's“ (3 Schritte), Rechenbeispiel (als „Beispiel – keine Prognose“ markiert), Für Entwickler, Für Creator, Pilot mit Next-Fest-Termin, FAQ (9 Fragen, `<details>` ohne JavaScript), Abschluss-CTA.
 - Texte aus dem Auftrag abgeleitet, ohne Einnahmeversprechen („Rechne mit einem kleinen Zuverdienst, nicht mit einem Einkommen“). Bitte inhaltlich prüfen → F-012.

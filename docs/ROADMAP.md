@@ -44,7 +44,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 2.4 | Startseite: Hero, 3 Schritte, Rechenbeispiel, Entwickler, Creator, Pilot/Next Fest, FAQ, Buttons | ✅ |
 
 > 2.3 und 2.4 getauscht: Die Startseite verlinkt auf die Anmeldeseiten, die deshalb zuerst existieren müssen.
-| 2.5 | Security-Header und strikte CSP von Anfang an, `/health` | ⬜ |
+| 2.5 | Security-Header und strikte CSP von Anfang an, `/health` | ✅ |
 | 2.6 | Erste Tests (`WebApplicationFactory`): Seiten liefern 200, Header vorhanden, hreflang korrekt | ⬜ |
 
 ## Phase 3 – Formulare, Datenbank, Double-Opt-in, Spam-Schutz ⬜
