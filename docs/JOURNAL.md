@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · F-013 beantwortet
+- Bestätigte Anmeldungen: 12 Monate ohne Aktivität → Warnmail mit Link „Ich möchte dabei bleiben“ → ohne Klick nach 30 Tagen gelöscht. Mit Klick gibt es eine Bestätigungsmail, und die Frist beginnt neu. Aktiver Admin-Status zählt ebenfalls als Aktivität (E-023).
+- Wird nach Phase 4 gebaut. In der Roadmap vermerkt.
+- **Phase 4 startet erst nach deiner Bestätigung.**
+
 ## 2026-11-26 · Schritt 3.9 – Abnahme, Phase 3 abgeschlossen
 - **Release-Build im Production-Modus** mit Konfiguration nur über Umgebungsvariablen (`ConnectionStrings__Default`, `Site__BaseUrl`, `Smtp__*`). Das ist eine Generalprobe für Docker in Phase 5.
 - **Durchlauf auf Englisch:** `/` → `/en` (Browsersprache) → Creator-Formular → englische Mail in Mailpit mit Link aus `Site:BaseUrl` → bestätigt.

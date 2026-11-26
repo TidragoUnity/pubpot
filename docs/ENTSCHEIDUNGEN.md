@@ -126,6 +126,16 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 
 **Offen für Phase 5:** Hinter Caddy sieht die App ohne Forwarded Headers nur die IP von Caddy. Alle Besucher würden sich dann ein Rate-Limit teilen.
 
+## E-023 · Aufbewahrung bestätigter Anmeldungen (F-013)
+**Entscheidung:**
+1. Eine bestätigte Anmeldung gilt als **inaktiv**, wenn 12 Monate lang nichts passiert ist. Aktivität ist entweder ein Klick auf „Ich möchte dabei bleiben“ oder ein aktiver Admin-Status („kontaktiert“, „Gespräch“, „Pilot“) bzw. eine Änderung im Admin-Bereich.
+2. Dann geht eine **Warnmail** raus: „Deine Daten werden in 30 Tagen gelöscht“, mit dem Link „Ich möchte dabei bleiben“. Den bestätigt man wie beim Double-Opt-in per Button, damit Mail-Scanner ihn nicht auslösen.
+3. Ein Klick löst eine **Bestätigungsmail** aus („Löschung verhindert“), und die 12 Monate beginnen neu.
+4. Ohne Klick wird die Anmeldung **30 Tage nach der Warnmail gelöscht**.
+5. Ein erneut abgeschicktes Formular zählt **nicht** als Aktivität (Wunsch aus F-013).
+
+**Umsetzung:** nach Phase 4 (eigener Schritt), mit einer neuen Spalte für die letzte Aktivität und dem Zeitpunkt der Warnmail. Die Datenschutzerklärung beschreibt die Frist erst, wenn sie gebaut ist. Anwaltlich prüfen lassen.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

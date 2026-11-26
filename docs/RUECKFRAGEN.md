@@ -10,11 +10,7 @@ So funktioniert es:
 
 ## Offen
 
-### F-013 · Wie lange bleiben bestätigte Anmeldungen gespeichert? · offen (vor dem Go-live)
-**Kontext:** Unbestätigte Anmeldungen löscht die App nach 30 Tagen automatisch, Mails nach 7 Tagen. Für **bestätigte** Anmeldungen gibt es noch keine Frist. Sie bleiben, bis jemand sie im Admin-Bereich löscht (Phase 4). Die DSGVO verlangt aber, Daten nur so lange zu speichern, wie es für den Zweck nötig ist.
-**Mögliche Regeln:** (a) 12 Monate nach dem letzten Kontakt bzw. der letzten Änderung, (b) bis Ende des Pilots plus X Monate, (c) unbefristet bis zum Widerruf, das müsste aber in der Datenschutzerklärung stehen.
-**Vorschlag:** (a) als Startpunkt. Technisch ist das eine Zeile im Aufräum-Job. Die Entscheidung gehört aber zu den Rechtstexten und sollte mit dem Anwalt abgestimmt werden.
-**Antwort:**
+*Zurzeit keine offenen Fragen.*
 
 ---
 
@@ -90,3 +86,13 @@ So funktioniert es:
 **Kontext:** Die Texte der Startseite und der Anmeldeseiten habe ich aus dem Auftrag abgeleitet (Deutsch und Englisch).
 **Offene Punkte, die ich bewusst nicht erfunden habe:** Ablauf des Pilots rund um das Next Fest, Definition „Steam-Nettoerlös“, Messung der „Reichweite“, Größenordnung im Rechenbeispiel, Marken-Hinweis in der Fußzeile.
 **Antwort (26.11.):** Die Texte passen erst einmal so. Die fünf Punkte können bei Bedarf später ergänzt werden, spätestens bei der anwaltlichen Prüfung vor dem Go-live.
+
+### F-013 · Wie lange bleiben bestätigte Anmeldungen gespeichert? · beantwortet
+**Kontext:** Unbestätigte Anmeldungen löscht die App nach 30 Tagen automatisch, Mails nach 7 Tagen. Für **bestätigte** Anmeldungen gibt es noch keine Frist. Sie bleiben, bis jemand sie im Admin-Bereich löscht (Phase 4). Die DSGVO verlangt aber, Daten nur so lange zu speichern, wie es für den Zweck nötig ist.
+**Mögliche Regeln:** (a) 12 Monate nach dem letzten Kontakt bzw. der letzten Änderung, (b) bis Ende des Pilots plus X Monate, (c) unbefristet bis zum Widerruf, das müsste aber in der Datenschutzerklärung stehen.
+**Vorschlag:** (a) als Startpunkt. Technisch ist das eine Zeile im Aufräum-Job. Die Entscheidung gehört aber zu den Rechtstexten und sollte mit dem Anwalt abgestimmt werden.
+**Antwort (26.11.):** Ein Jahr ohne Aktivität klingt gut. Dann eine Mail, dass die Daten in den nächsten 30 Tagen gelöscht werden, falls keine Rückmeldung kommt. Und eine Mail, sobald man die Löschung verhindert hat, damit man weiß, dass es geklappt hat.
+**Rückfragen dazu (26.11.):**
+- Was zählt als Aktivität? → **Nur der Link „Ich möchte dabei bleiben“ in der Warnmail.** Ein erneut abgeschicktes Formular zählt nicht.
+- Zählt ein aktiver Admin-Status? → **Ja.** Die Status „kontaktiert“, „Gespräch“ und „Pilot“ bzw. eine Änderung im Admin-Bereich setzen die Frist zurück.
+- Wann bauen? → **Nach Phase 4**, weil der Admin-Status hineinspielt. → E-023

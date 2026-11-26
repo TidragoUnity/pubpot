@@ -62,7 +62,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 3.9 | Abnahme: kompletter Ablauf im Browser mit Mailpit, Lighthouse auf den Formularen, Datenschutz-Fakten aktualisieren | ✅ |
 
 ## Phase 4 – Admin-Bereich ⬜
-Grob: Login mit Hash aus Umgebungsvariable + Sperre · Hilfsbefehl zum Erzeugen des Hashes · Liste mit Filter und Suche · Pipeline-Status, Notiz, nächster Schritt · CSV-Export · Löschen (DSGVO) · Benachrichtigung per E-Mail / Discord.
+Grob: Login mit Hash aus Umgebungsvariable + Sperre · Hilfsbefehl zum Erzeugen des Hashes · Liste mit Filter und Suche · Pipeline-Status, Notiz, nächster Schritt · CSV-Export · Löschen (DSGVO) · Benachrichtigung per E-Mail / Discord · **danach:** Aufbewahrungsfrist bestätigter Anmeldungen mit Warnmail, Link „Ich möchte dabei bleiben“ und Bestätigungsmail (F-013, E-023).
 
 ## Phase 5 – Docker und Compose lokal ⬜
 Grob: Multi-Stage-Dockerfiles (Nicht-Root, Healthcheck) · Migrations-Bundle als einmaliger Container · `compose.yaml` (web, worker, db, caddy, migrate) · `compose.override.yaml` (mailpit, adminer an 127.0.0.1) · DB-Init mit zwei Datenbanken und eigenen Benutzern (E-011) · Worker-Schema als SQL-Skript · `.env.example` · **Forwarded Headers** hinter Caddy (echte Client-IP fürs Rate-Limiting, HTTPS-Erkennung für HSTS und Secure-Cookies, siehe E-018/E-022) · Abnahme: `docker compose up` + Double-Opt-in mit Mailpit.
