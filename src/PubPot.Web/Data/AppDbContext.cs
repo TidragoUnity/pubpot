@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace PubPot.Web.Data;
@@ -7,13 +8,19 @@ namespace PubPot.Web.Data;
 /// Tabellen und Spalten heißen snake_case (<c>signup_confirmations.token_hash</c>), wie in Postgres üblich.
 /// Schema-Änderungen nur über EF-Migrationen: <c>dotnet ef migrations add &lt;Name&gt;</c> im Projektordner.
 /// </summary>
-public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
     public DbSet<Signup> Signups => Set<Signup>();
 
     public DbSet<SignupConfirmation> SignupConfirmations => Set<SignupConfirmation>();
 
     public DbSet<OutboxEmail> OutboxEmails => Set<OutboxEmail>();
+
+    /// <summary>
+    /// Schlüssel von ASP.NET Data Protection (Antiforgery, Formular-Zeitstempel, später Admin-Login).
+    /// In der Datenbank statt im Container, damit sie Neustarts und Deploys überleben.
+    /// </summary>
+    public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -61,6 +68,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             e.HasIndex(c => c.TokenHash).IsUnique();
             e.Property(c => c.PendingChanges).HasColumnType("jsonb");
         });
+
+        modelBuilder.Entity<DataProtectionKey>(e => e.ToTable("data_protection_keys"));
 
         modelBuilder.Entity<OutboxEmail>(e =>
         {

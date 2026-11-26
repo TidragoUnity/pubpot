@@ -57,7 +57,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 3.4 | Formular Entwickler: Felder, serverseitige Validierung (Steam-Link), Einwilligung mit Version und Zeitstempel, Speichern, Zusammenführen bei gleicher E-Mail | ✅ |
 | 3.5 | Formular Creator: Plattformen (Mehrfachauswahl), Kanal/Twitch-Login, Zuschauer-Bereich, Genres, 18+-Bestätigung | ✅ |
 | 3.6 | Double-Opt-in: Token (nur Hash gespeichert), Mail-Ausgang in der Datenbank + Versand per SMTP im Hintergrund, Bestätigungsseite (Klick auf Button statt reinem Link-Aufruf), Test mit Mailpit | ✅ |
-| 3.7 | Spam-Schutz: Honeypot, Mindestausfüllzeit, Rate-Limiting pro IP, Antiforgery | ⬜ |
+| 3.7 | Spam-Schutz: Honeypot, Mindestausfüllzeit, Rate-Limiting pro IP, Antiforgery | ✅ |
 | 3.8 | Aufräum-Job: unbestätigte Anmeldungen nach 30 Tagen löschen, versendete Mails nach 7 Tagen | ⬜ |
 | 3.9 | Abnahme: kompletter Ablauf im Browser mit Mailpit, Lighthouse auf den Formularen, Datenschutz-Fakten aktualisieren | ⬜ |
 
@@ -65,7 +65,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 Grob: Login mit Hash aus Umgebungsvariable + Sperre · Hilfsbefehl zum Erzeugen des Hashes · Liste mit Filter und Suche · Pipeline-Status, Notiz, nächster Schritt · CSV-Export · Löschen (DSGVO) · Benachrichtigung per E-Mail / Discord.
 
 ## Phase 5 – Docker und Compose lokal ⬜
-Grob: Multi-Stage-Dockerfiles (Nicht-Root, Healthcheck) · Migrations-Bundle als einmaliger Container · `compose.yaml` (web, worker, db, caddy, migrate) · `compose.override.yaml` (mailpit, adminer an 127.0.0.1) · DB-Init mit zwei Datenbanken und eigenen Benutzern (E-011) · Worker-Schema als SQL-Skript · `.env.example` · Abnahme: `docker compose up` + Double-Opt-in mit Mailpit.
+Grob: Multi-Stage-Dockerfiles (Nicht-Root, Healthcheck) · Migrations-Bundle als einmaliger Container · `compose.yaml` (web, worker, db, caddy, migrate) · `compose.override.yaml` (mailpit, adminer an 127.0.0.1) · DB-Init mit zwei Datenbanken und eigenen Benutzern (E-011) · Worker-Schema als SQL-Skript · `.env.example` · **Forwarded Headers** hinter Caddy (echte Client-IP fürs Rate-Limiting, HTTPS-Erkennung für HSTS und Secure-Cookies, siehe E-018/E-022) · Abnahme: `docker compose up` + Double-Opt-in mit Mailpit.
 
 ## Phase 6 – CI ⬜
 Grob: PR-Workflow (restore, build, format, Tests mit Postgres, Images bauen) · Push nach GHCR mit SHA-Tag bei Merge auf `main` · Dependabot (NuGet, Docker, Actions; keine 11.x-Pakete, E-007) · Secret Scanning.

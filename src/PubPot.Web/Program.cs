@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
@@ -13,6 +14,7 @@ using PubPot.Web.Forms;
 using PubPot.Web.Localization;
 using PubPot.Web.Security;
 using PubPot.Web.Signups;
+using PubPot.Web.Spam;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -113,6 +115,18 @@ builder.Services.Configure<CookiePolicyOptions>(o =>
     o.Secure = CookieSecurePolicy.SameAsRequest;
 });
 
+// Data Protection signiert/verschlüsselt Antiforgery-Tokens, Formular-Zeitstempel und später das Admin-Login.
+// Die Schlüssel liegen in der Datenbank – im Container gingen sie bei jedem Neustart verloren.
+builder.Services.AddDataProtection()
+    .SetApplicationName("PubPot")
+    .PersistKeysToDbContext<AppDbContext>();
+
+// Spam-Schutz ohne Drittanbieter: Honeypot, Mindestausfüllzeit, Rate-Limiting, Sperrfrist für Mails.
+var spamSection = builder.Configuration.GetSection("Spam");
+builder.Services.AddOptions<SpamOptions>().Bind(spamSection).ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddSingleton<FormTiming>();
+builder.Services.AddFormRateLimiting(spamSection.Get<SpamOptions>() ?? new SpamOptions());
+
 // HSTS: Browser merken sich ein Jahr lang, die Seite nur per HTTPS aufzurufen.
 builder.Services.AddHsts(o =>
 {
@@ -140,12 +154,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseCookiePolicy();
 
-// Leere 404-Antworten mit der Seite "/not-found" füllen (Statuscode bleibt 404).
-app.UseStatusCodePagesWithReExecute("/not-found");
+// Leere Fehlerantworten (404, 429, 400 …) mit einer freundlichen Seite füllen; der Statuscode bleibt erhalten.
+app.UseStatusCodePagesWithReExecute("/status/{0}");
 
 app.UseRouting();
 // Nach UseRouting, damit die Sprache aus der Route gelesen werden kann.
 app.UseRequestLocalization();
+app.UseRateLimiter();
 
 // Liefert wwwroot aus, mit Komprimierung (gzip/brotli) und Fingerprinting zur Build-Zeit.
 app.MapStaticAssets();

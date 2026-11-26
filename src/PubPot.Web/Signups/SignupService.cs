@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using Npgsql;
 using PubPot.Web.Data;
 using PubPot.Web.Localization;
+using PubPot.Web.Spam;
 
 namespace PubPot.Web.Signups;
 
@@ -28,6 +30,7 @@ public sealed class SignupService(
     TimeProvider time,
     LinkBuilder links,
     IStringLocalizer<SharedResource> text,
+    IOptions<SpamOptions> spam,
     ILogger<SignupService> log)
 {
     public async Task SubmitAsync(SignupSubmission submission, CancellationToken ct)
@@ -57,6 +60,7 @@ public sealed class SignupService(
             s => s.Kind == submission.Kind && s.NormalizedEmail == normalized, ct);
 
         var isUpdateOfConfirmed = signup is { IsConfirmed: true };
+        var sendMail = true;
         if (signup is null)
         {
             signup = submission.CreateEntity();
@@ -65,8 +69,16 @@ public sealed class SignupService(
         }
         else
         {
-            // Ältere, noch offene Links für diese Anmeldung verfallen – gültig ist nur der neueste.
-            await db.SignupConfirmations.Where(c => c.SignupId == signup.Id).ExecuteDeleteAsync(ct);
+            // Schutz vor Mail-Fluten: Gerade erst eine Mail geschickt? Dann keine weitere.
+            var lastLinkAt = await db.SignupConfirmations.Where(c => c.SignupId == signup.Id)
+                .MaxAsync(c => (DateTimeOffset?)c.CreatedAt, ct);
+            sendMail = lastLinkAt is null || now - lastLinkAt >= spam.Value.MailCooldown;
+
+            if (sendMail)
+            {
+                // Ältere, noch offene Links für diese Anmeldung verfallen – gültig ist nur der neueste.
+                await db.SignupConfirmations.Where(c => c.SignupId == signup.Id).ExecuteDeleteAsync(ct);
+            }
         }
 
         if (!isUpdateOfConfirmed)
@@ -77,24 +89,30 @@ public sealed class SignupService(
             signup.UpdatedAt = now;
         }
 
-        var (token, hash) = ConfirmationToken.Create();
-        db.SignupConfirmations.Add(new SignupConfirmation
+        if (sendMail)
         {
-            Signup = signup,
-            TokenHash = hash,
-            CreatedAt = now,
-            ExpiresAt = now + ConfirmationToken.Lifetime,
-            PendingChanges = isUpdateOfConfirmed ? PendingChanges.Serialize(submission, now) : null,
-        });
+            var (token, hash) = ConfirmationToken.Create();
+            db.SignupConfirmations.Add(new SignupConfirmation
+            {
+                Signup = signup,
+                TokenHash = hash,
+                CreatedAt = now,
+                ExpiresAt = now + ConfirmationToken.Lifetime,
+                PendingChanges = isUpdateOfConfirmed ? PendingChanges.Serialize(submission, now) : null,
+            });
 
-        db.OutboxEmails.Add(ConfirmationEmail(submission, token, isUpdateOfConfirmed, now));
+            db.OutboxEmails.Add(ConfirmationEmail(submission, token, isUpdateOfConfirmed, now));
+        }
 
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
         // Bewusst ohne E-Mail oder Namen im Log (keine personenbezogenen Daten in Logs).
-        log.LogInformation("Anmeldung {SignupId} ({Kind}) gespeichert, Bestätigungsmail eingereiht{Pending}.",
-            signup.Id, signup.Kind, isUpdateOfConfirmed ? " (Änderung wartet auf Bestätigung)" : "");
+        log.LogInformation("Anmeldung {SignupId} ({Kind}) gespeichert. {MailStatus}",
+            signup.Id, signup.Kind,
+            !sendMail ? "Keine neue Mail (Sperrfrist gegen Mail-Fluten)."
+            : isUpdateOfConfirmed ? "Bestätigungsmail eingereiht, Änderung wartet auf Bestätigung."
+            : "Bestätigungsmail eingereiht.");
     }
 
     /// <summary>Vorprüfung für die Bestätigungsseite (ändert nichts).</summary>

@@ -1,18 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using PubPot.Web.Data;
 using PubPot.Web.Forms;
 using PubPot.Web.Localization;
 using PubPot.Web.Signups;
+using PubPot.Web.Spam;
 
 namespace PubPot.Web.Pages.Signup;
 
+[EnableRateLimiting(RateLimits.FormPosts)]
 public sealed class CreatorModel(
     SignupService signups,
+    FormTiming timing,
+    IOptions<SpamOptions> spam,
     CurrentLanguage language,
-    IStringLocalizer<SharedResource> text) : PageModel
+    IStringLocalizer<SharedResource> text,
+    ILogger<CreatorModel> logger) : SignupFormPageModel(timing, spam, language, text, logger)
 {
     /// <summary>Reihenfolge der Plattformen im Formular.</summary>
     public static readonly CreatorPlatforms[] AllPlatforms =
@@ -23,27 +29,31 @@ public sealed class CreatorModel(
     [BindProperty]
     public CreatorInput Input { get; set; } = new();
 
-    public void OnGet()
-    {
-    }
+    public void OnGet() => IssueFormToken();
 
     public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
+        if (RejectSpam() is { } spamResult)
+        {
+            return spamResult;
+        }
+
         var platforms = Input.Platforms
             .Where(p => AllPlatforms.Contains(p))
             .Aggregate(CreatorPlatforms.None, (all, p) => all | p);
         if (platforms == CreatorPlatforms.None)
         {
-            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Platforms)}", text["Validation.Platforms"]);
+            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Platforms)}", Text["Validation.Platforms"]);
         }
 
         if (!string.IsNullOrWhiteSpace(Input.Channel) && !ChannelInput.IsValid(Input.Channel))
         {
-            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Channel)}", text["Validation.Channel"]);
+            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Channel)}", Text["Validation.Channel"]);
         }
 
         if (!ModelState.IsValid)
         {
+            IssueFormToken();
             return Page();
         }
 
@@ -51,7 +61,7 @@ public sealed class CreatorModel(
         {
             Name = Input.Name!,
             Email = Input.Email!,
-            Language = language.Code,
+            Language = Language.Code,
             Message = Input.Message,
             Platforms = platforms,
             Channel = Input.Channel!,
@@ -60,7 +70,7 @@ public sealed class CreatorModel(
             ConfirmedAdult = Input.Adult,
         }, ct);
 
-        return RedirectToPage("/Signup/Thanks", new { culture = language.Code });
+        return RedirectToThanks();
     }
 
     public bool IsChecked(CreatorPlatforms platform) => Input.Platforms.Contains(platform);

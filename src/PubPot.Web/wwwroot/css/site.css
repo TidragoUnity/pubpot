@@ -942,3 +942,12 @@ main {
   flex-wrap: wrap;
   gap: 0.75rem;
 }
+
+/* ---------- Spam-Schutz: Honeypot-Feld aus dem sichtbaren Bereich schieben ---------- */
+.hp {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}

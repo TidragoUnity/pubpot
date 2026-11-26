@@ -115,6 +115,17 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **Outbox mit Wiederholungen:** 1, 2, 4, 8 … Minuten, höchstens 1 Stunde, maximal 10 Versuche. Ins Log kommt nur die Mail-ID, nie der Empfänger.
 - **Nur eine Instanz verschickt.** Liefen mehrere App-Instanzen gleichzeitig, könnte eine Mail doppelt rausgehen. Dafür bräuchte es dann `SELECT … FOR UPDATE SKIP LOCKED`. Für V1 mit einem Container reicht das so.
 
+## E-022 · Spam-Schutz in Schichten, Data-Protection-Schlüssel in der Datenbank
+**Entscheidungen:**
+- **Honeypot** (Feld „Website“, außerhalb des sichtbaren Bereichs, `aria-hidden`, `tabindex=-1`) und **Mindestausfüllzeit** (3 s, Zeitstempel per Data Protection signiert und verschlüsselt). Ein Treffer wird **still verworfen**: Der Bot sieht die Danke-Seite, gespeichert wird nichts.
+- **Fehlender oder ungültiger Zeitstempel** wird nicht still verworfen. Dann erscheint ein Hinweis „bitte erneut absenden“, und die Eingaben bleiben erhalten. Grund: Das kann auch einen Menschen treffen, etwa wenn das Formular sehr lange offen war.
+- **Rate-Limiting** nur für POST: 5 pro IP und 10 Minuten. Bei Überschreitung kommt 429 mit eigener Seite. Die IP ist nur Schlüssel im Arbeitsspeicher, sie wird nie gespeichert oder geloggt.
+- **Sperrfrist für Mails:** höchstens eine Bestätigungsmail pro Anmeldung alle 5 Minuten. Das schützt Dritte davor, mit Mails geflutet zu werden.
+- **Data-Protection-Schlüssel in der Datenbank** (`data_protection_keys`, eigene Migration). Im Container würden sie bei jedem Neustart verloren gehen. Dann wären offene Formulare ungültig, und später würden alle Admins abgemeldet.
+- **Statusseite `/status/{code}`** statt einer reinen 404-Seite: Sie zeigt passende Texte für 404, 429 und alles andere.
+
+**Offen für Phase 5:** Hinter Caddy sieht die App ohne Forwarded Headers nur die IP von Caddy. Alle Besucher würden sich dann ein Rate-Limit teilen.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

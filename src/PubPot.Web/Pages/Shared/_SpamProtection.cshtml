@@ -1,0 +1,12 @@
+@model string?
+@*
+    Spam-Schutz für Anmeldeformulare:
+    - Honeypot "Website": per CSS aus dem Bild geschoben, für Screenreader ausgeblendet, nicht per Tab erreichbar.
+      Menschen sehen es nie; Bots, die alle Felder ausfüllen, verraten sich.
+    - FormStarted: signierter Zeitstempel für die Mindestausfüllzeit.
+*@
+<div class="hp" aria-hidden="true">
+    <label for="Website">Website</label>
+    <input id="Website" name="Website" type="text" tabindex="-1" autocomplete="off" />
+</div>
+<input type="hidden" name="FormStarted" value="@Model" />

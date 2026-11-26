@@ -1,47 +1,63 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using PubPot.Web.Forms;
 using PubPot.Web.Localization;
 using PubPot.Web.Signups;
+using PubPot.Web.Spam;
 
 namespace PubPot.Web.Pages.Signup;
 
+[EnableRateLimiting(RateLimits.FormPosts)]
 public sealed class DeveloperModel(
     SignupService signups,
     TimeProvider time,
+    FormTiming timing,
+    IOptions<SpamOptions> spam,
     CurrentLanguage language,
-    IStringLocalizer<SharedResource> text) : PageModel
+    IStringLocalizer<SharedResource> text,
+    ILogger<DeveloperModel> logger) : SignupFormPageModel(timing, spam, language, text, logger)
 {
     [BindProperty]
     public DeveloperInput Input { get; set; } = new();
 
     public IReadOnlyList<(string Value, string Label)> ReleaseMonths { get; private set; } = [];
 
-    public void OnGet() => ReleaseMonths = ReleaseChoice.Months(time.GetUtcNow());
+    public void OnGet()
+    {
+        ReleaseMonths = ReleaseChoice.Months(time.GetUtcNow());
+        IssueFormToken();
+    }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken ct)
     {
         var now = time.GetUtcNow();
         ReleaseMonths = ReleaseChoice.Months(now);
 
+        if (RejectSpam() is { } spamResult)
+        {
+            return spamResult;
+        }
+
         // Prüfungen, die Attribute nicht abdecken. Leere Felder meldet bereits [Required].
         long steamAppId = 0;
         if (!string.IsNullOrWhiteSpace(Input.SteamLink) && !SteamLink.TryParse(Input.SteamLink, out steamAppId))
         {
-            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.SteamLink)}", text["Validation.SteamLink"]);
+            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.SteamLink)}", Text["Validation.SteamLink"]);
         }
 
         var released = false;
         DateOnly? plannedRelease = null;
         if (!string.IsNullOrEmpty(Input.Release) && !ReleaseChoice.TryParse(Input.Release, now, out released, out plannedRelease))
         {
-            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Release)}", text["Validation.Release"]);
+            ModelState.AddModelError($"{nameof(Input)}.{nameof(Input.Release)}", Text["Validation.Release"]);
         }
 
         if (!ModelState.IsValid)
         {
+            IssueFormToken();
             return Page();
         }
 
@@ -49,7 +65,7 @@ public sealed class DeveloperModel(
         {
             Name = Input.Name!,
             Email = Input.Email!,
-            Language = language.Code,
+            Language = Language.Code,
             Message = Input.Message,
             Studio = Input.Studio!,
             GameTitle = Input.GameTitle!,
@@ -62,7 +78,7 @@ public sealed class DeveloperModel(
         }, ct);
 
         // Post/Redirect/Get: Neuladen der Danke-Seite schickt das Formular nicht erneut ab.
-        return RedirectToPage("/Signup/Thanks", new { culture = language.Code });
+        return RedirectToThanks();
     }
 }
 

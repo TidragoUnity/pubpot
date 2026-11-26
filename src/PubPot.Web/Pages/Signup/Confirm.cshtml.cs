@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.RateLimiting;
 using PubPot.Web.Localization;
 using PubPot.Web.Signups;
+using PubPot.Web.Spam;
 
 namespace PubPot.Web.Pages.Signup;
 
@@ -10,6 +12,7 @@ namespace PubPot.Web.Pages.Signup;
 /// GET prüft nur und zeigt einen Button; erst der Klick (POST) bestätigt. Grund: Mail-Programme und Virenscanner
 /// öffnen Links oft automatisch vorab – ein reiner GET würde Anmeldungen ohne menschlichen Klick bestätigen.
 /// </summary>
+[EnableRateLimiting(RateLimits.FormPosts)]
 public sealed class ConfirmModel(SignupService signups, CurrentLanguage language) : PageModel
 {
     public enum View

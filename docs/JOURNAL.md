@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.7 – Spam-Schutz
+- Honeypot, Mindestausfüllzeit (signierter Zeitstempel), Rate-Limiting für POST pro IP, Sperrfrist gegen Mail-Fluten, Antiforgery (war schon aktiv). Gemeinsame Basisklasse `SignupFormPageModel` für beide Formulare (E-022).
+- Data-Protection-Schlüssel in der Datenbank, zweite Migration `DataProtectionKeys`.
+- Neue Statusseite `/status/{code}` (404, 429, sonstige Fehler) ersetzt `/not-found`.
+- Tests: 230 grün. Die normalen Tests entschärfen den Spam-Schutz per Einstellung, `SpamProtectionTests` schalten ihn gezielt scharf.
+- Im echten Browser gegengeprüft: sofort abgeschickt → still verworfen, keine Mail. Mit 4 s Pause → Mail kommt in Mailpit an. Honeypot liegt bei x = −10000.
+- Stolperstein: Python-Hilfsskripte mit `"""` scheitern an C#-Code, der selbst `"""` enthält. Abhilfe: Skript als Datei mit `'''`-Strings.
+
 ## 2026-11-26 · Schritt 3.6 – Double-Opt-in
 - Absenden → Anmeldung, Bestätigungslink (nur Hash gespeichert, 30 Tage gültig) und Mail im Ausgang, alles in einer Transaktion. Ältere Links derselben Anmeldung verfallen.
 - Änderungen an bestätigten Anmeldungen warten als JSON am Link und werden erst beim Bestätigen übernommen.

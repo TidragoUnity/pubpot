@@ -1,0 +1,24 @@
+@page "/status/{code:int}"
+@{
+    // Wird für leere Fehlerantworten aufgerufen (UseStatusCodePagesWithReExecute) – der Statuscode steht dann schon.
+    // Direkter Aufruf (/status/404) soll denselben Code liefern, nicht 200.
+    var code = RouteData.Values["code"] is string raw && int.TryParse(raw, out var c) ? c : 500;
+    if (Response.StatusCode == StatusCodes.Status200OK && code is >= 400 and < 600)
+    {
+        Response.StatusCode = code;
+    }
+
+    var key = code switch
+    {
+        404 => "NotFound",
+        429 => "TooMany",
+        _ => "Error",
+    };
+    ViewData["Title"] = S[$"{key}.Title"];
+}
+
+<div class="container page-header">
+    <h1>@S[$"{key}.Heading"]</h1>
+    <p class="lead">@S[$"{key}.Text"]</p>
+    <a class="btn btn-primary" asp-page="/Index" asp-route-culture="@Lang.Code">@S["Common.BackHome"]</a>
+</div>

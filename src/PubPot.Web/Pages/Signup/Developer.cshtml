@@ -18,10 +18,16 @@
         {
             <div class="form-summary" role="alert">
                 <p>@S["Form.ErrorSummary"]</p>
+                @foreach (var error in ViewData.ModelState[string.Empty]?.Errors ?? [])
+                {
+                    <p>@error.ErrorMessage</p>
+                }
             </div>
         }
 
         <p class="form-note">@S["Form.RequiredNote"]</p>
+
+        <partial name="_SpamProtection" model="Model.FormStarted" />
 
         <fieldset class="form-group">
             <legend>@L["Group.You"]</legend>

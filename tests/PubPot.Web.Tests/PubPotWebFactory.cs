@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PubPot.Web.Tests;
 
@@ -14,6 +17,8 @@ public class PubPotWebFactory : WebApplicationFactory<Program>
     {
         builder.UseSetting("ConnectionStrings:Default", "Host=unused.invalid;Database=unused;Username=unused;Password=unused");
         TestSettings.Apply(builder);
+        // Ohne Datenbank: Data-Protection-Schlüssel nur im Speicher statt in der (nicht vorhandenen) DB.
+        builder.ConfigureTestServices(services => services.AddDataProtection().UseEphemeralDataProtectionProvider());
     }
 }
 
@@ -26,5 +31,9 @@ internal static class TestSettings
         builder.UseSetting("Smtp:FromAddress", "pubpot@example.test");
         // Kein Hintergrundversand im Test – Tests stoßen den Mail-Ausgang selbst an.
         builder.UseSetting("Outbox:Enabled", "false");
+        // Spam-Schutz für normale Tests entschärfen; SpamProtectionTests schalten ihn gezielt wieder scharf.
+        builder.UseSetting("Spam:MinFillSeconds", "0");
+        builder.UseSetting("Spam:MaxPostsPerWindow", "100000");
+        builder.UseSetting("Spam:MailCooldown", "00:00:00");
     }
 }

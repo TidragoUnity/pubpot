@@ -258,4 +258,16 @@
   <data name="Mail.SignOff" xml:space="preserve">
     <value>Viele Grüße</value>
   </data>
+  <data name="Validation.FormExpired" xml:space="preserve">
+    <value>Das Formular ist abgelaufen. Bitte sende es noch einmal ab – deine Eingaben sind noch da.</value>
+  </data>
+  <data name="TooMany.Title" xml:space="preserve">
+    <value>Zu viele Anfragen</value>
+  </data>
+  <data name="TooMany.Heading" xml:space="preserve">
+    <value>Bitte warte einen Moment.</value>
+  </data>
+  <data name="TooMany.Text" xml:space="preserve">
+    <value>Von deiner Verbindung kamen gerade sehr viele Anmeldungen. Bitte versuche es in ein paar Minuten noch einmal.</value>
+  </data>
 </root>

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Testing;
 
@@ -86,9 +87,16 @@ internal static partial class TestSupport
             .First(c => c.StartsWith(".AspNetCore.Antiforgery", StringComparison.Ordinal))
             .Split(';')[0];
 
+        // Wie ein Browser: verstecktes Feld FormStarted (Spam-Schutz) mitschicken, falls der Test es nicht selbst setzt.
+        var all = fields.ToList();
+        if (all.All(f => f.Key != "FormStarted") && FormStarted().Match(html) is { Success: true } started)
+        {
+            all.Add(new("FormStarted", WebUtility.HtmlDecode(started.Groups[1].Value)));
+        }
+
         using var request = new HttpRequestMessage(HttpMethod.Post, path)
         {
-            Content = new FormUrlEncodedContent(fields.Append(new("__RequestVerificationToken", token))),
+            Content = new FormUrlEncodedContent(all.Append(new("__RequestVerificationToken", token))),
         };
         request.Headers.Add("Cookie", cookie);
         return await client.SendAsync(request, Ct);
@@ -96,6 +104,9 @@ internal static partial class TestSupport
 
     [GeneratedRegex(@"name=""__RequestVerificationToken""[^>]*value=""([^""]+)""")]
     private static partial Regex AntiforgeryToken();
+
+    [GeneratedRegex(@"name=""FormStarted"" value=""([^""]+)""")]
+    private static partial Regex FormStarted();
 
     /// <summary>Repo-Wurzel (dort liegt PubPot.slnx), um Quelldateien wie .resx und .css zu prüfen.</summary>
     public static string RepoRoot { get; } = FindRepoRoot();
