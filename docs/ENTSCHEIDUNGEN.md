@@ -176,6 +176,16 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **50 pro Seite**, neueste zuerst. Eine zu große Seitenzahl springt auf die letzte Seite.
 **Alternative:** Alles per GET (einfacher, aber E-Mail-Adressen in Logs) oder alles per POST (keine Lesezeichen, kein Zurück).
 
+## E-028 · Löschen für DSGVO-Löschanfragen
+**Entscheidungen:**
+- **Endgültig löschen statt nur verstecken.** Wer eine Löschung verlangt, hat Anspruch darauf, dass die Daten wirklich weg sind. Ein „gelöscht“-Kennzeichen würde die Daten weiter speichern.
+- **Was gelöscht wird:** die Anmeldung, ihre Bestätigungslinks (per `ON DELETE CASCADE`) und **alle** Mails an diese Adresse im Mail-Ausgang, auch schon versendete. Die enthalten die Adresse und würden sonst noch bis zu 7 Tage gespeichert. Die Adresse wird ohne Rücksicht auf Groß-/Kleinschreibung verglichen. Alles läuft in einer Transaktion.
+- **Ausnahme:** Gibt es unter derselben Adresse noch eine Anmeldung in der anderen Rolle, bleiben die Mails erhalten, weil sie zu dieser gehören könnten. Die Rückfrage-Seite weist darauf hin und verlinkt die andere Anmeldung. Bei einer Löschanfrage löscht man dann beide.
+- **Zwei Schritte:** Erst eine Seite „Wirklich löschen?“ (GET ändert nichts), dann der Button (POST mit Antiforgery-Token). Ein versehentlicher Klick oder ein vorab geladener Link löscht so nichts.
+- **Ins Log kommt nur die ID** und die Zahl der entfernten Mails, nie Name oder Adresse. Sonst stünde die gelöschte Person weiter im Log.
+- **Grenze:** In Backups (Phase 7) bleiben die Daten bis zur Rotation erhalten. Das muss in der Datenschutzerklärung stehen (anwaltlich prüfen lassen).
+**Alternative:** Anonymisieren (Name und Adresse überschreiben, Rest behalten), z. B. für Statistiken. Für V1 gibt es keine Statistik, die das bräuchte.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

@@ -1,0 +1,48 @@
+@page "/admin/signups/{id:guid}/delete"
+@model PubPot.Web.Pages.Admin.Signups.DeleteModel
+@using PubPot.Web.Admin
+@{
+    var s = Model.Signup;
+    ViewData["Title"] = "Anmeldung löschen";
+}
+
+<div class="container admin-page admin-narrow">
+    <p><a href="/admin/signups/@s.Id">← Zurück zur Anmeldung</a></p>
+
+    <h1>Anmeldung löschen?</h1>
+
+    <div class="form-group">
+        <dl class="admin-facts">
+            <dt>Name</dt>
+            <dd>@s.Name</dd>
+            <dt>E-Mail</dt>
+            <dd>@s.Email</dd>
+            <dt>Art</dt>
+            <dd>@AdminText.Label(s.Kind)</dd>
+            <dt>Eingegangen</dt>
+            <dd>@AdminText.DateTime(s.CreatedAt)</dd>
+        </dl>
+    </div>
+
+    <p>Gelöscht werden die Anmeldung, offene Bestätigungslinks und alle Mails an diese Adresse im Mail-Ausgang.
+        <strong>Das lässt sich nicht rückgängig machen.</strong> In Backups bleiben die Daten bis zu deren Löschung erhalten.</p>
+
+    @if (Model.Related.Count > 0)
+    {
+        <div class="admin-notice admin-notice--warn">
+            <p>Unter derselben E-Mail-Adresse gibt es noch eine Anmeldung. Sie wird <strong>nicht</strong> mit gelöscht,
+                und die Mails im Mail-Ausgang bleiben deshalb erhalten. Bei einer Löschanfrage bitte auch diese löschen:</p>
+            <ul>
+                @foreach (var related in Model.Related)
+                {
+                    <li><a href="/admin/signups/@related.Id">Anmeldung als @AdminText.Label(related.Kind)</a></li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form method="post" class="form-actions">
+        <button class="btn btn-danger" type="submit">Endgültig löschen</button>
+        <a class="btn btn-secondary" href="/admin/signups/@s.Id">Abbrechen</a>
+    </form>
+</div>

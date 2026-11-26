@@ -29,6 +29,10 @@ public sealed class IndexModel(AdminSignups signups) : PageModel
     [BindProperty(SupportsGet = true, Name = "p")]
     public int PageNumber { get; set; } = 1;
 
+    /// <summary>Nach dem Löschen einer Anmeldung für den Hinweis „Gelöscht“.</summary>
+    [BindProperty(SupportsGet = true)]
+    public bool Deleted { get; set; }
+
     /// <summary>Nur per POST, nie aus der URL.</summary>
     [BindProperty]
     public string? Search { get; set; }

@@ -192,3 +192,18 @@
   border-left-color: var(--accent);
   background: var(--accent-soft);
 }
+
+/* ---------- Löschen ---------- */
+.admin-narrow {
+  max-width: 44rem;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--on-primary);
+}
+
+.btn-danger:hover {
+  background: color-mix(in srgb, var(--danger) 85%, var(--text));
+  color: var(--on-primary);
+}

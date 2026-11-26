@@ -36,7 +36,13 @@ public sealed record SignupPage(IReadOnlyList<SignupRow> Rows, int Total, int Pa
 /// <summary>Die Felder, die im Admin-Bereich änderbar sind.</summary>
 public sealed record PipelineUpdate(PipelineStatus Status, string? Note, DateOnly? NextStepOn);
 
-/// <summary>Abfragen und Änderungen für den Admin-Bereich: Liste, Filter, Suche, Pipeline.</summary>
+/// <summary>Ergebnis einer Löschung: wie viele Mails aus dem Mail-Ausgang mit entfernt wurden.</summary>
+public sealed record DeleteResult(int RemovedMails);
+
+/// <summary>Weitere Anmeldung derselben Person (gleiche E-Mail, andere Rolle).</summary>
+public sealed record RelatedSignup(Guid Id, SignupKind Kind);
+
+/// <summary>Abfragen und Änderungen für den Admin-Bereich: Liste, Filter, Suche, Pipeline, Löschen.</summary>
 public sealed class AdminSignups(AppDbContext db, TimeProvider time, ILogger<AdminSignups> log)
 {
     public const int PageSize = 50;
@@ -138,6 +144,45 @@ public sealed class AdminSignups(AppDbContext db, TimeProvider time, ILogger<Adm
         }
 
         return changed == 1;
+    }
+
+    /// <summary>Andere Anmeldungen mit derselben E-Mail-Adresse (z. B. als Entwickler und als Creator).</summary>
+    public async Task<IReadOnlyList<RelatedSignup>> RelatedAsync(Signup signup, CancellationToken ct) =>
+        await db.Signups.AsNoTracking()
+            .Where(s => s.NormalizedEmail == signup.NormalizedEmail && s.Id != signup.Id)
+            .Select(s => new RelatedSignup(s.Id, s.Kind))
+            .ToListAsync(ct);
+
+    /// <summary>
+    /// Löscht eine Anmeldung endgültig (DSGVO-Löschanfrage, E-028): die Anmeldung, ihre Bestätigungslinks
+    /// (per ON DELETE CASCADE) und alle Mails an diese Adresse im Mail-Ausgang, sofern es keine weitere Anmeldung
+    /// mit derselben Adresse gibt. Deren Mails könnten sonst zur anderen Anmeldung gehören.
+    /// </summary>
+    /// <returns><c>null</c>, wenn es die Anmeldung nicht (mehr) gibt.</returns>
+    public async Task<DeleteResult?> DeleteAsync(Guid id, CancellationToken ct)
+    {
+        await using var transaction = await db.Database.BeginTransactionAsync(ct);
+
+        var email = await db.Signups.Where(s => s.Id == id).Select(s => s.NormalizedEmail).SingleOrDefaultAsync(ct);
+        if (email is null)
+        {
+            return null;
+        }
+
+        await db.Signups.Where(s => s.Id == id).ExecuteDeleteAsync(ct);
+
+        var removedMails = 0;
+        if (!await db.Signups.AnyAsync(s => s.NormalizedEmail == email, ct))
+        {
+            // Auch schon versendete Mails: Sie enthalten die Adresse und würden sonst noch 7 Tage gespeichert.
+            removedMails = await db.OutboxEmails.Where(m => m.To.ToLower() == email).ExecuteDeleteAsync(ct);
+        }
+
+        await transaction.CommitAsync(ct);
+
+        // Nur die ID ins Log, keine Adresse.
+        log.LogInformation("Admin hat Anmeldung {SignupId} gelöscht, {Mails} Mails aus dem Mail-Ausgang entfernt.", id, removedMails);
+        return new DeleteResult(removedMails);
     }
 
     public static string EscapeLike(string text) =>

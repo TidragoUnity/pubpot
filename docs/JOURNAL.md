@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.6 – Löschen (DSGVO)
+- Auf der Detailseite gibt es „Anmeldung löschen …“. Das führt zur Rückfrage `/admin/signups/{id}/delete`, und erst „Endgültig löschen“ (POST) löscht. Danach geht es zurück zur Liste mit dem Hinweis „Die Anmeldung wurde gelöscht“.
+- Gelöscht werden die Anmeldung, ihre Bestätigungslinks und alle Mails an diese Adresse, auch versendete. Gibt es unter derselben Adresse eine zweite Anmeldung (andere Rolle), bleiben die Mails erhalten, und die Rückfrage verlinkt die andere Anmeldung (E-028).
+- Roter Button `btn-danger` in `admin.css`. Er nutzt die vorhandenen Farben `--danger` und `--on-primary`, damit der Kontrast in Hell und Dunkel passt.
+- 7 neue Tests (`AdminDeleteTests`): Rückfrage löscht nichts, vollständiges Löschen inklusive Groß-/Kleinschreibung, zweite Rolle, Antiforgery, Login, unbekannte ID.
+- **Als Nächstes:** 4.7 CSV-Export.
+
 ## 2026-11-26 · Schritt 4.5 – Detailseite
 - `/admin/signups/{id}` zeigt alle Angaben: Kontakt, Entwickler- bzw. Creator-Felder, Nachricht (Zeilenumbrüche bleiben erhalten), Verlauf und Einwilligung. Hinweise für „noch nicht bestätigt“ und „Änderung wartet auf Bestätigung“.
 - Formular für Status, Datum des nächsten Schritts und Notiz (höchstens 4000 Zeichen, nur intern). Speichern mit Post/Redirect/Get und dem Hinweis „Gespeichert“. Die Namen in der Liste verlinken auf die Detailseite, in der URL steht nur die ID.

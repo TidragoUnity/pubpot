@@ -10,6 +10,11 @@
 <div class="container admin-page">
     <h1>Anmeldungen</h1>
 
+    @if (Model.Deleted)
+    {
+        <p class="admin-notice" role="status">Die Anmeldung wurde gelöscht.</p>
+    }
+
     <form method="post" class="admin-filter" aria-label="Filter und Suche">
         <div class="field admin-filter__search">
             <label asp-for="Search">Suche</label>
