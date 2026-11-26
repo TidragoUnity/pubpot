@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Localization.Routing;
 using Microsoft.EntityFrameworkCore;
@@ -83,8 +84,12 @@ builder.Services.AddHsts(o =>
 });
 
 // --- Betrieb ---
-// /health = "Prozess lebt" (Liveness). /health/ready mit Datenbank-Prüfung folgt in Phase 3.
-builder.Services.AddHealthChecks();
+// /health       = "Prozess lebt" (Liveness, ohne Prüfungen) – Docker startet den Container neu, wenn das ausfällt.
+// /health/ready = "kann arbeiten" (Readiness): Datenbank erreichbar und alle Migrationen angewendet.
+//                 Dagegen läuft der Smoke-Test nach dem Deploy.
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("database", tags: ["ready"])
+    .AddCheck<MigrationsHealthCheck>("migrations", tags: ["ready"]);
 
 var app = builder.Build();
 
@@ -108,7 +113,8 @@ app.UseRequestLocalization();
 // Liefert wwwroot aus, mit Komprimierung (gzip/brotli) und Fingerprinting zur Build-Zeit.
 app.MapStaticAssets();
 
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health", new HealthCheckOptions { Predicate = _ => false });
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") });
 
 // "/" leitet je nach gewählter Sprache bzw. Browsersprache auf /de oder /en weiter.
 app.MapGet("/", (HttpContext ctx) =>

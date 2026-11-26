@@ -11,6 +11,8 @@
   <ItemGroup>
     <!-- Startet die komplette Web-App im Speicher (TestServer), ohne echten Port. -->
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <!-- Startet für Datenbank-Tests ein echtes PostgreSQL in Docker. -->
+    <PackageReference Include="Testcontainers.PostgreSql" />
     <PackageReference Include="xunit.v3" />
   </ItemGroup>
 

@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.3 – Readiness und Tests mit echter Datenbank
+- `/health` ist reine Liveness (keine Prüfungen). `/health/ready` prüft, dass die Datenbank erreichbar ist **und** keine Migration fehlt (`MigrationsHealthCheck`). Der Smoke-Test nach dem Deploy erkennt so auch eine vergessene Migration.
+- Testcontainers 4.17.0: `DatabaseWebFactory` startet `postgres:16.16` einmal pro Testlauf und legt das Schema über die echten Migrationen an. `ResetAsync()` leert die Tabellen zwischen Tests.
+- Neue Tests: bereit mit migrierter DB (200), nicht bereit ohne Migrationen (503), nicht bereit, aber lebendig ohne DB (503/200). 135 Tests grün in ca. 9 s.
+- Lokal gegen die Compose-Datenbank geprüft: `/health` und `/health/ready` liefern 200.
+
 ## 2026-11-26 · Schritt 3.2 – EF Core und Datenmodell
 - Pakete: Npgsql.EntityFrameworkCore.PostgreSQL 10.0.4, EFCore.NamingConventions 10.0.1 (snake_case), EF Design 10.0.15 (nur für `dotnet ef`, nicht in der veröffentlichten App).
 - `dotnet-ef` 10.0.15 als lokales Tool (`dotnet-tools.json`, ab SDK 10 im Wurzelordner statt `.config/`).
