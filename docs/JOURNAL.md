@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 2.1 – Web-Projekt und Design-Grundlage
+- `src/PubPot.Web` von Hand angelegt (ohne Bootstrap/jQuery aus der Vorlage, E-015). Layout mit Kopfzeile, Wortmarke „Pub**Pot**“, Navigation (ab 960 px sichtbar), Hell/Dunkel-Schalter und Fußzeile.
+- Schriften Inter und Space Grotesk (Fontsource 5.3.0, Latin-Teilmenge mit Umlauten und €) selbst gehostet.
+- Im Browser geprüft (Screenshots hell/dunkel/mobil): Schriften laden, keine Konsolenfehler, auf 390 px Breite kein seitlicher Scroll.
+- Stolperstein: Beim ersten Test fehlten CSS und JS. Ursache war der Startbefehl (`dotnet run --environment`), siehe E-016.
+- Texte sind noch fest auf Deutsch, die Lokalisierung folgt in 2.2.
+
 ## 2026-11-26 · Rückfragen F-006 bis F-010 beantwortet
 - F-006: getrennte Datenbanken für Web und Worker (E-011). F-007: kein externer Check (E-012). F-010: nur E-Mail (E-014).
 - F-008/F-009: Einen VPS gibt es noch nicht. Erst läuft alles lokal, Monitoring, Alarme und Backups eingeschlossen, danach kommt der VPS. Die Phasen 7 und 8 sind in der Roadmap getauscht (E-013).

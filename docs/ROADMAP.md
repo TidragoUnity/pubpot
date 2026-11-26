@@ -35,10 +35,10 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 
 > Reihenfolge von 1.1 und 1.2 getauscht: Mit zentraler Paketverwaltung wäre die unveränderte `.csproj` nicht baubar, und jeder Commit soll lauffähig sein.
 
-## Phase 2 – Web-Projekt mit allen Seiten, DE/EN, ohne Formulare ⬜
+## Phase 2 – Web-Projekt mit allen Seiten, DE/EN, ohne Formulare 🔄
 | # | Schritt | Status |
 |---|---|---|
-| 2.1 | Razor-Pages-Projekt, Layout, Design-Grundlage (CSS-Variablen, Hell/Dunkel, mobil zuerst), selbst gehostete Schrift, Wortmarke | ⬜ |
+| 2.1 | Razor-Pages-Projekt, Layout, Design-Grundlage (CSS-Variablen, Hell/Dunkel, mobil zuerst), selbst gehostete Schrift, Wortmarke | ✅ |
 | 2.2 | Lokalisierung: Routen `/de` und `/en`, `.resx`, Sprachumschalter, Vorschlag nach Browsersprache, `hreflang` | ⬜ |
 | 2.3 | Startseite: Hero, 3 Schritte, Rechenbeispiel, Entwickler, Creator, Pilot/Next Fest, FAQ, Buttons | ⬜ |
 | 2.4 | Restliche Seiten als Gerüst: Anmeldung (ohne Formular), Danke, Bestätigung, Impressum/Datenschutz (Platzhalter mit TODO) | ⬜ |

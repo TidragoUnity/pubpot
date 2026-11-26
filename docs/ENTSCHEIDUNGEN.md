@@ -60,6 +60,16 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 ## E-014 · Alarme und Benachrichtigungen nur per E-Mail
 **Entscheidung (F-010):** Alarme und Hinweise auf neue Anmeldungen kommen per E-Mail. Den Discord-Webhook aus dem Auftrag („optional“) baue ich trotzdem ein. Er bleibt aber aus, bis eine Umgebungsvariable gesetzt ist.
 
+## E-015 · Eigenes CSS statt Bootstrap, Schriften im Repo
+**Entscheidung:** Kein CSS-Framework, sondern ein eigenes Stylesheet mit Design-Tokens (CSS-Variablen). Inter (Fließtext) und Space Grotesk (Überschriften) als variable WOFF2-Dateien unter `wwwroot/fonts`, Lizenz (SIL OFL) liegt daneben.
+**Warum:** Die Webapp-Vorlage bringt Bootstrap und jQuery mit, zusammen gut 300 KB, von denen wir kaum etwas brauchen. Der Auftrag will wenig JavaScript und Lighthouse über 90. Selbst gehostete Schriften bedeuten: Der Browser fragt keinen fremden Server an, es wird keine IP-Adresse an Google übertragen, und es ist kein Cookie-Banner nötig.
+**Hell/Dunkel:** Standard ist die Systemeinstellung (`prefers-color-scheme`). Der Schalter speichert die Wahl nur im Browser (`localStorage`). Ohne JavaScript bleibt er versteckt.
+
+## E-016 · Statische Dateien über `MapStaticAssets`
+**Entscheidung:** `app.MapStaticAssets()` statt `UseStaticFiles()`.
+**Warum:** Ab .NET 9 werden CSS, JS und Schriften beim Build komprimiert (gzip/Brotli) und bekommen einen Fingerprint im Namen (`site.1mu24v7f3n.css`). Dadurch dürfen Browser sie dauerhaft cachen, und nach einer Änderung lädt trotzdem jeder die neue Version. Das zahlt direkt auf die Lighthouse-Performance ein.
+**Stolperstein:** Die Fingerprint-URLs funktionieren nur im Modus `Development` oder in einem veröffentlichten Build (`dotnet publish`). Zum Starten deshalb `ASPNETCORE_ENVIRONMENT=Development` setzen. Achtung: `dotnet run --environment X` setzt in .NET 10 eine **Umgebungsvariable** mit dem Namen X, nicht die ASP.NET-Umgebung.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
