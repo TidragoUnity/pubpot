@@ -62,7 +62,26 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 3.9 | Abnahme: kompletter Ablauf im Browser mit Mailpit, Lighthouse auf den Formularen, Datenschutz-Fakten aktualisieren | ✅ |
 
 ## Phase 4 – Admin-Bereich ⬜
-Grob: Login mit Hash aus Umgebungsvariable + Sperre · Hilfsbefehl zum Erzeugen des Hashes · Liste mit Filter und Suche · Pipeline-Status, Notiz, nächster Schritt · CSV-Export · Löschen (DSGVO) · Benachrichtigung per E-Mail / Discord · **danach:** Aufbewahrungsfrist bestätigter Anmeldungen mit Warnmail, Link „Ich möchte dabei bleiben“ und Bestätigungsmail (F-013, E-023).
+| # | Schritt | Status |
+|---|---|---|
+| 4.1 | **Admin-Konfiguration und Hash-Befehl:** `AdminOptions` (`Admin__Username`, `Admin__PasswordHash`). Ohne Hash ist der Admin-Bereich aus (404) und es gibt eine Warnung im Log. Befehl `dotnet run --project src/PubPot.Web -- hash-password` liest das Passwort verdeckt ein und gibt den Hash aus. Hashing mit `PasswordHasher` aus ASP.NET Core Identity (PBKDF2, E-025) | ⬜ |
+| 4.2 | **Login, Logout, Sperre:** eigenes Cookie-Schema nur für `/admin` (`__Host-`-Cookie, HttpOnly, Secure, SameSite=Strict, 8 h gleitend). Login-Seite, Logout per POST. Sperre nach 5 Fehlversuchen für 15 Minuten, dazu Rate-Limit auf den Login-POST pro IP. Admin-Layout, `X-Robots-Tag: noindex`, leere Startseite `/admin` | ⬜ |
+| 4.3 | **Datenmodell Pipeline:** neue Spalten `pipeline_status` (neu, kontaktiert, Gespräch, Pilot, abgesagt), `admin_note`, `next_step_on`, `admin_updated_at`. Migration 4, bestehende Einträge bekommen „neu“ | ⬜ |
+| 4.4 | **Liste:** alle Anmeldungen als Tabelle, Filter (Entwickler/Creator, bestätigt, Status, Sprache), Suche in Name, E-Mail, Studio, Spiel und Kanal, 50 pro Seite. Die Suche geht per POST, damit keine E-Mail-Adressen in URLs und Logs landen | ⬜ |
+| 4.5 | **Detailseite:** alle Angaben einer Anmeldung, Pipeline-Status, Notiz und Datum des nächsten Schritts bearbeiten. In der Adresse steht nur die ID | ⬜ |
+| 4.6 | **Löschen (DSGVO):** Rückfrage „Wirklich löschen?“, dann wird die Anmeldung samt Bestätigungen und noch offener Mails an diese Adresse gelöscht. Ins Log kommt nur die ID | ⬜ |
+| 4.7 | **CSV-Export** der aktuell gefilterten Liste: UTF-8 mit BOM und Semikolon (öffnet direkt in Excel), Schutz vor CSV-Injection (Zellen mit `=`, `+`, `-`, `@` werden entschärft) | ⬜ |
+| 4.8 | **Benachrichtigung** bei neuer bestätigter Anmeldung: Mail über die Outbox an `Admin__NotificationEmail` (E-014). Discord-Webhook nur, wenn `Notifications__DiscordWebhookUrl` gesetzt ist. Beide Nachrichten ohne persönliche Daten, nur Art der Anmeldung und Link zur Detailseite | ⬜ |
+| 4.9 | **Aufbewahrungsfrist (E-023):** Spalten für letzte Aktivität und Warnmail, täglicher Job: Warnmail nach 12 Monaten, Seite „Ich möchte dabei bleiben“ mit Button-POST, Mail „Löschung verhindert“, Löschen 30 Tage nach der Warnmail. Datenschutzerklärung ergänzen (anwaltlich prüfen lassen) | ⬜ |
+| 4.10 | **Abnahme:** kompletter Ablauf im Browser (Login, Sperre, Filter, Bearbeiten, Export, Löschen, Benachrichtigung in Mailpit), Lighthouse auf den Admin-Seiten, README um alle neuen Umgebungsvariablen ergänzen | ⬜ |
+
+**Was für alle Schritte gilt**
+- Jeder Schritt bringt eigene Tests mit (Integrationstests mit Testcontainers).
+- Der Admin-Bereich hält sich an dieselbe strikte CSP: kein Inline-Style, kein Inline-Skript.
+- Jede Admin-Seite verlangt den Login. Ein Test prüft das für alle Seiten auf einmal, damit keine neue Seite ungeschützt bleibt.
+- Die Sperre zählt im Arbeitsspeicher. Nach einem Neustart beginnt die Zählung neu. Für einen Container reicht das.
+- Der Admin-Bereich ist nur auf Deutsch, ohne `/de`- oder `/en`-Route (F-014, E-024).
+- Für die Aufbewahrungsfrist zählt nur eine **Änderung** im Admin-Bereich als Aktivität, nicht der Status an sich (F-015, E-023).
 
 ## Phase 5 – Docker und Compose lokal ⬜
 Grob: Multi-Stage-Dockerfiles (Nicht-Root, Healthcheck) · Migrations-Bundle als einmaliger Container · `compose.yaml` (web, worker, db, caddy, migrate) · `compose.override.yaml` (mailpit, adminer an 127.0.0.1) · DB-Init mit zwei Datenbanken und eigenen Benutzern (E-011) · Worker-Schema als SQL-Skript · `.env.example` · **Forwarded Headers** hinter Caddy (echte Client-IP fürs Rate-Limiting, HTTPS-Erkennung für HSTS und Secure-Cookies, siehe E-018/E-022) · Abnahme: `docker compose up` + Double-Opt-in mit Mailpit.

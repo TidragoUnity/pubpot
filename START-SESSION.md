@@ -29,19 +29,14 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 ## Stand (2026-11-26)
 - **Phasen 0–3 fertig:** alle Seiten auf DE/EN, Formulare für Entwickler und Creator, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks.
 - 234 Tests grün, 3 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
-- Letzter Commit: `de27b3b` (F-013 beantwortet, daraus E-023). **Keine offenen Rückfragen.**
+- **Phase 4 ist geplant und freigegeben** (Schritte 4.1–4.10 in `docs/ROADMAP.md`). F-014 und F-015 sind beantwortet. **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
-### Phase 4 – Admin-Bereich ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt
-1. Phase 4 in `docs/ROADMAP.md` in Schritte 4.1, 4.2 … aufteilen, dem Nutzer vorlegen und auf das OK warten.
-2. **Anforderungen** aus dem Auftrag:
-   - `/admin` mit einem Konto. Der Passwort-Hash kommt aus einer Umgebungsvariable. Cookie-Login, Sperre nach mehreren Fehlversuchen.
-   - Ein Hilfsbefehl, der den Passwort-Hash erzeugt.
-   - Liste aller Anmeldungen mit Filter (Entwickler/Creator, bestätigt, Status, Sprache) und Suche.
-   - Pipeline-Status pro Eintrag: neu → kontaktiert → Gespräch → Pilot → abgesagt. Dazu ein Notizfeld und das Datum des nächsten Schritts.
-   - CSV-Export und Löschen einzelner Einträge (DSGVO-Löschanfragen).
-   - Benachrichtigung bei neuer bestätigter Anmeldung **per E-Mail** (E-014). Der Discord-Webhook wird eingebaut, bleibt aber aus, bis eine Umgebungsvariable gesetzt ist.
-3. **Danach als eigener Schritt:** Aufbewahrungsfrist bestätigter Anmeldungen (E-023). Nach 12 Monaten Inaktivität geht eine Warnmail mit dem Link „Ich möchte dabei bleiben“ raus (Bestätigung per Button-POST). Ein Klick löst die Mail „Löschung verhindert“ aus. Ohne Klick wird 30 Tage nach der Warnmail gelöscht. Die Admin-Status „kontaktiert“, „Gespräch“ und „Pilot“ bzw. eine Änderung im Admin-Bereich zählen als Aktivität, ein erneut abgeschicktes Formular nicht.
+### Phase 4 – Admin-Bereich: weiter mit dem nächsten ⬜-Schritt in `docs/ROADMAP.md`
+- Der Plan mit allen Schritten steht in `docs/ROADMAP.md`. Die Anforderungen stehen in `docs/AUFTRAG.md` im Abschnitt „Admin-Bereich“.
+- Der Admin-Bereich ist **nur auf Deutsch**: Die Texte stehen direkt in Razor, nicht in `.resx`, und es gibt keine Sprach-Route (E-024).
+- Benachrichtigungen enthalten keine persönlichen Daten. Discord ist aus, solange die Umgebungsvariable fehlt (E-014).
+- Aufbewahrungsfrist (4.9): Nur eine **Änderung** im Admin-Bereich zählt als Aktivität, auch „Pilot“ bekommt nach 12 Monaten die Warnmail (E-023).
 
 **Hilfreich zu wissen:** Die Data-Protection-Schlüssel liegen schon in der Datenbank, Admin-Cookies überleben also einen Neustart. Mails sind nur Text und laufen über die Outbox, Links kommen aus `Site:BaseUrl` (E-021). Das Rate-Limiting gibt es schon in `Spam/RateLimits.cs`.
 

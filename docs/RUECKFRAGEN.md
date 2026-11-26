@@ -96,3 +96,16 @@ So funktioniert es:
 - Was zählt als Aktivität? → **Nur der Link „Ich möchte dabei bleiben“ in der Warnmail.** Ein erneut abgeschicktes Formular zählt nicht.
 - Zählt ein aktiver Admin-Status? → **Ja.** Die Status „kontaktiert“, „Gespräch“ und „Pilot“ bzw. eine Änderung im Admin-Bereich setzen die Frist zurück.
 - Wann bauen? → **Nach Phase 4**, weil der Admin-Status hineinspielt. → E-023
+
+### F-014 · Admin-Bereich nur auf Deutsch? · beantwortet
+**Wichtig ab:** Schritt 4.2.
+**Kontext:** Die Regel lautet bisher: Alle Texte stehen in `.resx`, auf Deutsch und Englisch. Den Admin-Bereich nutzt aber nur eine Person, nämlich du.
+**Vorschlag:** Der Admin-Bereich ist **nur auf Deutsch**, die Texte stehen direkt in den Razor-Seiten und er hat keine `/de`- oder `/en`-Route. Das spart etwa ein Drittel der Arbeit in Phase 4. Der Paritätstest bleibt für die öffentlichen Seiten wie gehabt.
+**Antwort (26.11.):** Ja, Deutsch reicht.
+
+### F-015 · Zählt der Status „Pilot“ dauerhaft als Aktivität? · beantwortet
+**Wichtig ab:** Schritt 4.9.
+**Kontext:** Laut E-023 zählen ein aktiver Admin-Status („kontaktiert“, „Gespräch“, „Pilot“) oder eine Änderung im Admin-Bereich als Aktivität. Unklar ist, ob ein Eintrag, der seit 12 Monaten unverändert auf „Pilot“ steht, trotzdem eine Warnmail bekommt.
+**Möglichkeiten:** (a) Nur die **Änderung** zählt. Wer 12 Monate nichts ändert, bekommt die Warnmail, egal welcher Status. (b) Solange ein aktiver Status gesetzt ist, gibt es **nie** eine Warnmail.
+**Vorschlag:** (a). Das ist eindeutig, die Frist hängt nicht davon ab, ob du vergisst, einen Status zurückzusetzen, und eine kurze Notiz reicht, um die 12 Monate neu zu starten.
+**Antwort (26.11.):** Ja, auch „Pilot“ bekommt die Warnmail.

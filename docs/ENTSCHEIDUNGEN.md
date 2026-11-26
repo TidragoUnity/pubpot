@@ -136,6 +136,13 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 
 **Umsetzung:** nach Phase 4 (eigener Schritt), mit einer neuen Spalte für die letzte Aktivität und dem Zeitpunkt der Warnmail. Die Datenschutzerklärung beschreibt die Frist erst, wenn sie gebaut ist. Anwaltlich prüfen lassen.
 
+**Ergänzung (F-015):** Als Aktivität zählt nur eine **Änderung** im Admin-Bereich (Status, Notiz, Datum), nicht der Status an sich. Auch ein Eintrag, der 12 Monate unverändert auf „Pilot“ steht, bekommt also die Warnmail. **Warum:** Die Frist ist so eindeutig und hängt nicht davon ab, ob ein Status vergessen wurde. Eine kurze Notiz reicht, um die 12 Monate neu zu starten.
+
+## E-024 · Admin-Bereich nur auf Deutsch (F-014)
+**Entscheidung:** Der Admin-Bereich unter `/admin` ist nur auf Deutsch. Die Texte stehen direkt in den Razor-Seiten, nicht in `.resx`, und es gibt keine `/de`- oder `/en`-Route.
+**Warum:** Ihn nutzt nur eine Person. Eine zweite Sprache würde die Arbeit in Phase 4 um etwa ein Drittel erhöhen, ohne dass jemand davon etwas hat. Der Paritätstest gilt weiter für alle öffentlichen Seiten.
+**Alternative:** Wie die öffentlichen Seiten über `.resx` in DE/EN. Das lohnt sich erst, wenn weitere Admins dazukommen, die kein Deutsch sprechen.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

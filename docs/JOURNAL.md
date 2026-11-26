@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Phase 4 geplant, F-014 und F-015 beantwortet
+- Phase 4 in zehn Schritte aufgeteilt (4.1 bis 4.10), siehe `ROADMAP.md`. Den Plan hast du freigegeben.
+- **F-014:** Der Admin-Bereich ist nur auf Deutsch (E-024).
+- **F-015:** Nur eine Änderung im Admin-Bereich zählt als Aktivität, auch „Pilot“ bekommt also nach 12 Monaten die Warnmail (Ergänzung zu E-023).
+- **Als Nächstes:** 4.1 Admin-Konfiguration und Hash-Befehl.
+
 ## 2026-11-26 · Startdatei für neue Sitzungen
 - Neue Datei `START-SESSION.md` im Repo-Wurzelordner: Überblick, Regeln, Stand, nächste Aufgabe, Wegweiser zu den Dateien. Zu Beginn einer Sitzung wird nur sie gelesen, das hält den Kontext klein.
 - `CLAUDE.md` angepasst: Sitzungsstart über `START-SESSION.md`, die am Ende jeder Sitzung aktualisiert wird.
