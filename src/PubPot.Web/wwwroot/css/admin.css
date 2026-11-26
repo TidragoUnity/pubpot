@@ -133,3 +133,62 @@
   align-items: center;
   gap: 1rem;
 }
+
+/* ---------- Detailseite ---------- */
+.admin-detail h1 {
+  margin-bottom: 0.25rem;
+}
+
+.admin-detail__meta {
+  color: var(--text-muted);
+}
+
+.admin-detail__grid {
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 60rem) {
+  .admin-detail__grid {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+}
+
+.admin-section h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.admin-facts {
+  display: grid;
+  grid-template-columns: minmax(8rem, max-content) 1fr;
+  gap: 0.5rem 1rem;
+  margin: 0;
+}
+
+.admin-facts dt {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.admin-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin-facts__text {
+  white-space: pre-line;
+}
+
+.admin-notice {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--primary);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.admin-notice--warn {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}

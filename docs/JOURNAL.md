@@ -5,6 +5,15 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.5 – Detailseite
+- `/admin/signups/{id}` zeigt alle Angaben: Kontakt, Entwickler- bzw. Creator-Felder, Nachricht (Zeilenumbrüche bleiben erhalten), Verlauf und Einwilligung. Hinweise für „noch nicht bestätigt“ und „Änderung wartet auf Bestätigung“.
+- Formular für Status, Datum des nächsten Schritts und Notiz (höchstens 4000 Zeichen, nur intern). Speichern mit Post/Redirect/Get und dem Hinweis „Gespeichert“. Die Namen in der Liste verlinken auf die Detailseite, in der URL steht nur die ID.
+- Speichern setzt `admin_updated_at` (zählt als Aktivität für E-023), aber **nicht** `updated_at`. Das bleibt die letzte Einreichung der Person, und danach richtet sich die Löschfrist unbestätigter Anmeldungen. Sonst würde jede Admin-Notiz eine unbestätigte Anmeldung verlängern.
+- Der Kanal eines Creators wird bewusst nur als Text gezeigt, nicht als Link: Er ist freie Eingabe (z. B. könnte dort ein `javascript:`-Link stehen). Der Steam-Link wird aus der App-ID gebaut und ist deshalb sicher.
+- **Gefunden:** Im Namespace `PubPot.Web.Pages.Admin.Signups` ist `Signup` doppeldeutig (auch Namespace der öffentlichen Seiten), daher `Data.Signup`.
+- 13 neue Tests (`AdminDetailTests`).
+- **Als Nächstes:** 4.6 Löschen (DSGVO).
+
 ## 2026-11-26 · Schritt 4.4 – Liste mit Filter und Suche
 - `/admin` zeigt alle Anmeldungen als Tabelle: Eingang, Name mit E-Mail, Art, Studio/Spiel bzw. Kanal, Sprache, Bestätigung, Status, nächster Schritt. Neueste zuerst, 50 pro Seite.
 - Filter nach Art, bestätigt, Status und Sprache in der URL. Der Suchtext geht nur per POST und landet so nie in URLs oder Logs (E-027).

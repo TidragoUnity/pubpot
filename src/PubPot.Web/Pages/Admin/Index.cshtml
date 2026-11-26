@@ -97,7 +97,7 @@
                             <tr>
                                 <td>@AdminText.Date(row.CreatedAt)</td>
                                 <td>
-                                    <span class="admin-table__name">@row.Name</span>
+                                    <a class="admin-table__name" href="/admin/signups/@row.Id">@row.Name</a>
                                     <span class="admin-table__email">@row.Email</span>
                                 </td>
                                 <td>@AdminText.Label(row.Kind)</td>

@@ -33,8 +33,11 @@ public sealed record SignupRow(
 
 public sealed record SignupPage(IReadOnlyList<SignupRow> Rows, int Total, int PageNumber, int PageCount);
 
-/// <summary>Abfragen für den Admin-Bereich: Liste, Filter und Suche.</summary>
-public sealed class AdminSignups(AppDbContext db)
+/// <summary>Die Felder, die im Admin-Bereich änderbar sind.</summary>
+public sealed record PipelineUpdate(PipelineStatus Status, string? Note, DateOnly? NextStepOn);
+
+/// <summary>Abfragen und Änderungen für den Admin-Bereich: Liste, Filter, Suche, Pipeline.</summary>
+public sealed class AdminSignups(AppDbContext db, TimeProvider time, ILogger<AdminSignups> log)
 {
     public const int PageSize = 50;
 
@@ -105,6 +108,36 @@ public sealed class AdminSignups(AppDbContext db)
             .ToListAsync(ct);
 
         return new SignupPage(rows, total, pageNumber, pageCount);
+    }
+
+    public Task<Signup?> FindAsync(Guid id, CancellationToken ct) =>
+        db.Signups.AsNoTracking().SingleOrDefaultAsync(s => s.Id == id, ct);
+
+    /// <summary>Wartet eine geänderte Anmeldung noch auf die Bestätigung per Mail (E-020)?</summary>
+    public Task<bool> HasPendingChangesAsync(Guid id, CancellationToken ct) =>
+        db.SignupConfirmations.AnyAsync(c => c.SignupId == id && c.PendingChanges != null, ct);
+
+    /// <summary>
+    /// Speichert Status, Notiz und nächsten Schritt. Setzt <see cref="Signup.AdminUpdatedAt"/> (zählt als Aktivität,
+    /// E-023), aber nicht <see cref="Signup.UpdatedAt"/>: Das ist die letzte Einreichung der Person selbst, und
+    /// danach richtet sich die Löschfrist unbestätigter Anmeldungen.
+    /// </summary>
+    /// <returns><c>false</c>, wenn es die Anmeldung nicht (mehr) gibt.</returns>
+    public async Task<bool> UpdatePipelineAsync(Guid id, PipelineUpdate update, CancellationToken ct)
+    {
+        var note = string.IsNullOrWhiteSpace(update.Note) ? null : update.Note.Trim().ReplaceLineEndings("\n");
+        var changed = await db.Signups.Where(s => s.Id == id).ExecuteUpdateAsync(u => u
+            .SetProperty(s => s.PipelineStatus, update.Status)
+            .SetProperty(s => s.AdminNote, note)
+            .SetProperty(s => s.NextStepOn, update.NextStepOn)
+            .SetProperty(s => s.AdminUpdatedAt, time.GetUtcNow()), ct);
+
+        if (changed == 1)
+        {
+            log.LogInformation("Admin hat Anmeldung {SignupId} geändert (Status {Status}).", id, update.Status);
+        }
+
+        return changed == 1;
     }
 
     public static string EscapeLike(string text) =>

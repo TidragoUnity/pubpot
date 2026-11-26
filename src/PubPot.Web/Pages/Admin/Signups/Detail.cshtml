@@ -1,0 +1,135 @@
+@page "/admin/signups/{id:guid}"
+@model PubPot.Web.Pages.Admin.Signups.DetailModel
+@using PubPot.Web.Admin
+@using PubPot.Web.Data
+@{
+    var s = Model.Signup;
+    ViewData["Title"] = s.Name;
+}
+
+<div class="container admin-page admin-detail">
+    <p><a href="/admin">← Zur Liste</a></p>
+
+    <h1>@s.Name</h1>
+    <p class="admin-detail__meta">
+        @AdminText.Label(s.Kind) · @AdminText.LanguageLabel(s.Language) ·
+        <span class="status status--@s.PipelineStatus.ToString().ToLowerInvariant()">@AdminText.Label(s.PipelineStatus)</span>
+    </p>
+
+    @if (Model.Saved && Model.Errors.Count == 0)
+    {
+        <p class="admin-notice" role="status">Gespeichert.</p>
+    }
+
+    @if (!s.IsConfirmed)
+    {
+        <p class="admin-notice admin-notice--warn">Noch nicht bestätigt. Ohne Bestätigung wird die Anmeldung 30 Tage nach der letzten Einreichung automatisch gelöscht.</p>
+    }
+
+    @if (Model.HasPendingChanges)
+    {
+        <p class="admin-notice">Eine Änderung der Angaben wartet auf die Bestätigung per Mail. Angezeigt wird der bestätigte Stand.</p>
+    }
+
+    <div class="admin-detail__grid">
+        <section class="form-group admin-section" aria-labelledby="pipeline-heading">
+            <h2 id="pipeline-heading">Pipeline</h2>
+            <form method="post" class="form">
+                @if (Model.Errors.Count > 0)
+                {
+                    <div class="form-summary" role="alert">
+                        @foreach (var error in Model.Errors)
+                        {
+                            <p>@error</p>
+                        }
+                    </div>
+                }
+
+                <div class="field">
+                    <label for="Status">Status</label>
+                    <select id="Status" name="Status">
+                        @foreach (var status in AdminText.Statuses)
+                        {
+                            <option value="@status" selected="@(Model.Status == status)">@AdminText.Label(status)</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="field">
+                    <label for="NextStepOn">Nächster Schritt am</label>
+                    <input id="NextStepOn" name="NextStepOn" type="date" value="@Model.NextStepOn?.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)" />
+                </div>
+
+                <div class="field">
+                    <label for="Note">Notiz</label>
+                    <textarea id="Note" name="Note" rows="6" maxlength="@AppDbContext.AdminNoteMaxLength" aria-describedby="note-hint">@Model.Note</textarea>
+                    <p id="note-hint" class="field-hint">Nur intern. Wird nie an die Person geschickt.</p>
+                </div>
+
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">Speichern</button>
+                </div>
+
+                @if (s.AdminUpdatedAt is { } adminUpdated)
+                {
+                    <p class="field-hint">Zuletzt geändert: @AdminText.DateTime(adminUpdated)</p>
+                }
+            </form>
+        </section>
+
+        <section class="form-group admin-section" aria-labelledby="contact-heading">
+            <h2 id="contact-heading">Angaben</h2>
+            <dl class="admin-facts">
+                <dt>E-Mail</dt>
+                <dd><a href="mailto:@s.Email">@s.Email</a></dd>
+
+                @if (s is DeveloperSignup dev)
+                {
+                    <dt>Studio</dt>
+                    <dd>@dev.Studio</dd>
+                    <dt>Spiel</dt>
+                    <dd>@dev.GameTitle</dd>
+                    <dt>Steam</dt>
+                    <dd><a href="@dev.SteamUrl" rel="noreferrer">App @dev.SteamAppId</a></dd>
+                    <dt>Release</dt>
+                    <dd>@(dev.AlreadyReleased ? "bereits veröffentlicht" : dev.PlannedRelease is { } month ? AdminText.Month(month) : "–")</dd>
+                    <dt>Demo</dt>
+                    <dd>@AdminText.YesNo(dev.HasDemo)</dd>
+                    <dt>Interesse am Next-Fest-Pilot</dt>
+                    <dd>@AdminText.YesNo(dev.InterestedInNextFestPilot)</dd>
+                    <dt>Publisher</dt>
+                    <dd>@AdminText.YesNo(dev.HasPublisher)</dd>
+                }
+                else if (s is CreatorSignup creator)
+                {
+                    <dt>Plattformen</dt>
+                    <dd>@AdminText.Label(creator.Platforms)</dd>
+                    @* Bewusst kein Link: Der Kanal ist freier Text der Person. *@
+                    <dt>Kanal</dt>
+                    <dd>@creator.Channel</dd>
+                    <dt>Zuschauer</dt>
+                    <dd>@AdminText.Label(creator.AudienceSize)</dd>
+                    <dt>Genres</dt>
+                    <dd>@creator.Genres</dd>
+                    <dt>18+ bestätigt</dt>
+                    <dd>@AdminText.YesNo(creator.ConfirmedAdult)</dd>
+                }
+
+                <dt>Nachricht</dt>
+                <dd class="admin-facts__text">@(string.IsNullOrWhiteSpace(s.Message) ? "–" : s.Message)</dd>
+            </dl>
+
+            <h2>Verlauf</h2>
+            <dl class="admin-facts">
+                <dt>Eingegangen</dt>
+                <dd>@AdminText.DateTime(s.CreatedAt)</dd>
+                <dt>Letzte Einreichung</dt>
+                <dd>@AdminText.DateTime(s.UpdatedAt)</dd>
+                <dt>Bestätigt</dt>
+                <dd>@(s.ConfirmedAt is { } confirmed ? AdminText.DateTime(confirmed) : "nein")</dd>
+                <dt>Einwilligung</dt>
+                <dd>Version @s.ConsentVersion, am @AdminText.DateTime(s.ConsentGivenAt)</dd>
+            </dl>
+        </section>
+    </div>
+</div>

@@ -30,6 +30,27 @@ public static class AdminText
         _ => kind.ToString(),
     };
 
+    public static string Label(AudienceSize size) => size switch
+    {
+        AudienceSize.Under10 => "unter 10",
+        AudienceSize.From10To24 => "10–24",
+        AudienceSize.From25To49 => "25–49",
+        AudienceSize.From50To99 => "50–99",
+        AudienceSize.From100 => "100 und mehr",
+        _ => size.ToString(),
+    };
+
+    /// <summary>"Twitch, YouTube" statt der gespeicherten Bitmaske.</summary>
+    public static string Label(CreatorPlatforms platforms) =>
+        platforms == CreatorPlatforms.None
+            ? "–"
+            : string.Join(", ", Enum.GetValues<CreatorPlatforms>()
+                .Where(p => p != CreatorPlatforms.None && platforms.HasFlag(p)));
+
+    public static string YesNo(bool value) => value ? "ja" : "nein";
+
+    public static string Month(DateOnly value) => value.ToString("MMMM yyyy", German);
+
     public static string LanguageLabel(string language) => language switch
     {
         "de" => "Deutsch",
