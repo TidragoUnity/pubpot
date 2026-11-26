@@ -10,6 +10,8 @@ namespace PubPot.Web.Data;
 /// </summary>
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
+    public const int AdminNoteMaxLength = 4000;
+
     public DbSet<Signup> Signups => Set<Signup>();
 
     public DbSet<SignupConfirmation> SignupConfirmations => Set<SignupConfirmation>();
@@ -38,6 +40,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
             e.Property(s => s.Language).HasMaxLength(5);
             e.Property(s => s.Message).HasMaxLength(2000);
             e.Property(s => s.ConsentVersion).HasMaxLength(20);
+            e.Property(s => s.PipelineStatus).HasConversion<string>().HasMaxLength(20);
+            e.Property(s => s.AdminNote).HasMaxLength(AdminNoteMaxLength);
 
             // Zusammenführen statt doppelt speichern: pro E-Mail und Rolle höchstens eine Anmeldung.
             e.HasIndex(s => new { s.Kind, s.NormalizedEmail }).IsUnique();

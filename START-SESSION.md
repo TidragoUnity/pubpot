@@ -28,8 +28,8 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 
 ## Stand (2026-11-26)
 - **Phasen 0–3 fertig:** alle Seiten auf DE/EN, Formulare für Entwickler und Creator, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks.
-- 272 Tests grün, 3 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
-- **Phase 4 läuft:** 4.1–4.2 sind fertig (Hash-Befehl, Login mit Sperre, E-025/E-026). Weiter geht es mit **4.3 Datenmodell Pipeline**. **Keine offenen Rückfragen.**
+- 275 Tests grün, 4 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
+- **Phase 4 läuft:** 4.1–4.3 sind fertig (Hash-Befehl, Login mit Sperre, Pipeline-Felder, E-025/E-026). Weiter geht es mit **4.4 Liste mit Filter und Suche**. **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
 ### Phase 4 – Admin-Bereich: weiter mit dem nächsten ⬜-Schritt in `docs/ROADMAP.md`
@@ -55,7 +55,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 ## Code-Landkarte
 | Ordner | Inhalt |
 |---|---|
-| `src/PubPot.Web/Data` | `AppDbContext`, Entitäten (`Signup`, `SignupConfirmation`, `OutboxEmail`), Migrationen, `DataCleanup` |
+| `src/PubPot.Web/Data` | `AppDbContext`, Entitäten (`Signup` mit Pipeline-Feldern, `SignupConfirmation`, `OutboxEmail`), Migrationen, `DataCleanup` |
 | `src/PubPot.Web/Signups` | Geschäftslogik der Anmeldung (`SignupService`, Token, Einwilligung, Validierung) |
 | `src/PubPot.Web/Email` | Outbox-Versand per SMTP (`OutboxProcessor`) |
 | `src/PubPot.Web/Spam` | Honeypot, Mindestzeit, Rate-Limiting, Basisklasse `SignupFormPageModel` |

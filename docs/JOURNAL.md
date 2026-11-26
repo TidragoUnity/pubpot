@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.3 – Datenmodell Pipeline
+- `Signup` hat neue Felder: `PipelineStatus` (New, Contacted, Conversation, Pilot, Declined, als Text gespeichert), `AdminNote` (höchstens 4000 Zeichen), `NextStepOn` (Datum) und `AdminUpdatedAt` (letzte Änderung im Admin-Bereich, zählt später für E-023).
+- Vierte Migration `AdminPipeline`. Die Spalte `pipeline_status` ist Pflicht. Den Standardwert für bestehende Zeilen habe ich von Hand von `""` auf `"New"` geändert, sonst hätten alte Anmeldungen einen ungültigen Status.
+- **Neu gelernt:** Eine Migration lässt sich mit Daten testen: eine eigene Datenbank nur bis zur vorigen Migration aufbauen (`IMigrator.MigrateAsync("CleanupIndex")`), eine alte Zeile einfügen, dann bis zum Ende migrieren und das Ergebnis prüfen.
+- Kein eigener Index für den Status: Bei ein paar hundert Anmeldungen ist ein Durchsuchen der Tabelle schneller als jeder Index.
+- 3 neue Tests (`AdminPipelineModelTests`) und Beispieldaten `TestData` für die nächsten Schritte.
+- **Als Nächstes:** 4.4 Liste mit Filter und Suche.
+
 ## 2026-11-26 · Schritt 4.2 – Login, Logout, Sperre
 - Cookie-Login für `/admin` (`__Host-pubpot-admin`, Secure, HttpOnly, SameSite=Strict, Sitzungscookie), 8 Stunden ohne Aktivität, höchstens 24 Stunden insgesamt. Begründungen in E-026.
 - Sperre nach 5 Fehlversuchen für 15 Minuten (`AdminLoginThrottle`), Rate-Limit `admin-login` mit 10 Versuchen pro IP in 10 Minuten. Benutzername und Passwort werden in gleich langer Zeit geprüft.

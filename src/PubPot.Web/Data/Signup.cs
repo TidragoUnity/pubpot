@@ -8,6 +8,19 @@ public enum SignupKind
 }
 
 /// <summary>
+/// Stand der Akquise im Admin-Bereich: neu → kontaktiert → Gespräch → Pilot, oder abgesagt.
+/// Wird als Text gespeichert ("Contacted" usw.), gut lesbar in der Datenbank.
+/// </summary>
+public enum PipelineStatus
+{
+    New = 1,
+    Contacted = 2,
+    Conversation = 3,
+    Pilot = 4,
+    Declined = 5,
+}
+
+/// <summary>
 /// Eine Anmeldung. Pro E-Mail-Adresse und Rolle gibt es genau eine (siehe docs/ENTSCHEIDUNGEN.md, E-020).
 /// Entwickler und Creator liegen in derselben Tabelle ("Table per Hierarchy"); die Spalte <c>kind</c> unterscheidet sie.
 /// </summary>
@@ -43,6 +56,19 @@ public abstract class Signup
     public DateTimeOffset? ConfirmedAt { get; set; }
 
     public bool IsConfirmed => ConfirmedAt is not null;
+
+    // --- Nur im Admin-Bereich sichtbar und änderbar ---
+
+    public PipelineStatus PipelineStatus { get; set; } = PipelineStatus.New;
+
+    /// <summary>Interne Notiz zur Akquise. Wird nie an die angemeldete Person geschickt.</summary>
+    public string? AdminNote { get; set; }
+
+    /// <summary>Datum des nächsten Schritts (z. B. „nachfassen am …“).</summary>
+    public DateOnly? NextStepOn { get; set; }
+
+    /// <summary>Letzte Änderung im Admin-Bereich. Zählt für die Aufbewahrungsfrist als Aktivität (E-023).</summary>
+    public DateTimeOffset? AdminUpdatedAt { get; set; }
 
     public static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 }

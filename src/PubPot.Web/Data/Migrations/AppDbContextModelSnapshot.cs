@@ -110,6 +110,15 @@ namespace PubPot.Web.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
+                    b.Property<string>("AdminNote")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("admin_note");
+
+                    b.Property<DateTimeOffset?>("AdminUpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("admin_updated_at");
+
                     b.Property<DateTimeOffset?>("ConfirmedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("confirmed_at");
@@ -157,11 +166,21 @@ namespace PubPot.Web.Data.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("name");
 
+                    b.Property<DateOnly?>("NextStepOn")
+                        .HasColumnType("date")
+                        .HasColumnName("next_step_on");
+
                     b.Property<string>("NormalizedEmail")
                         .IsRequired()
                         .HasMaxLength(254)
                         .HasColumnType("character varying(254)")
                         .HasColumnName("normalized_email");
+
+                    b.Property<string>("PipelineStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("pipeline_status");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
