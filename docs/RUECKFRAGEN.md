@@ -25,21 +25,22 @@ So funktioniert es:
 **Vorschlag:** Lokal bleibt es bei `C:\Timo\Docker\pubpot`. Auf GitHub ein **privates** Repo `pubpot` unter deinem Konto. Für ein privates Repo sind Actions (2.000 Minuten im Monat) und GHCR im Rahmen der Freikontingente kostenlos. Das reicht für dieses Projekt. Wichtig: Manuelle Freigaben für Environments gibt es bei **privaten** Repos nur in kostenpflichtigen GitHub-Plänen. Mit einem **öffentlichen** Repo bekommst du sie kostenlos (siehe F-005).
 **Antwort (26.11.):** Unter deinem eigenen Konto, **öffentlich**, auch als Showcase. Den Zugang klären wir über die GitHub CLI (siehe F-011).
 
-### F-004 · .NET-10-SDK fehlt lokal · in Klärung
+### F-004 · .NET-10-SDK fehlt lokal · beantwortet
 **Rückfrage (26.11.):** „Wäre es schlimm, es einfach mit 11 zu machen?“
 **Erklärung:** Nachgeprüft: Die Laufzeit .NET 10 (10.0.15) ist bei dir installiert, nur das SDK 10 fehlt. Das ist kein Problem. Es gibt zwei Wege:
 - **A (Vorschlag):** Die Projekte zielen weiter auf `net10.0` (LTS, wie im Auftrag), gebaut wird überall mit **SDK 11**: lokal, in der CI und im Docker-Build-Image. `global.json` legt SDK 11 fest, dadurch ist alles einheitlich. Ein SDK kann ältere Zielversionen problemlos bauen. Der einzige Nachteil ist ein kleiner Mehraufwand: Dependabot schlägt Paket-Updates auf 11.x vor, das unterbinde ich mit einer Regel. Die Laufzeit-Images bleiben bei `aspnet:10.0`.
 - **B:** Komplett auf `net11.0` umsteigen. Seit .NET 9 hat auch die STS-Version (Standard Term Support) 24 Monate Support. .NET 11 und .NET 10 laufen deshalb beide etwa im November 2028 aus. Die Pakete (EF Core 11, Npgsql 11.0.0) gibt es schon. Das wäre aber eine Abweichung vom Auftrag, und .NET 11 ist erst wenige Wochen alt, mit weniger Erfahrungsberichten und Beispielen.
-**Antwort:**
+**Antwort (26.11.):** Version A.
 
-### F-011 · GitHub-Zugang und öffentliches Repo · offen
+### F-011 · GitHub-Zugang und öffentliches Repo · beantwortet (Login über `gh` steht noch aus)
 **Kontext:** Du hast angeboten, mir einen Schlüssel zu geben.
 **Vorschlag:** Bitte **keinen Token in den Chat** kopieren, denn dort landet er im Verlauf. Besser: Du installierst die GitHub CLI (`winget install GitHub.cli`) und meldest dich einmal selbst an, indem du in den Prompt `! gh auth login` eingibst (Login im Browser). Danach kann ich das Repo anlegen und pushen, ohne dass ich den Schlüssel je sehe. Den SSH-Schlüssel für den Deploy auf den VPS (Phase 7) trägst du später selbst als GitHub-Secret ein.
 **Bei einem öffentlichen Repo zu beachten:**
 1. Die Commits enthalten deine E-Mail-Adresse. Vorschlag: Für dieses Repo die anonyme GitHub-Adresse `<ID>+<name>@users.noreply.github.com` verwenden. Das sollten wir **vor dem ersten Push** entscheiden, weil sich die Historie danach nur umständlich ändern lässt.
 2. `docs/AUFTRAG.md` (dein Geschäftskonzept inkl. Pilotplan) und diese Rückfragen wären öffentlich. Ist das ok, oder soll ich den Auftrag aus dem Repo nehmen bzw. kürzen?
 3. Was einmal gepusht ist, bleibt in der Git-Historie. Deshalb prüfe ich vor jedem Commit auf Secrets und richte in Phase 6 zusätzlich GitHub Secret Scanning ein (für öffentliche Repos kostenlos).
-**Antwort:**
+**Antwort (26.11.):** 1. Anonym klingt gut. 2. `AUFTRAG.md` gehört in `.gitignore`.
+**Umgesetzt:** Für dieses Repo ist `54796926+TidragoUnity@users.noreply.github.com` eingestellt (gilt nur hier, nicht global). Die beiden bisherigen Commits wurden umgeschrieben: neue E-Mail, `AUFTRAG.md` ist aus der Historie entfernt. Die Datei liegt nur noch lokal.
 **Kontext:** Auf deinem Rechner sind die SDKs 9.0 und 11.0 installiert, aber kein 10.0. Das SDK 11 kann zwar `net10.0` bauen. In der CI läuft aber SDK 10, und Unterschiede bei `dotnet format` oder den Analyzern würden lokal grüne Builds in der CI rot machen.
 **Vorschlag:** Du installierst das .NET-10-SDK (`winget install Microsoft.DotNet.SDK.10`). Ich lege per `global.json` SDK 10 fest, damit lokal und in der CI dieselbe Version baut.
 **Antwort:**

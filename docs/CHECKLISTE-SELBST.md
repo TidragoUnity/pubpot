@@ -6,6 +6,7 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 ## Sofort
 - [ ] Twitch Client Secret neu erzeugen, falls die alte `.env.example` irgendwo geteilt wurde (F-002)
 - [ ] GitHub CLI installieren (`winget install GitHub.cli`) und mit `! gh auth login` anmelden (F-011)
+- [ ] GitHub → Settings → Emails: „Keep my email addresses private“ und „Block command line pushes that expose my email“ aktivieren
 
 ## Bis Phase 6/7 (CI/CD)
 - [ ] GitHub-Repo anlegen (öffentlich) und pushen. Das übernehme ich, sobald `gh` angemeldet ist (F-003, F-011)

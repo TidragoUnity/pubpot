@@ -28,3 +28,12 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 ## E-006 · Keine Zugangsschlüssel im Chat
 **Entscheidung:** Der Zugang zu GitHub läuft über `gh auth login`, das du selbst ausführst. Tokens werden nie in den Chat kopiert.
 **Warum:** Was im Chat steht, landet im Verlauf. Ein Token, das dort liegt, gilt als kompromittiert.
+
+## E-007 · Ziel `net10.0`, gebaut mit SDK 11
+**Entscheidung (F-004, Variante A):** Alle Projekte zielen auf `net10.0` (LTS). Gebaut wird lokal, in der CI und im Docker-Build-Image mit SDK 11. Die Version legt `global.json` fest. Die Laufzeit-Images sind `aspnet:10.0` und `runtime:10.0`.
+**Warum:** Das **SDK** ist das Werkzeug zum Bauen, die **Laufzeit** führt das Programm aus. Ein neueres SDK baut problemlos für eine ältere Zielversion. Wichtig ist nur, dass überall dasselbe SDK verwendet wird, sonst verhalten sich `dotnet format` und die Analyzer lokal anders als in der CI.
+**Folge:** Dependabot darf Microsoft-, EF-Core- und Npgsql-Pakete nicht auf 11.x heben. Dafür kommt in Phase 6 eine Ignore-Regel.
+
+## E-008 · Privatsphäre im öffentlichen Repo
+**Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
+**Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

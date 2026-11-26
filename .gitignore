@@ -16,3 +16,6 @@ TestResults/
 # Lokal
 *.log
 backups/
+
+# Privat – nicht veröffentlichen (F-011)
+docs/AUFTRAG.md
