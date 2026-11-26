@@ -23,6 +23,9 @@ dotnet test --solution PubPot.slnx
 dotnet format PubPot.slnx --verify-no-changes
 ```
 
+Alles auf einmal, so wie die CI prüft (bricht beim ersten Fehler ab): `./scripts/check.sh`.
+Die Datenbank-Tests brauchen ein laufendes Docker, weil Testcontainers ein eigenes Postgres startet.
+
 ## Lokale Hilfsdienste (Docker)
 
 Datenbank, Mail-Fänger und Datenbank-Oberfläche laufen in Docker:
