@@ -18,7 +18,9 @@ services:
     # Bewusst kein "ports:": Die Datenbank ist nur für den Worker erreichbar, nicht aus dem Internet.
 
   worker:
-    build: .
+    build:
+      context: ../..                         # Repo-Wurzel (global.json, Directory.*.props)
+      dockerfile: src/TwitchWorker/Dockerfile
     restart: unless-stopped
     env_file: .env
     environment:

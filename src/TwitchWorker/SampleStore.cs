@@ -49,7 +49,13 @@ public sealed class SampleStore
 
     public SampleStore(string connectionString)
     {
-        _db = NpgsqlDataSource.Create(connectionString);
+        var builder = new NpgsqlDataSourceBuilder(connectionString);
+
+        // Kerberos/GSSAPI nutzen wir nicht. Ohne diese Zeile versucht Npgsql (ab Version 9), libgssapi zu laden,
+        // und schreibt im schlanken Docker-Image eine harmlose, aber verwirrende Fehlermeldung ins Log.
+        builder.ConnectionStringBuilder.GssEncryptionMode = GssEncryptionMode.Disable;
+
+        _db = builder.Build();
     }
 
     public async Task EnsureSchemaAsync(CancellationToken ct)

@@ -122,7 +122,7 @@ docker compose exec db psql -U twitch -d twitch -c \
 
 ## 6. Ohne Docker entwickeln (z. B. in Rider oder Visual Studio)
 
-Du brauchst das .NET 8 SDK und eine erreichbare PostgreSQL-Datenbank. Dann im Projektordner:
+Du brauchst das .NET SDK 11 (Version siehe `global.json` im Repo-Wurzelordner, Ziel ist .NET 10) und eine erreichbare PostgreSQL-Datenbank. Dann im Projektordner:
 
 ```bash
 dotnet user-secrets init

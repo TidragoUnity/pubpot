@@ -1,0 +1,16 @@
+# Was nicht in den Docker-Build-Kontext soll: kleinerer Kontext = schnellerer Build,
+# und Secrets können nicht versehentlich in ein Image gelangen.
+**/bin/
+**/obj/
+**/.env
+**/.env.*
+!**/.env.example
+.git/
+.github/
+.vs/
+.idea/
+docs/
+**/*.md
+**/TestResults/
+src/TwitchWorker/export/
+src/TwitchWorker/sql/
