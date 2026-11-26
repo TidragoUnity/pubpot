@@ -16,6 +16,9 @@ public class PubPotWebFactory : WebApplicationFactory<Program>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("ConnectionStrings:Default", "Host=unused.invalid;Database=unused;Username=unused;Password=unused");
+        // Gewollte Verbindungsfehler (Test "Datenbank nicht erreichbar") nicht als Stacktrace ins Testprotokoll schreiben.
+        builder.UseSetting("Logging:LogLevel:Microsoft.EntityFrameworkCore", "None");
+        builder.UseSetting("Logging:LogLevel:Microsoft.Extensions.Diagnostics.HealthChecks", "None");
         TestSettings.Apply(builder);
         // Ohne Datenbank: Data-Protection-Schlüssel nur im Speicher statt in der (nicht vorhandenen) DB.
         builder.ConfigureTestServices(services => services.AddDataProtection().UseEphemeralDataProtectionProvider());

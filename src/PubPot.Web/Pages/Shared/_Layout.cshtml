@@ -72,7 +72,9 @@
             </nav>
 
             <div class="header-tools">
-                <a class="lang-switch" href="@Lang.SwitchUrl(other)" hreflang="@other" rel="nofollow" aria-label="@S["Lang.Switch.Label"]">@S["Lang.Switch.Short"]</a>
+                @* Kein aria-label: Der vorgelesene Name muss den sichtbaren Text ("EN") enthalten (WCAG 2.5.3),
+                   sonst findet Sprachsteuerung ("klicke EN") den Link nicht. Die Erklärung kommt versteckt dazu. *@
+                <a class="lang-switch" href="@Lang.SwitchUrl(other)" hreflang="@other" rel="nofollow">@S["Lang.Switch.Short"]<span class="visually-hidden">: @S["Lang.Switch.Label"]</span></a>
                 <button id="theme-toggle" class="icon-button" type="button" aria-pressed="false" hidden>
                     <span class="visually-hidden">@S["Theme.Toggle"]</span>
                     <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" /></svg>

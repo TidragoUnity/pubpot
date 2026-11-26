@@ -10,7 +10,11 @@ So funktioniert es:
 
 ## Offen
 
-*Zurzeit keine offenen Fragen.*
+### F-013 · Wie lange bleiben bestätigte Anmeldungen gespeichert? · offen (vor dem Go-live)
+**Kontext:** Unbestätigte Anmeldungen löscht die App nach 30 Tagen automatisch, Mails nach 7 Tagen. Für **bestätigte** Anmeldungen gibt es noch keine Frist. Sie bleiben, bis jemand sie im Admin-Bereich löscht (Phase 4). Die DSGVO verlangt aber, Daten nur so lange zu speichern, wie es für den Zweck nötig ist.
+**Mögliche Regeln:** (a) 12 Monate nach dem letzten Kontakt bzw. der letzten Änderung, (b) bis Ende des Pilots plus X Monate, (c) unbefristet bis zum Widerruf, das müsste aber in der Datenschutzerklärung stehen.
+**Vorschlag:** (a) als Startpunkt. Technisch ist das eine Zeile im Aufräum-Job. Die Entscheidung gehört aber zu den Rechtstexten und sollte mit dem Anwalt abgestimmt werden.
+**Antwort:**
 
 ---
 

@@ -48,7 +48,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 > 2.3 und 2.4 getauscht: Die Startseite verlinkt auf die Anmeldeseiten, die deshalb zuerst existieren müssen.
 > Ergebnis Lighthouse (Release-Build, `/de`): mobil 99/100/100/100, Desktop 100/100/100/100.
 
-## Phase 3 – Formulare, Datenbank, Double-Opt-in, Spam-Schutz 🔄
+## Phase 3 – Formulare, Datenbank, Double-Opt-in, Spam-Schutz ✅
 | # | Schritt | Status |
 |---|---|---|
 | 3.1 | Docker für die lokalen Hilfsdienste: `deploy/compose.yaml` (Postgres 16, Init-Skript mit zwei Datenbanken und eigenen Benutzern, E-011), `deploy/compose.override.yaml` (Mailpit, Adminer, nur `127.0.0.1`), `deploy/.env.example` | ✅ |
@@ -59,7 +59,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 3.6 | Double-Opt-in: Token (nur Hash gespeichert), Mail-Ausgang in der Datenbank + Versand per SMTP im Hintergrund, Bestätigungsseite (Klick auf Button statt reinem Link-Aufruf), Test mit Mailpit | ✅ |
 | 3.7 | Spam-Schutz: Honeypot, Mindestausfüllzeit, Rate-Limiting pro IP, Antiforgery | ✅ |
 | 3.8 | Aufräum-Job: unbestätigte Anmeldungen nach 30 Tagen löschen, versendete Mails nach 7 Tagen | ✅ |
-| 3.9 | Abnahme: kompletter Ablauf im Browser mit Mailpit, Lighthouse auf den Formularen, Datenschutz-Fakten aktualisieren | ⬜ |
+| 3.9 | Abnahme: kompletter Ablauf im Browser mit Mailpit, Lighthouse auf den Formularen, Datenschutz-Fakten aktualisieren | ✅ |
 
 ## Phase 4 – Admin-Bereich ⬜
 Grob: Login mit Hash aus Umgebungsvariable + Sperre · Hilfsbefehl zum Erzeugen des Hashes · Liste mit Filter und Suche · Pipeline-Status, Notiz, nächster Schritt · CSV-Export · Löschen (DSGVO) · Benachrichtigung per E-Mail / Discord.

@@ -5,6 +5,16 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.9 – Abnahme, Phase 3 abgeschlossen
+- **Release-Build im Production-Modus** mit Konfiguration nur über Umgebungsvariablen (`ConnectionStrings__Default`, `Site__BaseUrl`, `Smtp__*`). Das ist eine Generalprobe für Docker in Phase 5.
+- **Durchlauf auf Englisch:** `/` → `/en` (Browsersprache) → Creator-Formular → englische Mail in Mailpit mit Link aus `Site:BaseUrl` → bestätigt.
+- **Lighthouse** (Release): `/de/signup/developer`, `/en/signup/creator`, `/de` jeweils mobil und Desktop **100/100/100/100**.
+- **Gefunden und behoben:** Der Sprachumschalter hatte ein `aria-label`, das den sichtbaren Text „EN“ nicht enthielt (WCAG 2.5.3 „Label in Name“, Sprachsteuerung findet den Link sonst nicht). Jetzt sichtbarer Text plus versteckter Zusatz.
+- Datenschutz-Fakten ergänzt: Antiforgery-Cookie, IP nur im Arbeitsspeicher, Aufbewahrungsfristen. Neue Rückfrage F-013 (Frist für bestätigte Anmeldungen).
+- Erwartete DB-Fehlermeldungen im Testprotokoll stummgeschaltet (CI-Ausgabe bleibt lesbar).
+- Stand: 234 Tests grün, 3 Migrationen (`Initial`, `DataProtectionKeys`, `CleanupIndex`).
+- **Als Nächstes:** Phase 4 (Admin-Bereich). Vorher fein planen.
+
 ## 2026-11-26 · Schritt 3.8 – Aufräum-Job
 - `DataCleanup` löscht direkt in der Datenbank (`ExecuteDelete`, ohne Daten zu laden): unbestätigte Anmeldungen 30 Tage nach der **letzten** Einreichung (passend zum Link aus der letzten Mail), abgelaufene Links, versendete Mails nach 7 Tagen, endgültig gescheiterte Mails nach 30 Tagen. Läuft stündlich als Hintergrunddienst, erstmals 30 s nach dem Start.
 - Dritte Migration `CleanupIndex`: Der Index für den Job liegt jetzt auf `(confirmed_at, updated_at)` statt `created_at`.

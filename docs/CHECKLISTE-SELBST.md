@@ -24,5 +24,6 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 ## Bis zum Go-live
 - [ ] SMTP-Anbieter in der EU wählen, Absenderdomain mit SPF, DKIM und DMARC einrichten
 - [ ] Impressum und Datenschutzerklärung erstellen und **anwaltlich prüfen lassen**
-- [ ] Einwilligungstext für die Formulare prüfen lassen
+- [ ] Einwilligungstext für die Formulare prüfen lassen (`Consent.*` in `SharedResource.resx`; bei Änderung `ConsentText.Version` erhöhen)
+- [ ] Aufbewahrungsfrist für bestätigte Anmeldungen festlegen (F-013)
 - [ ] Backup-Ziel wählen und buchen (F-008, noch offen) und einen Restore-Test selbst einmal durchführen

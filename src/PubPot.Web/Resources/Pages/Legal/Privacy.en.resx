@@ -48,4 +48,13 @@
   <data name="Facts.Logs" xml:space="preserve">
     <value>The application doesn't write personal data to its logs (TODO: decide on web server access logs).</value>
   </data>
+  <data name="Facts.Antiforgery" xml:space="preserve">
+    <value>Security cookie ".AspNetCore.Antiforgery.…": set on pages with a form to protect against forged form submissions (CSRF). It contains no personal details and is deleted when the browser is closed.</value>
+  </data>
+  <data name="Facts.RateLimit" xml:space="preserve">
+    <value>Spam protection: when a form is sent, the IP address is used briefly in memory to limit too many requests from the same address (at most 10 minutes). It is neither stored in the database nor logged.</value>
+  </data>
+  <data name="Facts.Retention" xml:space="preserve">
+    <value>Retention: unconfirmed sign-ups are deleted 30 days after the last submission, sent confirmation emails 7 days after sending, undeliverable ones after 30 days. Confirmed sign-ups are kept until deleted (TODO: define retention period).</value>
+  </data>
 </root>
