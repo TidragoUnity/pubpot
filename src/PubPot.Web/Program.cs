@@ -102,6 +102,14 @@ if (builder.Configuration.GetValue("Outbox:Enabled", defaultValue: true))
     builder.Services.AddHostedService<OutboxSenderService>();
 }
 
+// Aufräumen nach Aufbewahrungsfristen (unbestätigte Anmeldungen nach 30 Tagen, versendete Mails nach 7 Tagen).
+builder.Services.AddOptions<CleanupOptions>().Bind(builder.Configuration.GetSection("Cleanup")).ValidateOnStart();
+builder.Services.AddScoped<DataCleanup>();
+if (builder.Configuration.GetValue("Cleanup:Enabled", defaultValue: true))
+{
+    builder.Services.AddHostedService<DataCleanupService>();
+}
+
 // --- Sicherheit ---
 // Kein "Server: Kestrel"-Header: verrät unnötig, welche Software läuft.
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);

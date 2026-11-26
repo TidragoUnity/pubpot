@@ -170,8 +170,8 @@ namespace PubPot.Web.Data.Migrations
                     b.HasKey("Id")
                         .HasName("pk_signups");
 
-                    b.HasIndex("ConfirmedAt", "CreatedAt")
-                        .HasDatabaseName("ix_signups_confirmed_at_created_at");
+                    b.HasIndex("ConfirmedAt", "UpdatedAt")
+                        .HasDatabaseName("ix_signups_confirmed_at_updated_at");
 
                     b.HasIndex("Kind", "NormalizedEmail")
                         .IsUnique()

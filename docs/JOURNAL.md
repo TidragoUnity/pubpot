@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.8 – Aufräum-Job
+- `DataCleanup` löscht direkt in der Datenbank (`ExecuteDelete`, ohne Daten zu laden): unbestätigte Anmeldungen 30 Tage nach der **letzten** Einreichung (passend zum Link aus der letzten Mail), abgelaufene Links, versendete Mails nach 7 Tagen, endgültig gescheiterte Mails nach 30 Tagen. Läuft stündlich als Hintergrunddienst, erstmals 30 s nach dem Start.
+- Dritte Migration `CleanupIndex`: Der Index für den Job liegt jetzt auf `(confirmed_at, updated_at)` statt `created_at`.
+- Neues Prüfskript `scripts/check.sh` (Build im CI-Modus, Format, Tests, Abbruch beim ersten Fehler), angelegt als Folge des Fehlers in 3.7.
+- Tests prüfen vor allem, was **nicht** gelöscht werden darf: bestätigte Anmeldungen, frische Unbestätigte, Mails, die noch versucht werden. 234 Tests grün.
+
 ## 2026-11-26 · Schritt 3.7 – Spam-Schutz
 - Honeypot, Mindestausfüllzeit (signierter Zeitstempel), Rate-Limiting für POST pro IP, Sperrfrist gegen Mail-Fluten, Antiforgery (war schon aktiv). Gemeinsame Basisklasse `SignupFormPageModel` für beide Formulare (E-022).
 - Data-Protection-Schlüssel in der Datenbank, zweite Migration `DataProtectionKeys`.

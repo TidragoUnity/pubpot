@@ -31,6 +31,7 @@ internal static class TestSettings
         builder.UseSetting("Smtp:FromAddress", "pubpot@example.test");
         // Kein Hintergrundversand im Test – Tests stoßen den Mail-Ausgang selbst an.
         builder.UseSetting("Outbox:Enabled", "false");
+        builder.UseSetting("Cleanup:Enabled", "false");
         // Spam-Schutz für normale Tests entschärfen; SpamProtectionTests schalten ihn gezielt wieder scharf.
         builder.UseSetting("Spam:MinFillSeconds", "0");
         builder.UseSetting("Spam:MaxPostsPerWindow", "100000");

@@ -41,8 +41,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
 
             // Zusammenführen statt doppelt speichern: pro E-Mail und Rolle höchstens eine Anmeldung.
             e.HasIndex(s => new { s.Kind, s.NormalizedEmail }).IsUnique();
-            // Für den Aufräum-Job (unbestätigt und älter als 30 Tage).
-            e.HasIndex(s => new { s.ConfirmedAt, s.CreatedAt });
+            // Für den Aufräum-Job: unbestätigt und letzte Einreichung älter als 30 Tage.
+            e.HasIndex(s => new { s.ConfirmedAt, s.UpdatedAt });
             e.Ignore(s => s.IsConfirmed);
         });
 
