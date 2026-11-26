@@ -1,0 +1,18 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+.idea/
+TestResults/
+
+# Secrets – nie committen
+.env
+.env.*
+!.env.example
+*.pfx
+*.key
+
+# Lokal
+*.log
+backups/
