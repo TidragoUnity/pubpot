@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Antworten F-001 bis F-005 eingearbeitet
+- F-001: Worker kommt als eigenes Projekt ins Repo. F-002: `.env` bleibt draußen. F-003: öffentliches Repo unter deinem Konto. F-005 ist damit erledigt (echte Freigabe möglich).
+- F-004 (SDK 11 statt 10): Optionen erklärt, Entscheidung steht aus. Die .NET-10-Laufzeit ist installiert, es fehlt nur das SDK.
+- Neu: F-011 (GitHub-Zugang, was ein öffentliches Repo bedeutet).
+- **Als Nächstes:** Antwort zu F-004, dann Schritt 1.1.
+
 ## 2026-11-26 · Phase 0
 **Erledigt**
 - Auftrag gelesen (Kopie in [AUFTRAG.md](AUFTRAG.md)), bestehenden Worker angesehen.

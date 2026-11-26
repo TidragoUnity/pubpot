@@ -4,11 +4,11 @@ Dinge, die ich nicht für dich tun kann oder soll, weil sie Konten, Geld, Vertr�
 Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 
 ## Sofort
-- [ ] .NET-10-SDK installieren (F-004)
 - [ ] Twitch Client Secret neu erzeugen, falls die alte `.env.example` irgendwo geteilt wurde (F-002)
+- [ ] GitHub CLI installieren (`winget install GitHub.cli`) und mit `! gh auth login` anmelden (F-011)
 
 ## Bis Phase 6/7 (CI/CD)
-- [ ] GitHub-Repo anlegen und lokales Repo pushen (F-003)
+- [ ] GitHub-Repo anlegen (öffentlich) und pushen. Das übernehme ich, sobald `gh` angemeldet ist (F-003, F-011)
 - [ ] GitHub Environments `staging` und `production` anlegen
 - [ ] GitHub-Secrets eintragen (genaue Liste folgt in Phase 7)
 - [ ] Branch-Schutz für `main`: PR mit grüner CI erforderlich

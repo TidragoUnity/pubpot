@@ -10,22 +10,36 @@ So funktioniert es:
 
 ## Offen – wichtig vor Phase 1
 
-### F-001 · Der laufende Worker · offen
+### F-001 · Der laufende Worker · beantwortet
 **Kontext:** Dein Twitch-Worker läuft gerade in Docker (`twitch-worker-worker-1`, seit etwa 5 Stunden, `StopAfterHours=168`). Das ist vermutlich die einwöchige Marktstudie. Die Daten liegen im Volume `twitch-worker_pgdata`.
 **Vorschlag:** Ich **kopiere** den Quellcode ins neue Repo und lasse `C:\Timo\Docker\twitch-worker` samt Containern völlig unangetastet, bis die Studie fertig ist. Die gesammelten Daten übernehmen wir später per `pg_dump` in die neue Datenbank, falls du sie behalten willst.
-**Antwort:**
+**Antwort (26.11.):** Ja, den Worker als eigenes Projekt mit ins Repo aufnehmen.
 
-### F-002 · Echte Zugangsdaten in `.env.example` · offen
+### F-002 · Echte Zugangsdaten in `.env.example` · beantwortet
 **Kontext:** In `twitch-worker/.env.example` stehen Werte für `Twitch__ClientId`, `Twitch__ClientSecret` und `POSTGRES_PASSWORD`, die nach echten Daten aussehen. Die Beispieldatei ist dafür gedacht, ins Repo zu kommen.
 **Vorschlag:** Im neuen Repo bekommt `.env.example` nur Platzhalter. Zusätzlich solltest du das Client Secret in der Twitch-Entwicklerkonsole **neu erzeugen**, falls die Datei je geteilt oder hochgeladen wurde. Das neue Secret kommt nur in die `.env`. Ich fasse die alten Dateien nicht an.
-**Antwort:**
+**Antwort (26.11.):** Ja, die `.env` kommt nicht ins Repo, sondern direkt in `.gitignore`.
 
-### F-003 · Ort des Repos und GitHub · offen
+### F-003 · Ort des Repos und GitHub · beantwortet
 **Kontext:** Ich habe das Repo unter `C:\Timo\Docker\pubpot` angelegt, getrennt vom laufenden Worker. Für CI/CD brauchen wir später ein GitHub-Repo.
 **Vorschlag:** Lokal bleibt es bei `C:\Timo\Docker\pubpot`. Auf GitHub ein **privates** Repo `pubpot` unter deinem Konto. Für ein privates Repo sind Actions (2.000 Minuten im Monat) und GHCR im Rahmen der Freikontingente kostenlos. Das reicht für dieses Projekt. Wichtig: Manuelle Freigaben für Environments gibt es bei **privaten** Repos nur in kostenpflichtigen GitHub-Plänen. Mit einem **öffentlichen** Repo bekommst du sie kostenlos (siehe F-005).
-**Antwort:** (Konto- oder Organisationsname? privat oder öffentlich?)
+**Antwort (26.11.):** Unter deinem eigenen Konto, **öffentlich**, auch als Showcase. Den Zugang klären wir über die GitHub CLI (siehe F-011).
 
-### F-004 · .NET-10-SDK fehlt lokal · offen
+### F-004 · .NET-10-SDK fehlt lokal · in Klärung
+**Rückfrage (26.11.):** „Wäre es schlimm, es einfach mit 11 zu machen?“
+**Erklärung:** Nachgeprüft: Die Laufzeit .NET 10 (10.0.15) ist bei dir installiert, nur das SDK 10 fehlt. Das ist kein Problem. Es gibt zwei Wege:
+- **A (Vorschlag):** Die Projekte zielen weiter auf `net10.0` (LTS, wie im Auftrag), gebaut wird überall mit **SDK 11**: lokal, in der CI und im Docker-Build-Image. `global.json` legt SDK 11 fest, dadurch ist alles einheitlich. Ein SDK kann ältere Zielversionen problemlos bauen. Der einzige Nachteil ist ein kleiner Mehraufwand: Dependabot schlägt Paket-Updates auf 11.x vor, das unterbinde ich mit einer Regel. Die Laufzeit-Images bleiben bei `aspnet:10.0`.
+- **B:** Komplett auf `net11.0` umsteigen. Seit .NET 9 hat auch die STS-Version (Standard Term Support) 24 Monate Support. .NET 11 und .NET 10 laufen deshalb beide etwa im November 2028 aus. Die Pakete (EF Core 11, Npgsql 11.0.0) gibt es schon. Das wäre aber eine Abweichung vom Auftrag, und .NET 11 ist erst wenige Wochen alt, mit weniger Erfahrungsberichten und Beispielen.
+**Antwort:**
+
+### F-011 · GitHub-Zugang und öffentliches Repo · offen
+**Kontext:** Du hast angeboten, mir einen Schlüssel zu geben.
+**Vorschlag:** Bitte **keinen Token in den Chat** kopieren, denn dort landet er im Verlauf. Besser: Du installierst die GitHub CLI (`winget install GitHub.cli`) und meldest dich einmal selbst an, indem du in den Prompt `! gh auth login` eingibst (Login im Browser). Danach kann ich das Repo anlegen und pushen, ohne dass ich den Schlüssel je sehe. Den SSH-Schlüssel für den Deploy auf den VPS (Phase 7) trägst du später selbst als GitHub-Secret ein.
+**Bei einem öffentlichen Repo zu beachten:**
+1. Die Commits enthalten deine E-Mail-Adresse. Vorschlag: Für dieses Repo die anonyme GitHub-Adresse `<ID>+<name>@users.noreply.github.com` verwenden. Das sollten wir **vor dem ersten Push** entscheiden, weil sich die Historie danach nur umständlich ändern lässt.
+2. `docs/AUFTRAG.md` (dein Geschäftskonzept inkl. Pilotplan) und diese Rückfragen wären öffentlich. Ist das ok, oder soll ich den Auftrag aus dem Repo nehmen bzw. kürzen?
+3. Was einmal gepusht ist, bleibt in der Git-Historie. Deshalb prüfe ich vor jedem Commit auf Secrets und richte in Phase 6 zusätzlich GitHub Secret Scanning ein (für öffentliche Repos kostenlos).
+**Antwort:**
 **Kontext:** Auf deinem Rechner sind die SDKs 9.0 und 11.0 installiert, aber kein 10.0. Das SDK 11 kann zwar `net10.0` bauen. In der CI läuft aber SDK 10, und Unterschiede bei `dotnet format` oder den Analyzern würden lokal grüne Builds in der CI rot machen.
 **Vorschlag:** Du installierst das .NET-10-SDK (`winget install Microsoft.DotNet.SDK.10`). Ich lege per `global.json` SDK 10 fest, damit lokal und in der CI dieselbe Version baut.
 **Antwort:**
@@ -34,11 +48,11 @@ So funktioniert es:
 
 ## Offen – wichtig ab späteren Phasen (kein Zeitdruck)
 
-### F-005 · Manuelle Freigabe für Production (Phase 7) · offen
+### F-005 · Manuelle Freigabe für Production (Phase 7) · beantwortet
 **Kontext:** Für Production verlangt der Auftrag eine manuelle Freigabe im GitHub-Environment „production“. Diese Funktion („Required reviewers“) gibt es für private Repos nur mit GitHub Team/Enterprise (kostet Geld).
 **Optionen:** (a) Repo öffentlich machen: Freigabe kostenlos, Secrets bleiben trotzdem geheim. (b) Privat bleiben und den Production-Deploy nur per Tag **und** manuell gestartetem Workflow (`workflow_dispatch`) erlauben. Das ist fast gleichwertig, aber ohne Freigabe-Button. (c) GitHub Team buchen.
 **Vorschlag:** (b), außer du willst das Repo ohnehin öffentlich machen.
-**Antwort:**
+**Antwort (26.11.):** Rückfrage „Was wäre die Alternative?“ Durch F-003 (öffentliches Repo) ist die Frage erledigt: Wir nutzen die echte, kostenlose Freigabe im Environment „production“, genau wie im Auftrag.
 
 ### F-006 · Datenbank des Workers: Schema per EF-Migration? (Phase 5) · offen
 **Kontext:** Der Worker legt seine Tabellen beim Start selbst an (`CREATE TABLE IF NOT EXISTS`). Laut Auftrag laufen Migrationen als EF-Bundle vor dem App-Start. Der Worker nutzt aber gar kein EF, sondern direkt Npgsql mit `COPY`, und das ist für Massen-Inserts genau richtig.
