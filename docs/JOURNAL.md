@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 1.1 – Worker übernommen
+- Quellcode aus `C:\Timo\Docker\twitch-worker` nach `src/TwitchWorker` kopiert. Das Original und der laufende Container bleiben unberührt.
+- Vor dem Commit geprüft: Die Werte aus der alten `.env.example` stehen in keiner Datei im Repo. Die neue `.env.example` enthält nur Platzhalter.
+- Build mit SDK 11 (Ziel noch `net8.0`) läuft grün.
+
 ## 2026-11-26 · F-004 und F-011 beantwortet
 - F-004: Variante A, also Ziel `net10.0`, gebaut mit SDK 11 (E-007).
 - F-011: Anonyme Commit-Adresse, `AUFTRAG.md` nur lokal. Die Historie wurde vor dem ersten Push umgeschrieben (E-008).
