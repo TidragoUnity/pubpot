@@ -1,7 +1,11 @@
 @page
+@using PubPot.Web.Data
+@model PubPot.Web.Pages.Signup.CreatorModel
 @{
     ViewData["Title"] = L["Page.Title"];
     ViewData["Description"] = L["Page.Description"].Value;
+    var hasErrors = !ViewData.ModelState.IsValid;
+    var platformsInvalid = Model.HasError("Platforms");
 }
 
 <div class="container page-header">
@@ -11,8 +15,112 @@
 </div>
 
 <div class="container prose">
-    @* Phase 3: Hier kommt das Formular hin. *@
-    <div class="todo-box">
-        <p>@L["Placeholder"]</p>
-    </div>
+    <form method="post" class="form">
+        @if (hasErrors)
+        {
+            <div class="form-summary" role="alert">
+                <p>@S["Form.ErrorSummary"]</p>
+            </div>
+        }
+
+        <p class="form-note">@S["Form.RequiredNote"]</p>
+
+        <fieldset class="form-group">
+            <legend>@L["Group.You"]</legend>
+
+            <div class="field">
+                <label asp-for="Input.Name"></label>
+                <input asp-for="Input.Name" autocomplete="name" maxlength="100" required />
+                <field-error for="Input.Name" />
+            </div>
+
+            <div class="field">
+                <label asp-for="Input.Email"></label>
+                <input asp-for="Input.Email" type="email" autocomplete="email" maxlength="254" required />
+                <field-error for="Input.Email" />
+            </div>
+        </fieldset>
+
+        <fieldset class="form-group">
+            <legend>@L["Group.Channel"]</legend>
+
+            @* Mehrfachauswahl: mehrere Checkboxen mit demselben Namen → Liste im Modell. *@
+            <fieldset class="choice-group" aria-describedby="Platforms-hint@(platformsInvalid ? " Input_Platforms-error" : "")">
+                <legend>@S["Form.Platforms"]</legend>
+                <p id="Platforms-hint" class="field-hint">@S["Form.Platforms.Hint"]</p>
+                <div class="choices">
+                    @foreach (var platform in CreatorModel.AllPlatforms)
+                    {
+                        <label class="choice">
+                            <input type="checkbox" name="Input.Platforms" value="@platform" id="Platform-@platform"
+                                   checked="@Model.IsChecked(platform)" aria-invalid="@(platformsInvalid ? "true" : null)" />
+                            @platform
+                        </label>
+                    }
+                </div>
+                <field-error for="Input.Platforms" />
+            </fieldset>
+
+            <div class="field">
+                <label asp-for="Input.Channel"></label>
+                <input asp-for="Input.Channel" type="text" inputmode="url" maxlength="200" required aria-describedby="Input_Channel-hint" />
+                <p id="Input_Channel-hint" class="field-hint">@S["Form.Channel.Hint"]</p>
+                <field-error for="Input.Channel" />
+            </div>
+
+            <fieldset class="choice-group">
+                <legend>@S["Form.Audience"]</legend>
+                <div class="choices">
+                    @foreach (var size in CreatorModel.AllAudienceSizes)
+                    {
+                        <label class="choice">
+                            <input type="radio" asp-for="Input.AudienceSize" value="@size" id="Audience-@size" required />
+                            @S[$"Form.Audience.{size}"]
+                        </label>
+                    }
+                </div>
+                <field-error for="Input.AudienceSize" />
+            </fieldset>
+        </fieldset>
+
+        <fieldset class="form-group">
+            <legend>@L["Group.More"]</legend>
+
+            <div class="field">
+                <label asp-for="Input.Genres"></label>
+                <input asp-for="Input.Genres" maxlength="200" required aria-describedby="Input_Genres-hint" />
+                <p id="Input_Genres-hint" class="field-hint">@S["Form.Genres.Hint"]</p>
+                <field-error for="Input.Genres" />
+            </div>
+
+            <div class="field">
+                <label asp-for="Input.Message"></label>
+                <textarea asp-for="Input.Message" rows="5" maxlength="2000"></textarea>
+                <field-error for="Input.Message" />
+            </div>
+        </fieldset>
+
+        <div class="field consent">
+            <label class="choice">
+                <input asp-for="Input.Adult" required />
+                <span>@S["Form.Adult"]</span>
+            </label>
+            <field-error for="Input.Adult" />
+        </div>
+
+        <div class="field consent">
+            <label class="choice">
+                <input asp-for="Input.Consent" required />
+                <span>
+                    @S["Consent.Text"]
+                    @S["Consent.More"] <a asp-page="/Legal/Privacy" asp-route-culture="@Lang.Code" target="_blank">@S["Consent.PrivacyLink"]</a>.
+                </span>
+            </label>
+            <field-error for="Input.Consent" />
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">@S["Form.Submit"]</button>
+        </div>
+    </form>
 </div>

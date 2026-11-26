@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.5 – Creator-Formular
+- Felder: Name, E-Mail, Plattformen (Checkboxen → Bitmaske), Kanal-Link oder Twitch-Login (`ChannelInput`: http(s)-Link mit Domain oder 4–25 Zeichen `[A-Za-z0-9_]`), Zuschauer-Bereich (5 Stufen), Lieblingsgenres, 18+-Bestätigung, Nachricht, Einwilligung.
+- Dieselbe E-Mail als Entwickler und als Creator ergibt zwei Einträge (E-020), per Test abgesichert.
+- Ausgewählte Plattformen bleiben nach einem Validierungsfehler angehakt.
+- 207 Tests grün. Im Browser geprüft (dunkel, mobil, mit Fehlern).
+
 ## 2026-11-26 · Schritt 3.4 – Entwickler-Formular
 - Aufbau: `Signups/` (Geschäftslogik: `DeveloperSubmission`, `SignupService` mit Zusammenführen, `SteamLink`, `ReleaseChoice`, `ConsentText`) getrennt von der Razor Page. Post/Redirect/Get zur Danke-Seite.
 - Validierung: Der Browser prüft vorab ohne JavaScript, maßgeblich ist der Server. Meldungen und Feldnamen sind übersetzt (`Validation.*`, `Form.*` in SharedResource). Eigene Tag-Helper setzen `aria-invalid` und verknüpfen die Fehlermeldung mit dem Feld.

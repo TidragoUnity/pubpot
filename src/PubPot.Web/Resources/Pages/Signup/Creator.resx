@@ -24,7 +24,13 @@
   <data name="Intro" xml:space="preserve">
     <value>Wir suchen vor allem kleine Kanäle: Twitch-Streamer mit unter 50 Zuschauern im Schnitt und kleine YouTuber. Mitmachen kannst du ab 18 Jahren.</value>
   </data>
-  <data name="Placeholder" xml:space="preserve">
-    <value>Das Anmeldeformular folgt in Kürze.</value>
+  <data name="Group.You" xml:space="preserve">
+    <value>Über dich</value>
+  </data>
+  <data name="Group.Channel" xml:space="preserve">
+    <value>Dein Kanal</value>
+  </data>
+  <data name="Group.More" xml:space="preserve">
+    <value>Interessen und Nachricht</value>
   </data>
 </root>

@@ -24,7 +24,13 @@
   <data name="Intro" xml:space="preserve">
     <value>We're mainly looking for small channels: Twitch streamers with fewer than 50 average viewers and small YouTubers. You must be at least 18 to take part.</value>
   </data>
-  <data name="Placeholder" xml:space="preserve">
-    <value>The sign-up form is coming soon.</value>
+  <data name="Group.You" xml:space="preserve">
+    <value>About you</value>
+  </data>
+  <data name="Group.Channel" xml:space="preserve">
+    <value>Your channel</value>
+  </data>
+  <data name="Group.More" xml:space="preserve">
+    <value>Interests and message</value>
   </data>
 </root>

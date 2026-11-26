@@ -177,4 +177,52 @@
   <data name="Consent.PrivacyLink" xml:space="preserve">
     <value>Datenschutzerklärung</value>
   </data>
+  <data name="Form.Platforms" xml:space="preserve">
+    <value>Auf welchen Plattformen bist du aktiv?</value>
+  </data>
+  <data name="Form.Platforms.Hint" xml:space="preserve">
+    <value>Mehrfachauswahl möglich.</value>
+  </data>
+  <data name="Form.Channel" xml:space="preserve">
+    <value>Kanal-Link oder Twitch-Login</value>
+  </data>
+  <data name="Form.Channel.Hint" xml:space="preserve">
+    <value>Zum Beispiel https://www.youtube.com/@deinkanal oder einfach dein Twitch-Name.</value>
+  </data>
+  <data name="Form.Audience" xml:space="preserve">
+    <value>Ungefähre Zuschauer im Schnitt (Stream) bzw. Views pro Video</value>
+  </data>
+  <data name="Form.Audience.Under10" xml:space="preserve">
+    <value>unter 10</value>
+  </data>
+  <data name="Form.Audience.From10To24" xml:space="preserve">
+    <value>10–24</value>
+  </data>
+  <data name="Form.Audience.From25To49" xml:space="preserve">
+    <value>25–49</value>
+  </data>
+  <data name="Form.Audience.From50To99" xml:space="preserve">
+    <value>50–99</value>
+  </data>
+  <data name="Form.Audience.From100" xml:space="preserve">
+    <value>100+</value>
+  </data>
+  <data name="Form.Genres" xml:space="preserve">
+    <value>Lieblingsgenres</value>
+  </data>
+  <data name="Form.Genres.Hint" xml:space="preserve">
+    <value>Zum Beispiel Roguelikes, Cozy Games, Strategie.</value>
+  </data>
+  <data name="Form.Adult" xml:space="preserve">
+    <value>Ich bin mindestens 18 Jahre alt.</value>
+  </data>
+  <data name="Validation.Platforms" xml:space="preserve">
+    <value>Bitte wähle mindestens eine Plattform.</value>
+  </data>
+  <data name="Validation.Channel" xml:space="preserve">
+    <value>Bitte gib einen Link (https://…) oder deinen Twitch-Namen an.</value>
+  </data>
+  <data name="Validation.Adult" xml:space="preserve">
+    <value>Mitmachen kannst du erst ab 18 Jahren.</value>
+  </data>
 </root>

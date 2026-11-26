@@ -78,3 +78,40 @@ public sealed record DeveloperSubmission : SignupSubmission
         developer.HasPublisher = HasPublisher;
     }
 }
+
+public sealed record CreatorSubmission : SignupSubmission
+{
+    public CreatorPlatforms Platforms { get; init; }
+
+    public required string Channel { get; init; }
+
+    public AudienceSize AudienceSize { get; init; }
+
+    public required string Genres { get; init; }
+
+    public bool ConfirmedAdult { get; init; }
+
+    public override SignupKind Kind => SignupKind.Creator;
+
+    public override Signup CreateEntity() => new CreatorSignup
+    {
+        Email = "",
+        NormalizedEmail = "",
+        Name = "",
+        Language = "",
+        ConsentVersion = "",
+        Channel = "",
+        Genres = "",
+    };
+
+    public override void ApplyTo(Signup signup)
+    {
+        base.ApplyTo(signup);
+        var creator = (CreatorSignup)signup;
+        creator.Platforms = Platforms;
+        creator.Channel = Channel.Trim();
+        creator.AudienceSize = AudienceSize;
+        creator.Genres = Genres.Trim();
+        creator.ConfirmedAdult = ConfirmedAdult;
+    }
+}

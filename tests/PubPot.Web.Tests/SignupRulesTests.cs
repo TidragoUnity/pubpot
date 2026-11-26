@@ -96,3 +96,20 @@ public class SignupRulesTests
             $"Der Einwilligungstext hat sich geändert. ConsentText.Version erhöhen und Hash eintragen: {hash}");
     }
 }
+
+/// <summary>Kanal-Link oder Twitch-Login.</summary>
+public class ChannelInputTests
+{
+    [Theory]
+    [InlineData("kim_streamt", true)]
+    [InlineData("Kim1", true)]
+    [InlineData("https://www.youtube.com/@kim", true)]
+    [InlineData("http://kick.com/kim", true)]
+    [InlineData("kim", false)]                       // zu kurz für einen Twitch-Namen
+    [InlineData("kim streamt", false)]
+    [InlineData("javascript:alert(1)", false)]
+    [InlineData("ftp://kim.example", false)]
+    [InlineData("https://localhost/kim", false)]
+    [InlineData("", false)]
+    public void Channel_input(string input, bool valid) => Assert.Equal(valid, ChannelInput.IsValid(input));
+}
