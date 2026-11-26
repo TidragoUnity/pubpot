@@ -1,5 +1,4 @@
 using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace PubPot.Web.Spam;
 

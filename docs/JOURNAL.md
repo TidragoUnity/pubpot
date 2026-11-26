@@ -12,6 +12,7 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 - Tests: 230 grün. Die normalen Tests entschärfen den Spam-Schutz per Einstellung, `SpamProtectionTests` schalten ihn gezielt scharf.
 - Im echten Browser gegengeprüft: sofort abgeschickt → still verworfen, keine Mail. Mit 4 s Pause → Mail kommt in Mailpit an. Honeypot liegt bei x = −10000.
 - Stolperstein: Python-Hilfsskripte mit `"""` scheitern an C#-Code, der selbst `"""` enthält. Abhilfe: Skript als Datei mit `'''`-Strings.
+- **Fehler im Ablauf, korrigiert:** Commit `f150b3f` wurde trotz Fehler von `dotnet format` (überflüssige `using`-Direktive in `RateLimits.cs`) erstellt und gepusht, weil die Befehle mit `;` statt `&&` verkettet waren. In der CI wäre er rot gewesen. Folge-Commit behebt das. Lehre: Prüfschritte vor Commits immer mit `&&` verketten und die Exit-Codes prüfen, nicht nur die Ausgabe filtern.
 
 ## 2026-11-26 · Schritt 3.6 – Double-Opt-in
 - Absenden → Anmeldung, Bestätigungslink (nur Hash gespeichert, 30 Tage gültig) und Mail im Ausgang, alles in einer Transaktion. Ältere Links derselben Anmeldung verfallen.
