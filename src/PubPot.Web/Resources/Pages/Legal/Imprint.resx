@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Page.Title" xml:space="preserve">
+    <value>Impressum</value>
+  </data>
+  <data name="Todo.Label" xml:space="preserve">
+    <value>Platzhalter</value>
+  </data>
+  <data name="Todo.Text" xml:space="preserve">
+    <value>TODO: Die Pflichtangaben für das Impressum fehlen noch. Der Text muss erstellt und anwaltlich geprüft werden, bevor die Website öffentlich online geht.</value>
+  </data>
+</root>

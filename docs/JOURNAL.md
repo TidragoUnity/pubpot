@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 2.3 – Restliche Seiten
+- Reihenfolge mit 2.4 getauscht, damit die Links der Startseite sofort funktionieren.
+- Neue Seiten jeweils unter `/de` und `/en`: `signup/developer`, `signup/creator`, `signup/thanks`, `signup/confirm`, `legal/imprint`, `legal/privacy`. URLs werden klein geschrieben (`LowercaseUrls`).
+- Impressum und Datenschutz sind Platzhalter mit TODO und „anwaltlich prüfen lassen“, dazu `noindex`. Die Datenschutzseite listet **technische Fakten** als Arbeitsgrundlage für den Anwalt, ausdrücklich als „kein Rechtstext“ gekennzeichnet. Diese Liste wächst mit dem Projekt mit.
+- Danke- und Bestätigungsseite: `noindex`. Die Logik (Token prüfen) folgt in Phase 3.
+- `robots.txt`: alles erlaubt außer `/lang/`.
+- Geprüft: Alle 14 Seiten liefern 200, kein Ressourcen-Schlüssel erscheint als Rohtext, kein Konsolenfehler.
+
 ## 2026-11-26 · Schritt 2.2 – Deutsch und Englisch
 - Sprachpräfix per Konvention, Weiterleitung von `/`, Umschalter mit Cookie, Sprachvorschlag, hreflang/canonical, lokalisierte Fehler- und 404-Seiten (E-017).
 - Mit curl geprüft: Weiterleitung für de/en/fr/leer, Cookie hat Vorrang, `/fr` und `/DE` → 404, Open Redirect über `returnPath=//evil.com` blockiert.

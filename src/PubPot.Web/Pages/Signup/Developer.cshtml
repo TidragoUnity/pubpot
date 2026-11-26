@@ -1,0 +1,18 @@
+@page
+@{
+    ViewData["Title"] = L["Page.Title"];
+    ViewData["Description"] = L["Page.Description"].Value;
+}
+
+<div class="container page-header">
+    <span class="eyebrow">@L["Eyebrow"]</span>
+    <h1>@L["Page.Title"]</h1>
+    <p class="lead">@L["Intro"]</p>
+</div>
+
+<div class="container prose">
+    @* Phase 3: Hier kommt das Formular hin. *@
+    <div class="todo-box">
+        <p>@L["Placeholder"]</p>
+    </div>
+</div>

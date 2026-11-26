@@ -16,7 +16,7 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f7fb" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0e0c18" media="(prefers-color-scheme: dark)" />
-    @if (Lang.IsLocalizedPage)
+    @if (Lang.IsLocalizedPage && ViewData["NoIndex"] is not true)
     {
         <link rel="canonical" href="@Lang.CanonicalUrl" />
         @foreach (var culture in SupportedCultures.All)
@@ -89,8 +89,8 @@
             <p>© @DateTime.UtcNow.Year PubPot · @S["Footer.WorkingTitle"]</p>
             <nav aria-label="@S["Footer.LegalLabel"]">
                 <ul>
-                    <li><a href="#">@S["Footer.Imprint"]</a></li>
-                    <li><a href="#">@S["Footer.Privacy"]</a></li>
+                    <li><a asp-page="/Legal/Imprint" asp-route-culture="@code">@S["Footer.Imprint"]</a></li>
+                    <li><a asp-page="/Legal/Privacy" asp-route-culture="@code">@S["Footer.Privacy"]</a></li>
                 </ul>
             </nav>
         </div>

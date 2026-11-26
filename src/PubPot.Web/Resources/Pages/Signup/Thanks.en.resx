@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Page.Title" xml:space="preserve">
+    <value>Almost done</value>
+  </data>
+  <data name="Heading" xml:space="preserve">
+    <value>Please confirm your email address.</value>
+  </data>
+  <data name="Sent" xml:space="preserve">
+    <value>We've sent you an email with a confirmation link. Your sign-up is only confirmed once you click it.</value>
+  </data>
+  <data name="Spam" xml:space="preserve">
+    <value>No email? Please check your spam folder as well.</value>
+  </data>
+  <data name="Deletion" xml:space="preserve">
+    <value>If you don't confirm within 30 days, we'll delete your details automatically.</value>
+  </data>
+</root>

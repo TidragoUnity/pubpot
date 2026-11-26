@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Page.Title" xml:space="preserve">
+    <value>Privacy policy</value>
+  </data>
+  <data name="Todo.Label" xml:space="preserve">
+    <value>Placeholder</value>
+  </data>
+  <data name="Todo.Text" xml:space="preserve">
+    <value>TODO: The privacy policy is still missing. It must be written and reviewed by a lawyer before the website goes live.</value>
+  </data>
+  <data name="Facts.Heading" xml:space="preserve">
+    <value>Technical facts as a basis (not legal text)</value>
+  </data>
+  <data name="Facts.Intro" xml:space="preserve">
+    <value>This list describes what the website does technically. It is a working basis for the privacy policy and does not replace it.</value>
+  </data>
+  <data name="Facts.NoTracking" xml:space="preserve">
+    <value>No trackers, no analytics, no ads and no third-party embeds. Fonts and all files are served from this server.</value>
+  </data>
+  <data name="Facts.LangCookie" xml:space="preserve">
+    <value>Cookie "pubpot_lang": stores the chosen language. It is only set when someone clicks the language switcher and lasts one year.</value>
+  </data>
+  <data name="Facts.Theme" xml:space="preserve">
+    <value>Browser storage "pubpot-theme" (localStorage): stores the choice between light and dark theme. The value never leaves the browser.</value>
+  </data>
+  <data name="Facts.Forms" xml:space="preserve">
+    <value>Sign-up forms: the details are stored in order to get in touch, together with the consent (text version and time). A sign-up only counts once confirmed by email (double opt-in). Unconfirmed sign-ups are deleted automatically after 30 days. Deletion on request is possible at any time.</value>
+  </data>
+  <data name="Facts.Mail" xml:space="preserve">
+    <value>Emails are sent via an SMTP provider in the EU (TODO: choose provider).</value>
+  </data>
+  <data name="Facts.Hosting" xml:space="preserve">
+    <value>Hosted on a dedicated server at Hetzner (TODO: choose location).</value>
+  </data>
+  <data name="Facts.Logs" xml:space="preserve">
+    <value>The application doesn't write personal data to its logs (TODO: decide on web server access logs).</value>
+  </data>
+</root>

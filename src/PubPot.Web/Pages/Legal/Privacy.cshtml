@@ -1,0 +1,29 @@
+@page
+@{
+    ViewData["Title"] = L["Page.Title"];
+    // Solange nur ein Platzhalter: nicht in Suchmaschinen aufnehmen.
+    ViewData["NoIndex"] = true;
+}
+
+<div class="container page-header">
+    <h1>@L["Page.Title"]</h1>
+</div>
+
+<div class="container prose">
+    <div class="todo-box" role="note" aria-label="@L["Todo.Label"]">
+        <p>@L["Todo.Text"]</p>
+    </div>
+
+    @* Fakten über die Technik, damit die Datenschutzerklärung vollständig wird. Bei Änderungen mitpflegen! *@
+    <h2>@L["Facts.Heading"]</h2>
+    <p>@L["Facts.Intro"]</p>
+    <ul>
+        <li>@L["Facts.NoTracking"]</li>
+        <li>@L["Facts.LangCookie"]</li>
+        <li>@L["Facts.Theme"]</li>
+        <li>@L["Facts.Forms"]</li>
+        <li>@L["Facts.Mail"]</li>
+        <li>@L["Facts.Hosting"]</li>
+        <li>@L["Facts.Logs"]</li>
+    </ul>
+</div>

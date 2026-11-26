@@ -11,7 +11,11 @@ builder.Services.Configure<SiteOptions>(builder.Configuration.GetSection("Site")
 // --- Sprachen ---
 builder.Services.AddLocalization(o => o.ResourcesPath = "Resources");
 builder.Services.Configure<RouteOptions>(o =>
-    o.ConstraintMap[CultureRouteConstraint.Name] = typeof(CultureRouteConstraint));
+{
+    o.ConstraintMap[CultureRouteConstraint.Name] = typeof(CultureRouteConstraint);
+    // Erzeugte Links klein schreiben: /de/signup/developer statt /de/Signup/Developer.
+    o.LowercaseUrls = true;
+});
 builder.Services.Configure<RequestLocalizationOptions>(o =>
 {
     var cultures = SupportedCultures.All.Select(CultureInfo.GetCultureInfo).ToList();

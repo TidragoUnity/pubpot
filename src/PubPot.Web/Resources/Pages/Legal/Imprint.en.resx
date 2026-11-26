@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Page.Title" xml:space="preserve">
+    <value>Legal notice</value>
+  </data>
+  <data name="Todo.Label" xml:space="preserve">
+    <value>Placeholder</value>
+  </data>
+  <data name="Todo.Text" xml:space="preserve">
+    <value>TODO: The mandatory legal notice details are still missing. The text must be written and reviewed by a lawyer before the website goes live.</value>
+  </data>
+</root>

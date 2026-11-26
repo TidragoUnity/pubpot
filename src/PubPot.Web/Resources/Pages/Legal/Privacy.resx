@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Page.Title" xml:space="preserve">
+    <value>Datenschutzerklärung</value>
+  </data>
+  <data name="Todo.Label" xml:space="preserve">
+    <value>Platzhalter</value>
+  </data>
+  <data name="Todo.Text" xml:space="preserve">
+    <value>TODO: Die Datenschutzerklärung fehlt noch. Sie muss erstellt und anwaltlich geprüft werden, bevor die Website öffentlich online geht.</value>
+  </data>
+  <data name="Facts.Heading" xml:space="preserve">
+    <value>Technische Fakten als Grundlage (kein Rechtstext)</value>
+  </data>
+  <data name="Facts.Intro" xml:space="preserve">
+    <value>Diese Liste beschreibt, was die Website technisch tut. Sie dient als Arbeitsgrundlage für die Datenschutzerklärung und ersetzt sie nicht.</value>
+  </data>
+  <data name="Facts.NoTracking" xml:space="preserve">
+    <value>Keine Tracker, keine Analyse-Werkzeuge, keine Werbung und keine externen Einbindungen. Schriften und alle Dateien kommen von diesem Server.</value>
+  </data>
+  <data name="Facts.LangCookie" xml:space="preserve">
+    <value>Cookie „pubpot_lang“: speichert die gewählte Sprache. Es wird erst gesetzt, wenn jemand den Sprachumschalter anklickt, und gilt ein Jahr.</value>
+  </data>
+  <data name="Facts.Theme" xml:space="preserve">
+    <value>Browser-Speicher „pubpot-theme“ (localStorage): speichert die Wahl zwischen hellem und dunklem Design. Der Wert verlässt den Browser nicht.</value>
+  </data>
+  <data name="Facts.Forms" xml:space="preserve">
+    <value>Anmeldeformulare: Die Angaben werden zur Kontaktaufnahme gespeichert, zusammen mit der Einwilligung (Version des Textes und Zeitpunkt). Die Anmeldung gilt erst nach Bestätigung per E-Mail (Double-Opt-in). Unbestätigte Anmeldungen werden nach 30 Tagen automatisch gelöscht. Löschung auf Anfrage ist jederzeit möglich.</value>
+  </data>
+  <data name="Facts.Mail" xml:space="preserve">
+    <value>E-Mail-Versand über einen SMTP-Anbieter in der EU (TODO: Anbieter festlegen).</value>
+  </data>
+  <data name="Facts.Hosting" xml:space="preserve">
+    <value>Hosting auf einem eigenen Server bei Hetzner (TODO: Standort festlegen).</value>
+  </data>
+  <data name="Facts.Logs" xml:space="preserve">
+    <value>Die Anwendung schreibt keine personenbezogenen Daten in ihre Protokolle (TODO: Zugriffsprotokolle des Webservers festlegen).</value>
+  </data>
+</root>

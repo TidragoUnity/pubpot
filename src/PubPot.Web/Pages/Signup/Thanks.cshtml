@@ -1,0 +1,16 @@
+@page
+@{
+    ViewData["Title"] = L["Page.Title"];
+    ViewData["NoIndex"] = true;
+}
+
+<div class="container page-header">
+    <h1>@L["Heading"]</h1>
+    <p class="lead">@L["Sent"]</p>
+</div>
+
+<div class="container prose">
+    <p>@L["Spam"]</p>
+    <p>@L["Deletion"]</p>
+    <a class="btn btn-secondary" asp-page="/Index" asp-route-culture="@Lang.Code">@S["Common.BackHome"]</a>
+</div>

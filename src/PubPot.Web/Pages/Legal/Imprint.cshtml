@@ -1,0 +1,16 @@
+@page
+@{
+    ViewData["Title"] = L["Page.Title"];
+    // Solange nur ein Platzhalter: nicht in Suchmaschinen aufnehmen.
+    ViewData["NoIndex"] = true;
+}
+
+<div class="container page-header">
+    <h1>@L["Page.Title"]</h1>
+</div>
+
+<div class="container prose">
+    <div class="todo-box" role="note" aria-label="@L["Todo.Label"]">
+        <p>@L["Todo.Text"]</p>
+    </div>
+</div>
