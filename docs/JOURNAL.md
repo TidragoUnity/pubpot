@@ -5,6 +5,16 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 4.2 – Login, Logout, Sperre
+- Cookie-Login für `/admin` (`__Host-pubpot-admin`, Secure, HttpOnly, SameSite=Strict, Sitzungscookie), 8 Stunden ohne Aktivität, höchstens 24 Stunden insgesamt. Begründungen in E-026.
+- Sperre nach 5 Fehlversuchen für 15 Minuten (`AdminLoginThrottle`), Rate-Limit `admin-login` mit 10 Versuchen pro IP in 10 Minuten. Benutzername und Passwort werden in gleich langer Zeit geprüft.
+- Abmelden nur per POST. Die Sitzung wird zusätzlich gesperrt, sodass ein kopiertes Cookie nicht mehr gilt. Ein Passwortwechsel beendet alle Sitzungen.
+- Ohne `Admin__PasswordHash` antwortet alles unter `/admin` mit 404. Admin-Seiten sind immer Deutsch, ohne Sprachpräfix, mit `no-store` und `noindex`.
+- Eigenes Layout und `admin.css`, das nur im Admin-Bereich geladen wird. Die öffentlichen Seiten bleiben dadurch gleich schlank.
+- **Gefunden:** Ein `<form action="/admin/logout">` bekommt kein Antiforgery-Token, weil ASP.NET es nur bei `asp-page`/`asp-action` einfügt. Damit kein Token an fremde Adressen geht.
+- 24 neue Tests (`AdminLoginTests`), darunter ein Test, der alle Admin-Seiten selbst findet und den Login-Schutz prüft. Neue Test-Hilfen: `TestClock` (Uhr zum Vorstellen) und `LoginAsAdminAsync`.
+- **Als Nächstes:** 4.3 Datenmodell für die Pipeline.
+
 ## 2026-11-26 · Schritt 4.1 – Admin-Konfiguration und Hash-Befehl
 - `AdminOptions` (`Admin__Username`, Standard `admin`, und `Admin__PasswordHash`). Ohne Hash ist der Admin-Bereich aus, dazu gibt es eine Warnung im Log. Ein ungültiger Hash oder ein leerer Benutzername verhindern den Start.
 - `AdminPassword`: Hashen und Prüfen mit dem `PasswordHasher` aus ASP.NET Core Identity (PBKDF2/HMAC-SHA512, 100 000 Runden). Ein kaputter Hash ergibt `false` statt einer Ausnahme.

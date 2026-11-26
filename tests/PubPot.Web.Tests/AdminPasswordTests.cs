@@ -81,7 +81,7 @@ public class AdminPasswordTests
     [Fact]
     public void App_starts_without_admin_and_with_a_valid_hash()
     {
-        using var withoutAdmin = new PubPotWebFactory();
+        using var withoutAdmin = new PubPotWebFactory().WithWebHostBuilder(b => b.UseSetting("Admin:PasswordHash", ""));
         Assert.False(withoutAdmin.Services.GetRequiredService<IOptions<AdminOptions>>().Value.IsEnabled);
 
         using var withAdmin = new PubPotWebFactory().WithWebHostBuilder(b =>

@@ -152,6 +152,20 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **Kein Hash, kein Admin:** Fehlt `Admin__PasswordHash`, ist der Bereich aus (404). Ein **kaputter** Hash (etwa beim Kopieren abgeschnitten) verhindert dagegen den Start (fail fast), sonst würde jeder Login scheitern, ohne dass man den Grund sieht.
 **Alternative:** ASP.NET Core Identity komplett mit Benutzertabelle. Das ist für ein einziges Konto zu groß: Es bräuchte Migrationen, Registrierung und Passwort-Reset, die wir nicht wollen.
 
+## E-026 · Admin-Login: Cookie, Sperre und Sitzungen
+**Entscheidungen:**
+- **Cookie-Login** mit dem eingebauten Cookie-Schema von ASP.NET Core. Das Cookie ist mit Data Protection verschlüsselt und signiert. Weil die Schlüssel in der Datenbank liegen, überlebt ein Login einen Neustart (E-022).
+- **Cookie `__Host-pubpot-admin`** mit `Secure`, `HttpOnly` und `SameSite=Strict`. Es ist ein Sitzungscookie und endet also, wenn der Browser geschlossen wird. Das Präfix `__Host-` zwingt den Browser, das Cookie nur mit Secure, ohne Domain und mit `Path=/` anzunehmen, sodass keine Subdomain es setzen kann. `Strict` heißt: Bei Anfragen von fremden Seiten fehlt das Cookie, auch beim Klick auf einen Link in einer Mail. Dann kommt zuerst der Login und danach direkt die gewünschte Seite.
+- **Sitzungsdauer:** 8 Stunden ohne Aktivität (jede Anfrage verlängert), höchstens 24 Stunden insgesamt.
+- **Sperre für das Konto:** Nach 5 Fehlversuchen in Folge ist der Login für 15 Minuten gesperrt, auch für das richtige Passwort. Dazu kommt ein **Rate-Limit pro IP** (10 Login-Versuche in 10 Minuten). Die Kontosperre hilft auch gegen Angreifer mit vielen IP-Adressen. Der Preis: Ein Angreifer kann den Login zeitweise blockieren. Für ein einziges Admin-Konto ist das vertretbar. Die IP-Erkennung hinter Caddy kommt in Phase 5.
+- **Gleich lange Prüfung:** Benutzername und Passwort werden immer beide geprüft, und der Name wird in fester Zeit verglichen. So verrät die Antwortzeit nicht, welcher Teil falsch war.
+- **Abmelden sperrt die Sitzung:** Ein Cookie trägt alles selbst und wäre sonst nach dem Abmelden weiter gültig, falls jemand es kopiert hat. Die abgemeldeten Sitzungen stehen in einer Liste im Arbeitsspeicher. **Grenze:** Nach einem Neustart ist die Liste leer, und ein vorher kopiertes Cookie gilt wieder bis zu seinem Ablauf (höchstens 24 Stunden). Für V1 reicht das. Sonst bräuchte es eine Tabelle.
+- **Passwortwechsel beendet alle Sitzungen:** Das Cookie enthält einen Fingerabdruck von Benutzername und Passwort-Hash. Passt er nicht mehr, wird man abgemeldet.
+- **Schutz aller Seiten über eine Konvention** (`AuthorizeFolder("/Admin")`) statt einzeln per Attribut. Ein Test findet alle Admin-Seiten selbst und prüft, dass jede außer dem Login geschützt ist.
+- **Nichts zwischenspeichern:** Admin-Seiten senden `Cache-Control: no-store` und `X-Robots-Tag: noindex`. Der Pfad `/admin` steht bewusst nicht in `robots.txt`, weil die Datei öffentlich ist und den Pfad nur bekannter machen würde.
+- **Ins Log** kommen Fehlversuche und Sperren, aber nie der eingegebene Benutzername. Dort steht oft versehentlich das Passwort.
+**Alternative:** ASP.NET Core Identity mit Benutzertabelle, Lockout und Sicherheitsstempel in der Datenbank. Das ist für ein Konto zu groß (siehe E-025). Für mehrere Admins wäre es der richtige Weg.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

@@ -28,8 +28,8 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 
 ## Stand (2026-11-26)
 - **Phasen 0–3 fertig:** alle Seiten auf DE/EN, Formulare für Entwickler und Creator, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks.
-- 248 Tests grün, 3 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
-- **Phase 4 läuft:** 4.1 ist fertig (Admin-Einstellungen, `hash-password`, E-025). Weiter geht es mit **4.2 Login, Logout, Sperre**. **Keine offenen Rückfragen.**
+- 272 Tests grün, 3 Migrationen. Lighthouse auf allen Seiten 100/100/100/100.
+- **Phase 4 läuft:** 4.1–4.2 sind fertig (Hash-Befehl, Login mit Sperre, E-025/E-026). Weiter geht es mit **4.3 Datenmodell Pipeline**. **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
 ### Phase 4 – Admin-Bereich: weiter mit dem nächsten ⬜-Schritt in `docs/ROADMAP.md`
@@ -61,7 +61,8 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 | `src/PubPot.Web/Spam` | Honeypot, Mindestzeit, Rate-Limiting, Basisklasse `SignupFormPageModel` |
 | `src/PubPot.Web/Pages` | Razor Pages: Start, Signup/*, Legal/*, Status/* |
 | `src/PubPot.Web/Resources` | Texte DE (`.resx`) und EN (`.en.resx`) |
-| `src/PubPot.Web/Admin` | Admin-Konto: `AdminOptions`, `AdminPassword` (Hash), `HashPasswordCommand` |
+| `src/PubPot.Web/Admin` | Admin-Konto: `AdminOptions`, `AdminPassword` (Hash), `HashPasswordCommand`, `AdminAuth` (Cookie, Sitzungen, `UseAdminGate`), `AdminLoginThrottle` |
+| `src/PubPot.Web/Pages/Admin` | Admin-Seiten (nur Deutsch, eigenes Layout, `wwwroot/css/admin.css`) |
 | `src/PubPot.Web/Security` | Security-Header und CSP |
 | `src/TwitchWorker` | Twitch-Worker (.NET 10) |
 | `tests/PubPot.Web.Tests` | Integrationstests (`PubPotWebFactory` ohne DB, `DatabaseWebFactory` mit Testcontainers) |

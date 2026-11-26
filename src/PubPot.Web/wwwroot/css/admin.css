@@ -1,0 +1,43 @@
+/* Admin-Bereich: ergänzt site.css (Farben, Formulare, Buttons kommen von dort). Nur auf /admin geladen. */
+
+.admin-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  min-height: 4rem;
+}
+
+.admin-header .wordmark {
+  margin-right: 0;
+}
+
+.admin-badge {
+  margin-left: 0.25rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.admin-nav {
+  display: block;
+  flex: 1;
+}
+
+.admin-logout {
+  margin: 0;
+}
+
+.admin-page {
+  padding-block: 2rem 4rem;
+}
+
+.admin-login {
+  max-width: 26rem;
+  padding-block: 3rem 4rem;
+}

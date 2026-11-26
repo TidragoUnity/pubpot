@@ -4,7 +4,8 @@ namespace PubPot.Web.Localization;
 
 /// <summary>
 /// Setzt vor jede Razor Page das Sprachpräfix: aus <c>/Signup/Developer</c> wird <c>/{culture}/signup/developer</c>.
-/// Ausgenommen sind die sprachneutralen Seiten unter <c>Pages/Status</c> (Fehler, 404).
+/// Ausgenommen sind die sprachneutralen Seiten unter <c>Pages/Status</c> (Fehler, 404) und der
+/// Admin-Bereich unter <c>Pages/Admin</c>, den es nur auf Deutsch gibt (E-024).
 /// </summary>
 public sealed class CultureRouteConvention : IPageRouteModelConvention
 {
@@ -12,7 +13,8 @@ public sealed class CultureRouteConvention : IPageRouteModelConvention
 
     public void Apply(PageRouteModel model)
     {
-        if (model.ViewEnginePath.StartsWith("/Status/", StringComparison.Ordinal))
+        if (model.ViewEnginePath.StartsWith("/Status/", StringComparison.Ordinal)
+            || model.ViewEnginePath.StartsWith("/Admin/", StringComparison.Ordinal))
         {
             return;
         }

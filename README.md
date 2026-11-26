@@ -79,6 +79,11 @@ dotnet user-secrets set "Admin:PasswordHash" "<HASH>" --project src/PubPot.Web
 |---|---|---|
 | `Admin:Username` | `Admin__Username` | Benutzername, Standard `admin` |
 | `Admin:PasswordHash` | `Admin__PasswordHash` | Hash aus `hash-password`. Leer = Admin-Bereich aus. Ein ungültiger Wert verhindert den Start. |
+| `Admin:MaxFailedLogins` / `Admin:LockoutDuration` | `Admin__MaxFailedLogins` / `Admin__LockoutDuration` | Sperre nach Fehlversuchen, Standard 5 und `00:15:00` |
+| `Admin:IdleTimeout` / `Admin:MaxSessionLifetime` | `Admin__IdleTimeout` / `Admin__MaxSessionLifetime` | Sitzungsdauer, Standard `08:00:00` und `1.00:00:00` |
+| `Admin:LoginPostsPerWindow` / `Admin:LoginWindow` | `Admin__LoginPostsPerWindow` / `Admin__LoginWindow` | Rate-Limit pro IP, Standard 10 in `00:10:00` |
+
+Danach ist der Admin-Bereich unter http://localhost:5080/admin erreichbar.
 
 > Ohne Startprofil muss die Umgebung über die Variable gesetzt werden: `ASPNETCORE_ENVIRONMENT=Development`.
 > Nicht `dotnet run --environment Development` verwenden. Das setzt in .NET 10 eine Umgebungsvariable namens „Development“

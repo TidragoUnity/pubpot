@@ -78,12 +78,14 @@ internal static partial class TestSupport
     /// Antiforgery-Tokens gelten seitenübergreifend – nützlich, wenn die Zielseite selbst kein Formular zeigt.
     /// </remarks>
     public static async Task<HttpResponseMessage> PostFormAsync(
-        HttpClient client, string path, IEnumerable<KeyValuePair<string, string>> fields, string? tokenSource = null)
+        HttpClient client, string path, IEnumerable<KeyValuePair<string, string>> fields, string? tokenSource = null,
+        string? cookie = null)
     {
-        using var page = await GetAsync(client, tokenSource ?? path);
+        // Mit Login-Cookie: Das Antiforgery-Token gehört dann zum angemeldeten Benutzer.
+        using var page = await GetAsync(client, tokenSource ?? path, cookie: cookie);
         var html = await page.Content.ReadAsStringAsync(Ct);
         var token = AntiforgeryToken().Match(html).Groups[1].Value;
-        var cookie = page.Headers.GetValues("Set-Cookie")
+        var antiforgeryCookie = page.Headers.GetValues("Set-Cookie")
             .First(c => c.StartsWith(".AspNetCore.Antiforgery", StringComparison.Ordinal))
             .Split(';')[0];
 
@@ -98,9 +100,25 @@ internal static partial class TestSupport
         {
             Content = new FormUrlEncodedContent(all.Append(new("__RequestVerificationToken", token))),
         };
-        request.Headers.Add("Cookie", cookie);
+        request.Headers.Add("Cookie", cookie is null ? antiforgeryCookie : $"{antiforgeryCookie}; {cookie}");
         return await client.SendAsync(request, Ct);
     }
+
+    /// <summary>Meldet sich im Admin-Bereich an und gibt das Login-Cookie zurück ("Name=Wert").</summary>
+    public static async Task<string> LoginAsAdminAsync(HttpClient client)
+    {
+        using var response = await PostFormAsync(client, "/admin/login",
+            [new("Username", TestAdmin.Username), new("Password", TestAdmin.Password)]);
+        Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
+        return AdminCookie(response) ?? throw new InvalidOperationException("Kein Admin-Cookie erhalten.");
+    }
+
+    /// <summary>Das Admin-Cookie aus einer Antwort ("Name=Wert"), oder <c>null</c>.</summary>
+    public static string? AdminCookie(HttpResponseMessage response) =>
+        response.Headers.TryGetValues("Set-Cookie", out var cookies)
+            ? cookies.FirstOrDefault(c => c.StartsWith("__Host-pubpot-admin=", StringComparison.Ordinal)
+                && !c.StartsWith("__Host-pubpot-admin=;", StringComparison.Ordinal))?.Split(';')[0]
+            : null;
 
     [GeneratedRegex(@"name=""__RequestVerificationToken""[^>]*value=""([^""]+)""")]
     private static partial Regex AntiforgeryToken();

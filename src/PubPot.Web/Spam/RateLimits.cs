@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using PubPot.Web.Admin;
 
 namespace PubPot.Web.Spam;
 
@@ -15,20 +16,26 @@ public static class RateLimits
 {
     public const string FormPosts = "form-posts";
 
-    public static IServiceCollection AddFormRateLimiting(this IServiceCollection services, SpamOptions spam) =>
+    /// <summary>Login-Versuche im Admin-Bereich, zusätzlich zur Sperre des Kontos (E-026).</summary>
+    public const string AdminLogin = "admin-login";
+
+    public static IServiceCollection AddFormRateLimiting(this IServiceCollection services, SpamOptions spam, AdminOptions admin) =>
         services.AddRateLimiter(o =>
         {
             o.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-            o.AddPolicy(FormPosts, context =>
-                HttpMethods.IsPost(context.Request.Method)
-                    ? RateLimitPartition.GetFixedWindowLimiter(
-                        context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-                        _ => new FixedWindowRateLimiterOptions
-                        {
-                            PermitLimit = spam.MaxPostsPerWindow,
-                            Window = spam.Window,
-                            QueueLimit = 0,
-                        })
-                    : RateLimitPartition.GetNoLimiter("get"));
+            o.AddPolicy(FormPosts, context => PostsPerIp(context, spam.MaxPostsPerWindow, spam.Window));
+            o.AddPolicy(AdminLogin, context => PostsPerIp(context, admin.LoginPostsPerWindow, admin.LoginWindow));
         });
+
+    private static RateLimitPartition<string> PostsPerIp(HttpContext context, int limit, TimeSpan window) =>
+        HttpMethods.IsPost(context.Request.Method)
+            ? RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = limit,
+                    Window = window,
+                    QueueLimit = 0,
+                })
+            : RateLimitPartition.GetNoLimiter("get");
 }

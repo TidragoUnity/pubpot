@@ -75,7 +75,13 @@ builder.Services.Configure<RequestLocalizationOptions>(o =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentLanguage>();
 
-builder.Services.AddRazorPages(o => o.Conventions.Add(new CultureRouteConvention()))
+builder.Services.AddRazorPages(o =>
+    {
+        o.Conventions.Add(new CultureRouteConvention());
+        // Jede Seite unter Pages/Admin verlangt den Admin-Login, außer der Login-Seite selbst.
+        o.Conventions.AuthorizeFolder("/Admin", AdminAuth.Policy);
+        o.Conventions.AllowAnonymousToPage("/Admin/Login");
+    })
     .AddViewLocalization()
     // Fehlermeldungen und Feldnamen der Formulare ([Required(ErrorMessage = "Validation.Required")] usw.)
     // sind Schlüssel in SharedResource.resx.
@@ -123,6 +129,7 @@ if (builder.Configuration.GetValue("Cleanup:Enabled", defaultValue: true))
 builder.Services.AddOptions<AdminOptions>().Bind(builder.Configuration.GetSection(AdminOptions.SectionName))
     .Validate(AdminOptions.IsValid, "Admin:Username fehlt oder Admin:PasswordHash ist kein gültiger Hash (neu erzeugen mit: hash-password).")
     .ValidateOnStart();
+builder.Services.AddAdminAuthentication();
 
 // --- Sicherheit ---
 // Kein "Server: Kestrel"-Header: verrät unnötig, welche Software läuft.
@@ -147,7 +154,9 @@ builder.Services.AddDataProtection()
 var spamSection = builder.Configuration.GetSection("Spam");
 builder.Services.AddOptions<SpamOptions>().Bind(spamSection).ValidateDataAnnotations().ValidateOnStart();
 builder.Services.AddSingleton<FormTiming>();
-builder.Services.AddFormRateLimiting(spamSection.Get<SpamOptions>() ?? new SpamOptions());
+builder.Services.AddFormRateLimiting(
+    spamSection.Get<SpamOptions>() ?? new SpamOptions(),
+    builder.Configuration.GetSection(AdminOptions.SectionName).Get<AdminOptions>() ?? new AdminOptions());
 
 // HSTS: Browser merken sich ein Jahr lang, die Seite nur per HTTPS aufzurufen.
 builder.Services.AddHsts(o =>
@@ -188,6 +197,10 @@ app.UseRouting();
 // Nach UseRouting, damit die Sprache aus der Route gelesen werden kann.
 app.UseRequestLocalization();
 app.UseRateLimiter();
+// Admin-Bereich: 404 ohne Passwort-Hash, sonst Login per Cookie (E-026).
+app.UseAdminGate();
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Liefert wwwroot aus, mit Komprimierung (gzip/brotli) und Fingerprinting zur Build-Zeit.
 app.MapStaticAssets();
