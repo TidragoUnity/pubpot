@@ -72,10 +72,14 @@ internal static partial class TestSupport
     /// Schickt ein Formular ab wie ein Browser: erst die Seite laden (Antiforgery-Token und -Cookie holen),
     /// dann mit Token und Cookie per POST absenden.
     /// </summary>
+    /// <remarks>
+    /// <c>tokenSource</c>: Seite, von der das Token geholt wird (Standard: die Zielseite selbst).
+    /// Antiforgery-Tokens gelten seitenübergreifend – nützlich, wenn die Zielseite selbst kein Formular zeigt.
+    /// </remarks>
     public static async Task<HttpResponseMessage> PostFormAsync(
-        HttpClient client, string path, IEnumerable<KeyValuePair<string, string>> fields)
+        HttpClient client, string path, IEnumerable<KeyValuePair<string, string>> fields, string? tokenSource = null)
     {
-        using var page = await GetAsync(client, path);
+        using var page = await GetAsync(client, tokenSource ?? path);
         var html = await page.Content.ReadAsStringAsync(Ct);
         var token = AntiforgeryToken().Match(html).Groups[1].Value;
         var cookie = page.Headers.GetValues("Set-Cookie")

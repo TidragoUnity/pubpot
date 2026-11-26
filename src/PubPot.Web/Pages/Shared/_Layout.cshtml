@@ -30,8 +30,10 @@
         <meta name="robots" content="noindex" />
     }
     <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" href="~/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="~/fonts/space-grotesk-var.woff2" as="font" type="font/woff2" crossorigin />
+    @* Ohne "~/": sonst setzt .NET den Fingerprint-Namen ein (inter-var.abc123.woff2), das CSS lädt aber
+       inter-var.woff2 – der Browser würde die Schrift doppelt herunterladen. Die URLs müssen exakt gleich sein. *@
+    <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/space-grotesk-var.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @* Bewusst im <head>: setzt das gewählte Design vor dem ersten Zeichnen, damit nichts aufblitzt. *@
     <script src="~/js/theme.js" asp-append-version="true"></script>

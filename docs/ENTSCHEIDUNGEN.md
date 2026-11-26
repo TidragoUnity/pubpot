@@ -107,6 +107,14 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 6. **Keine IP-Adressen in der Datenbank.** Das Rate-Limiting arbeitet nur im Arbeitsspeicher (Datensparsamkeit).
 7. **Spam wird still verworfen.** Füllt ein Bot den Honeypot aus oder ist er zu schnell, sieht er trotzdem die Danke-Seite. So lernt er nicht, was ihn verraten hat.
 
+## E-021 · Mails: nur Text, Links nur aus `Site:BaseUrl`, Versand über Outbox
+**Entscheidungen:**
+- **Nur Text-Mails** (kein HTML). Weniger Angriffsfläche: Ein Name mit HTML darin kann nichts anrichten. Zustellbarkeit und Barrierefreiheit sind gut, und es gibt kein Template, das gepflegt werden muss.
+- **Absolute Links nur aus `Site:BaseUrl`.** Außerhalb von Development bricht die App ohne diese Einstellung beim Start ab. Grund ist die sogenannte Host-Header-Injection: Wer das Formular mit `Host: boese.example` abschickt, würde sonst echte PubPot-Mails mit fremden Links an beliebige Adressen auslösen.
+- **SMTP über MailKit 4.18** (die bewährte 4er-Reihe, 5.0 ist ganz neu). `Smtp:Security` steht standardmäßig auf `StartTls` und verlangt damit Verschlüsselung. `None` gibt es nur lokal für Mailpit.
+- **Outbox mit Wiederholungen:** 1, 2, 4, 8 … Minuten, höchstens 1 Stunde, maximal 10 Versuche. Ins Log kommt nur die Mail-ID, nie der Empfänger.
+- **Nur eine Instanz verschickt.** Liefen mehrere App-Instanzen gleichzeitig, könnte eine Mail doppelt rausgehen. Dafür bräuchte es dann `SELECT … FOR UPDATE SKIP LOCKED`. Für V1 mit einem Container reicht das so.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

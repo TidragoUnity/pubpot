@@ -12,13 +12,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Page.Title" xml:space="preserve">
+  <data name="Prompt.Title" xml:space="preserve">
+    <value>Confirm sign-up</value>
+  </data>
+  <data name="Prompt.Heading" xml:space="preserve">
+    <value>Almost there: please confirm your sign-up.</value>
+  </data>
+  <data name="Prompt.Text" xml:space="preserve">
+    <value>Just click the button.</value>
+  </data>
+  <data name="Prompt.Button" xml:space="preserve">
+    <value>Confirm sign-up</value>
+  </data>
+  <data name="Confirmed.Title" xml:space="preserve">
     <value>Sign-up confirmed</value>
   </data>
-  <data name="Heading" xml:space="preserve">
+  <data name="Confirmed.Heading" xml:space="preserve">
     <value>Thanks, your sign-up is confirmed!</value>
   </data>
-  <data name="Text" xml:space="preserve">
+  <data name="Confirmed.Text" xml:space="preserve">
     <value>We'll get in touch as soon as there's news about the pilot.</value>
+  </data>
+  <data name="Invalid.Title" xml:space="preserve">
+    <value>Invalid link</value>
+  </data>
+  <data name="Invalid.Heading" xml:space="preserve">
+    <value>This link is invalid.</value>
+  </data>
+  <data name="Invalid.Text" xml:space="preserve">
+    <value>It may already have been used or wasn't copied completely. Just sign up again and you'll get a new link.</value>
+  </data>
+  <data name="Expired.Title" xml:space="preserve">
+    <value>Link expired</value>
+  </data>
+  <data name="Expired.Heading" xml:space="preserve">
+    <value>This link has expired.</value>
+  </data>
+  <data name="Expired.Text" xml:space="preserve">
+    <value>Confirmation links are valid for 30 days. Just sign up again and you'll get a new link.</value>
+  </data>
+  <data name="Again.Developer" xml:space="preserve">
+    <value>Sign up as a developer</value>
+  </data>
+  <data name="Again.Creator" xml:space="preserve">
+    <value>Sign up as a creator</value>
   </data>
 </root>

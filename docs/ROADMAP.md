@@ -56,7 +56,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 | 3.3 | `/health/ready` mit Datenbank-Prüfung, Test-Basis mit Testcontainers (echtes Postgres im Test) | ✅ |
 | 3.4 | Formular Entwickler: Felder, serverseitige Validierung (Steam-Link), Einwilligung mit Version und Zeitstempel, Speichern, Zusammenführen bei gleicher E-Mail | ✅ |
 | 3.5 | Formular Creator: Plattformen (Mehrfachauswahl), Kanal/Twitch-Login, Zuschauer-Bereich, Genres, 18+-Bestätigung | ✅ |
-| 3.6 | Double-Opt-in: Token (nur Hash gespeichert), Mail-Ausgang in der Datenbank + Versand per SMTP im Hintergrund, Bestätigungsseite (Klick auf Button statt reinem Link-Aufruf), Test mit Mailpit | ⬜ |
+| 3.6 | Double-Opt-in: Token (nur Hash gespeichert), Mail-Ausgang in der Datenbank + Versand per SMTP im Hintergrund, Bestätigungsseite (Klick auf Button statt reinem Link-Aufruf), Test mit Mailpit | ✅ |
 | 3.7 | Spam-Schutz: Honeypot, Mindestausfüllzeit, Rate-Limiting pro IP, Antiforgery | ⬜ |
 | 3.8 | Aufräum-Job: unbestätigte Anmeldungen nach 30 Tagen löschen, versendete Mails nach 7 Tagen | ⬜ |
 | 3.9 | Abnahme: kompletter Ablauf im Browser mit Mailpit, Lighthouse auf den Formularen, Datenschutz-Fakten aktualisieren | ⬜ |

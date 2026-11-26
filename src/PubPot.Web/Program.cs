@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PubPot.Web;
 using PubPot.Web.Data;
+using PubPot.Web.Email;
 using PubPot.Web.Forms;
 using PubPot.Web.Localization;
 using PubPot.Web.Security;
@@ -76,8 +77,28 @@ builder.Services.AddRazorPages(o => o.Conventions.Add(new CultureRouteConvention
 builder.Services.AddSingleton<IConfigureOptions<MvcOptions>, LocalizedModelBindingMessages>();
 builder.Services.AddSingleton<IValidationAttributeAdapterProvider, LocalizedValidationAdapterProvider>();
 
-// --- Anmeldungen ---
+// --- Anmeldungen und E-Mail ---
+builder.Services.AddScoped<LinkBuilder>();
 builder.Services.AddScoped<SignupService>();
+
+// Außerhalb der Entwicklung muss die öffentliche Adresse feststehen: Links in Mails dürfen nie aus dem
+// Host-Header der Anfrage entstehen (sonst könnten Angreifer Links auf fremde Seiten in echte Mails schmuggeln).
+if (!builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(builder.Configuration["Site:BaseUrl"]))
+{
+    throw new InvalidOperationException("Site:BaseUrl fehlt (z. B. Site__BaseUrl=https://pubpot.games).");
+}
+
+// SMTP-Zugang wird beim Start geprüft (fail fast), nicht erst beim ersten Mailversand.
+builder.Services.AddOptions<SmtpOptions>().Bind(builder.Configuration.GetSection("Smtp"))
+    .ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddOptions<OutboxOptions>().Bind(builder.Configuration.GetSection("Outbox"))
+    .ValidateDataAnnotations().ValidateOnStart();
+builder.Services.AddScoped<IEmailTransport, SmtpEmailTransport>();
+builder.Services.AddScoped<OutboxProcessor>();
+if (builder.Configuration.GetValue("Outbox:Enabled", defaultValue: true))
+{
+    builder.Services.AddHostedService<OutboxSenderService>();
+}
 
 // --- Sicherheit ---
 // Kein "Server: Kestrel"-Header: verrät unnötig, welche Software läuft.

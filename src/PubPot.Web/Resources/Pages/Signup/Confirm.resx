@@ -12,13 +12,49 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Page.Title" xml:space="preserve">
+  <data name="Prompt.Title" xml:space="preserve">
+    <value>Anmeldung bestätigen</value>
+  </data>
+  <data name="Prompt.Heading" xml:space="preserve">
+    <value>Fast geschafft: Bitte bestätige deine Anmeldung.</value>
+  </data>
+  <data name="Prompt.Text" xml:space="preserve">
+    <value>Ein Klick auf den Button genügt.</value>
+  </data>
+  <data name="Prompt.Button" xml:space="preserve">
+    <value>Anmeldung bestätigen</value>
+  </data>
+  <data name="Confirmed.Title" xml:space="preserve">
     <value>Anmeldung bestätigt</value>
   </data>
-  <data name="Heading" xml:space="preserve">
+  <data name="Confirmed.Heading" xml:space="preserve">
     <value>Danke, deine Anmeldung ist bestätigt!</value>
   </data>
-  <data name="Text" xml:space="preserve">
+  <data name="Confirmed.Text" xml:space="preserve">
     <value>Wir melden uns bei dir, sobald es Neuigkeiten zum Pilot gibt.</value>
+  </data>
+  <data name="Invalid.Title" xml:space="preserve">
+    <value>Link ungültig</value>
+  </data>
+  <data name="Invalid.Heading" xml:space="preserve">
+    <value>Dieser Link ist ungültig.</value>
+  </data>
+  <data name="Invalid.Text" xml:space="preserve">
+    <value>Vielleicht wurde er schon verwendet oder nicht vollständig kopiert. Melde dich einfach noch einmal an, dann bekommst du einen neuen Link.</value>
+  </data>
+  <data name="Expired.Title" xml:space="preserve">
+    <value>Link abgelaufen</value>
+  </data>
+  <data name="Expired.Heading" xml:space="preserve">
+    <value>Dieser Link ist abgelaufen.</value>
+  </data>
+  <data name="Expired.Text" xml:space="preserve">
+    <value>Bestätigungslinks sind 30 Tage gültig. Melde dich einfach noch einmal an, dann bekommst du einen neuen Link.</value>
+  </data>
+  <data name="Again.Developer" xml:space="preserve">
+    <value>Als Entwickler anmelden</value>
+  </data>
+  <data name="Again.Creator" xml:space="preserve">
+    <value>Als Creator anmelden</value>
   </data>
 </root>

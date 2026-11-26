@@ -5,6 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-26 · Schritt 3.6 – Double-Opt-in
+- Absenden → Anmeldung, Bestätigungslink (nur Hash gespeichert, 30 Tage gültig) und Mail im Ausgang, alles in einer Transaktion. Ältere Links derselben Anmeldung verfallen.
+- Änderungen an bestätigten Anmeldungen warten als JSON am Link und werden erst beim Bestätigen übernommen.
+- Bestätigungsseite: GET prüft nur und zeigt den Button, erst der POST bestätigt (Schutz vor Mail-Scannern). Danach Weiterleitung auf `?status=…`.
+- Hintergrunddienst verschickt per SMTP (MailKit) mit Wiederholungen (E-021). In Tests ersetzt ein Fake den Versand.
+- `LinkBuilder`: absolute Links aus `Site:BaseUrl`, in Production Pflicht (Schutz vor Host-Header-Injection, per Test abgesichert).
+- **Ende-zu-Ende mit Mailpit geprüft:** Formular im Browser → Mail nach einem Versuch in Mailpit → Link → Button → bestätigt, Link verbraucht.
+- **Dabei gefunden (Fehler aus Phase 2):** Die Schriften wurden doppelt geladen. Die Preload-Links bekamen den Fingerprint-Namen, das CSS lädt aber den normalen Namen. Behoben, dazu ein Test, der Preload-URLs und CSS-URLs vergleicht. Lighthouse hatte das nicht bemängelt, die Browserkonsole schon.
+- Stolperstein im Test: Antiforgery-Tokens gelten seitenübergreifend. Der Test-Helfer kann sie jetzt von einer anderen Seite holen, wenn die Zielseite kein Formular zeigt (z. B. bei einem ungültigen Link).
+- 221 Tests grün.
+
 ## 2026-11-26 · Schritt 3.5 – Creator-Formular
 - Felder: Name, E-Mail, Plattformen (Checkboxen → Bitmaske), Kanal-Link oder Twitch-Login (`ChannelInput`: http(s)-Link mit Domain oder 4–25 Zeichen `[A-Za-z0-9_]`), Zuschauer-Bereich (5 Stufen), Lieblingsgenres, 18+-Bestätigung, Nachricht, Einwilligung.
 - Dieselbe E-Mail als Entwickler und als Creator ergibt zwei Einträge (E-020), per Test abgesichert.

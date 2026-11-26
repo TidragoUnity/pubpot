@@ -225,4 +225,37 @@
   <data name="Validation.Adult" xml:space="preserve">
     <value>You must be at least 18 to take part.</value>
   </data>
+  <data name="Mail.Confirm.Subject" xml:space="preserve">
+    <value>Please confirm your PubPot sign-up</value>
+  </data>
+  <data name="Mail.Update.Subject" xml:space="preserve">
+    <value>Please confirm your updated PubPot details</value>
+  </data>
+  <data name="Mail.Greeting" xml:space="preserve">
+    <value>Hi {0},</value>
+  </data>
+  <data name="Mail.Role.Developer" xml:space="preserve">
+    <value>as a developer</value>
+  </data>
+  <data name="Mail.Role.Creator" xml:space="preserve">
+    <value>as a creator</value>
+  </data>
+  <data name="Mail.Confirm.Intro" xml:space="preserve">
+    <value>thanks for signing up with PubPot {0}. Please confirm your email address using this link:</value>
+  </data>
+  <data name="Mail.Confirm.Note" xml:space="preserve">
+    <value>Your sign-up only counts once you've confirmed it. The link is valid for 30 days. Without confirmation, we'll delete your details automatically after 30 days.</value>
+  </data>
+  <data name="Mail.Update.Intro" xml:space="preserve">
+    <value>you've updated your details with PubPot. Please confirm the changes using this link:</value>
+  </data>
+  <data name="Mail.Update.Note" xml:space="preserve">
+    <value>Until then, your previous details stay as they are. The link is valid for 30 days.</value>
+  </data>
+  <data name="Mail.NotYou" xml:space="preserve">
+    <value>Didn't sign up? Then simply ignore this email.</value>
+  </data>
+  <data name="Mail.SignOff" xml:space="preserve">
+    <value>Best regards</value>
+  </data>
 </root>

@@ -74,7 +74,9 @@ public class SecurityTests(PubPotWebFactory factory) : IClassFixture<PubPotWebFa
     {
         // Eigene Instanz im Modus "Production", Aufruf über HTTPS mit echter Domain
         // (für "localhost" setzt ASP.NET bewusst kein HSTS).
-        using var production = factory.WithWebHostBuilder(b => b.UseEnvironment("Production"));
+        using var production = factory.WithWebHostBuilder(b => b
+            .UseEnvironment("Production")
+            .UseSetting("Site:BaseUrl", "https://pubpot.test")); // außerhalb von Development Pflicht
         using var client = CreateClient(production, "https://pubpot.test");
 
         using var response = await GetAsync(client, "/health");

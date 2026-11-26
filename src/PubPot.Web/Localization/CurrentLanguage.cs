@@ -1,5 +1,4 @@
 using System.Globalization;
-using Microsoft.Extensions.Options;
 
 namespace PubPot.Web.Localization;
 
@@ -7,7 +6,7 @@ namespace PubPot.Web.Localization;
 /// Sprache der aktuellen Anfrage und die daraus abgeleiteten Links (Umschalter, hreflang, canonical).
 /// In allen Views als <c>Lang</c> verfügbar (siehe _ViewImports.cshtml).
 /// </summary>
-public sealed class CurrentLanguage(IHttpContextAccessor accessor, IOptions<SiteOptions> site)
+public sealed class CurrentLanguage(IHttpContextAccessor accessor, LinkBuilder links)
 {
     private HttpContext Context => accessor.HttpContext
         ?? throw new InvalidOperationException("CurrentLanguage wird nur während einer Anfrage verwendet.");
@@ -57,13 +56,7 @@ public sealed class CurrentLanguage(IHttpContextAccessor accessor, IOptions<Site
     /// <summary>Für hreflang="x-default": die Wurzel, die nach Browsersprache weiterleitet.</summary>
     public string DefaultUrl => Absolute("/");
 
-    private string Absolute(string path)
-    {
-        var baseUrl = string.IsNullOrWhiteSpace(site.Value.BaseUrl)
-            ? $"{Context.Request.Scheme}://{Context.Request.Host}"
-            : site.Value.BaseUrl.TrimEnd('/');
-        return baseUrl + path;
-    }
+    private string Absolute(string path) => links.Absolute(path);
 
     /// <summary>Führt <paramref name="action"/> mit einer anderen UI-Sprache aus (z. B. für den Sprachvorschlag).</summary>
     public static T InCulture<T>(string culture, Func<T> action)

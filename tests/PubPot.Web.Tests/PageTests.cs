@@ -83,6 +83,29 @@ public partial class PageTests(PubPotWebFactory factory) : IClassFixture<PubPotW
         Assert.True(seen.Count >= 14, $"Nur {seen.Count} Links gefunden – fehlen Seiten in der Navigation?");
     }
 
+    /// <summary>
+    /// Vorab geladene Schriften müssen exakt die URL haben, die auch das CSS lädt –
+    /// sonst lädt der Browser jede Schrift zweimal (in Schritt 3.6 so passiert, siehe Journal).
+    /// </summary>
+    [Fact]
+    public async Task Preloaded_fonts_are_the_ones_the_stylesheet_uses()
+    {
+        var html = await GetHtmlAsync(_client, "/de");
+        var css = await File.ReadAllTextAsync(Path.Combine(WebProjectDir, "wwwroot", "css", "site.css"), Ct);
+
+        var preloads = FontPreload().Matches(html).Select(m => m.Groups[1].Value).ToList();
+
+        Assert.NotEmpty(preloads);
+        foreach (var href in preloads)
+        {
+            Assert.StartsWith("/fonts/", href, StringComparison.Ordinal);
+            Assert.Contains($"url(\"..{href}\")", css, StringComparison.Ordinal);
+        }
+    }
+
+    [GeneratedRegex(@"<link rel=""preload"" href=""([^""]+)"" as=""font""")]
+    private static partial Regex FontPreload();
+
     // Text zwischen Tags, der wie ein Schlüssel aussieht: "Nav.How", "Faq.Cost.Q" …
     [GeneratedRegex(@">\s*([A-Z][A-Za-z0-9]*(?:\.[A-Z0-9][A-Za-z0-9]*)+)\s*<")]
     private static partial Regex ResourceKeyInText();

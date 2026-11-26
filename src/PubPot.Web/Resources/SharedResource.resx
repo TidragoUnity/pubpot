@@ -225,4 +225,37 @@
   <data name="Validation.Adult" xml:space="preserve">
     <value>Mitmachen kannst du erst ab 18 Jahren.</value>
   </data>
+  <data name="Mail.Confirm.Subject" xml:space="preserve">
+    <value>Bitte bestätige deine Anmeldung bei PubPot</value>
+  </data>
+  <data name="Mail.Update.Subject" xml:space="preserve">
+    <value>Bitte bestätige deine geänderten Angaben bei PubPot</value>
+  </data>
+  <data name="Mail.Greeting" xml:space="preserve">
+    <value>Hallo {0},</value>
+  </data>
+  <data name="Mail.Role.Developer" xml:space="preserve">
+    <value>als Entwickler</value>
+  </data>
+  <data name="Mail.Role.Creator" xml:space="preserve">
+    <value>als Creator</value>
+  </data>
+  <data name="Mail.Confirm.Intro" xml:space="preserve">
+    <value>danke für deine Anmeldung {0} bei PubPot. Bitte bestätige deine E-Mail-Adresse über diesen Link:</value>
+  </data>
+  <data name="Mail.Confirm.Note" xml:space="preserve">
+    <value>Erst danach ist deine Anmeldung bestätigt. Der Link ist 30 Tage gültig. Ohne Bestätigung löschen wir deine Angaben nach 30 Tagen automatisch.</value>
+  </data>
+  <data name="Mail.Update.Intro" xml:space="preserve">
+    <value>du hast deine Angaben bei PubPot geändert. Bitte bestätige die Änderungen über diesen Link:</value>
+  </data>
+  <data name="Mail.Update.Note" xml:space="preserve">
+    <value>Bis dahin bleiben deine bisherigen Angaben gespeichert. Der Link ist 30 Tage gültig.</value>
+  </data>
+  <data name="Mail.NotYou" xml:space="preserve">
+    <value>Du hast dich nicht angemeldet? Dann ignoriere diese E-Mail einfach.</value>
+  </data>
+  <data name="Mail.SignOff" xml:space="preserve">
+    <value>Viele Grüße</value>
+  </data>
 </root>
