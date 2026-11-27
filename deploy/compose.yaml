@@ -256,6 +256,37 @@ services:
       timeout: 3s
       retries: 12
 
+  # Verschickt die Alarme aus Prometheus per Mail (E-055), über dieselben SMTP-Einstellungen wie die Website.
+  # Oberfläche (aktive Alarme, Stummschalten): http://localhost:9093
+  alertmanager:
+    logging: *logging
+    image: prom/alertmanager:v0.35.1
+    profiles: [monitoring]
+    <<: *hardening
+    restart: unless-stopped
+    # start.sh setzt die SMTP-Werte in alertmanager.yml ein und startet Alertmanager.
+    entrypoint: ["sh", "/etc/alertmanager/start.sh"]
+    environment:
+      # Empfänger der Alarme. Standard: dieselbe Adresse wie für Hinweise auf neue Anmeldungen.
+      ALERT_EMAIL: ${ALERT_EMAIL:-${Notifications__Email:-}}
+      ALERT_SMTP_HOST: ${Smtp__Host:-}
+      ALERT_SMTP_PORT: ${Smtp__Port:-587}
+      ALERT_SMTP_SECURITY: ${Smtp__Security:-StartTls}
+      ALERT_SMTP_USERNAME: ${Smtp__Username:-}
+      ALERT_SMTP_PASSWORD: ${Smtp__Password:-}
+      ALERT_SMTP_FROM: ${Smtp__FromAddress:-}
+    volumes:
+      - ./monitoring/alertmanager:/etc/alertmanager:ro
+      # Stummschaltungen und Zustand überstehen einen Neustart.
+      - alertmanager_data:/alertmanager
+    ports:
+      - "127.0.0.1:9093:9093"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9093/-/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
   # Prüft die Website von außen gesehen: über Caddy, mit HTTPS und der echten Domain (E-054).
   # Hängt dafür im eigenen Netz "probe", das es nur mit Caddy teilt. Das Netz "edge" bleibt Caddy und web vorbehalten.
   blackbox:
@@ -317,6 +348,7 @@ volumes:
   caddy_config:
   prometheus_data:
   grafana_data:
+  alertmanager_data:
 
 networks:
   # Festes Subnetz, damit die App weiß, wem sie die Forwarded-Header glauben darf (Proxy__KnownNetworks bei web).

@@ -33,7 +33,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Keine offenen Rückfragen.** Ideen für nach V1 stehen in `docs/IDEEN.md` (I-01 bis I-04).
 
 ## Nächste Aufgabe
-1. **Phase 7 – Monitoring, Alarme, Backups (lokal)**: Go vom Nutzer am 2026-11-27. Plan in `docs/ROADMAP.md` (7.1–7.9, E-049). 7.1 bis 7.3 fertig: JSON-Logs (E-050), `/metrics` für Website und Worker auf Port 9464 (E-051, E-052), Push-URL `Worker__PushUrl`. 7.4: Prometheus, Grafana, node-exporter, cAdvisor im Profil `monitoring` (E-053). 7.5: Blackbox-Exporter über Caddy (E-054). Als Nächstes **7.6 Alarme per E-Mail** (Alertmanager, Regeln mit `promtool test rules`).
+1. **Phase 7 – Monitoring, Alarme, Backups (lokal)**: Go vom Nutzer am 2026-11-27. Plan in `docs/ROADMAP.md` (7.1–7.9, E-049). 7.1 bis 7.3 fertig: JSON-Logs (E-050), `/metrics` für Website und Worker auf Port 9464 (E-051, E-052), Push-URL `Worker__PushUrl`. 7.4: Prometheus, Grafana, node-exporter, cAdvisor im Profil `monitoring` (E-053). 7.5: Blackbox-Exporter über Caddy (E-054). 7.6: Alarme per Mail über Alertmanager, Regeln mit Unit-Tests (E-055). Als Nächstes **7.7 Backups** (Messwerte für die Backup-Alarme sind schon festgelegt: `pubpot_backup_last_run_success`, `pubpot_backup_last_success_timestamp_seconds`, Label `database`).
 
 **Arbeitsweise seit Phase 6 (F-019, E-040):** Jeder Schritt in einem eigenen Branch (`x.y-kurzname`), PR, warten bis grün (`gh pr checks <nr> --watch`), dann `gh pr merge <nr> --squash --subject "x.y: …"`. Direkt auf `main` geht nicht mehr. Push und Merge sind in `C:\Timo\Docker\.claude\settings.local.json` freigegeben.
 
@@ -69,7 +69,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 | `src/TwitchWorker` | Twitch-Worker (.NET 10), `WorkerMetrics` (/metrics per HttpListener), `PushNotifier` |
 | `tests/PubPot.Web.Tests` | Integrationstests (`PubPotWebFactory` ohne DB, `DatabaseWebFactory` mit Testcontainers) |
 | `tests/TwitchWorker.Tests` | Worker: Healthcheck, Schema-Runner `deploy/db/twitch/migrate.sh` im echten Postgres |
-| `deploy/` | `compose.yaml` (db, migrate, web, Profil `worker`: migrate-twitch, worker, Profil `monitoring`: prometheus, grafana, blackbox, node-exporter, cadvisor; Konfiguration in `monitoring/`), `compose.override.yaml` (Build, Mailpit :8025, Adminer :8081), `caddy/Caddyfile` (https://localhost), `db/twitch` (Worker-Schema) |
+| `deploy/` | `compose.yaml` (db, migrate, web, Profil `worker`: migrate-twitch, worker, Profil `monitoring`: prometheus, alertmanager, grafana, blackbox, node-exporter, cadvisor; Konfiguration in `monitoring/`), `compose.override.yaml` (Build, Mailpit :8025, Adminer :8081), `caddy/Caddyfile` (https://localhost), `db/twitch` (Worker-Schema) |
 
 ## Schnellbefehle
 ```bash

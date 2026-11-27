@@ -1,0 +1,43 @@
+# Alertmanager: verschickt die Alarme aus Prometheus per E-Mail (Schritt 7.6, E-055).
+# Platzhalter (__…__) setzt start.sh beim Start aus den SMTP-Einstellungen der Website ein (Smtp__*, ALERT_EMAIL).
+# Doku: https://prometheus.io/docs/alerting/latest/configuration/
+
+global:
+  smtp_smarthost: "__SMTP_HOST__:__SMTP_PORT__"
+  smtp_from: "PubPot Monitoring <__SMTP_FROM__>"
+  smtp_hello: pubpot
+  smtp_auth_username: "__SMTP_USERNAME__"
+  # Das Passwort steht nie in dieser Datei. start.sh legt es in eine eigene Datei, die nur der Dienst lesen kann.
+  smtp_auth_password_file: /tmp/smtp_password
+  smtp_require_tls: __SMTP_REQUIRE_TLS__
+
+route:
+  receiver: __RECEIVER__
+  # Gleiche Alarme in einer Mail bündeln. Erste Mail nach 30 s, Nachträge frühestens nach 5 Minuten.
+  # Ein Alarm, der weiter besteht, kommt alle 4 Stunden erneut.
+  group_by: [alertname]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+receivers:
+  - name: mail
+    email_configs:
+      - to: "__ALERT_EMAIL__"
+        # Auch melden, wenn der Alarm vorbei ist.
+        send_resolved: true
+        headers:
+          Subject: '[PubPot] {{ if eq .Status "firing" }}Alarm{{ else }}Behoben{{ end }}: {{ .CommonLabels.alertname }}{{ if gt (len .Alerts) 1 }} ({{ len .Alerts }}){{ end }}'
+        text: |-
+          {{ range .Alerts }}{{ if eq .Status "firing" }}ALARM{{ else }}BEHOBEN{{ end }}: {{ .Annotations.summary }}
+          {{ .Annotations.description }}
+          Seit: {{ .StartsAt.Format "02.01.2006 15:04 MST" }}
+
+          {{ end }}
+  # Ohne ALERT_EMAIL: Alarme sind in Prometheus und Alertmanager sichtbar, es geht aber keine Mail raus.
+  - name: aus
+
+inhibit_rules:
+  # Ist die App selbst aus, schlägt auch die Prüfung von außen fehl. Eine Mail genügt.
+  - source_matchers: [alertname="AppNichtErreichbar"]
+    target_matchers: [alertname="WebsiteNichtErreichbar"]

@@ -8,6 +8,16 @@ global:
   scrape_interval: 15s
   evaluation_interval: 15s
 
+# Alarmregeln (7.6, E-055), getestet mit "promtool test rules" (tests/alerts_test.yml).
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+# Feuernde Alarme gehen an Alertmanager, der die Mails verschickt.
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ["alertmanager:9093"]
+
 scrape_configs:
   # Prometheus selbst (Speicher, Anzahl Zeitreihen, eigene Fehler).
   - job_name: prometheus
@@ -85,3 +95,8 @@ scrape_configs:
   - job_name: blackbox
     static_configs:
       - targets: ["blackbox:9115"]
+
+  # Alertmanager (verschickt die Alarm-Mails).
+  - job_name: alertmanager
+    static_configs:
+      - targets: ["alertmanager:9093"]

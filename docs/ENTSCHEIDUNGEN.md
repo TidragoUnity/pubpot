@@ -378,6 +378,30 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-055 · Alarme: Regeln mit Unit-Tests, Alertmanager über die SMTP-Werte der Website (7.6)
+**Entscheidungen:**
+- **Elf Regeln** in `deploy/monitoring/prometheus/rules/alerts.yml`, jede mit deutscher Zusammenfassung und dem ersten Befehl zur Fehlersuche:
+  - Website von außen nicht erreichbar (2 min)
+  - App intern nicht erreichbar (2 min)
+  - Fehlerquote über 5 % (5 min, erst ab 10 Anfragen in 5 min, sonst wäre 1 Fehler bei 2 Anfragen schon „50 %“)
+  - Zertifikat unter 14 Tagen (nur `tls="public"`)
+  - Worker 15 min ohne vollständige Runde (nicht nach geplantem Ende)
+  - Worker nicht erreichbar
+  - Festplatte über 80 % (10 min)
+  - Monitoring-Dienst aus
+  - Backup fehlgeschlagen, älter als 26 h oder ohne Messwerte
+- **Unit-Tests** (`tests/alerts_test.yml`, `promtool test rules`, 16 Fälle) in `check.sh`, also auch in der CI. Jede Regel wird geprüft, ob sie nach der richtigen Zeit feuert und ob sie in den Fällen stumm bleibt, in denen sie es soll: wenig Verkehr, 1 % Fehler, lokales Zertifikat, geplantes Worker-Ende, tmpfs, 70 % Belegung.
+- **Alertmanager** nutzt die SMTP-Werte der Website (`Smtp__*`). Empfänger ist `ALERT_EMAIL`, sonst `Notifications__Email`. Ohne Empfänger sind die Alarme nur in den Oberflächen sichtbar (Hinweis im Log).
+- **`start.sh`** setzt die Werte ein, weil auch Alertmanager keine Umgebungsvariablen liest. Die Werte werden auf erlaubte Zeichen geprüft. Das Passwort landet in einer eigenen Datei (`umask 077`), nie in der Konfiguration. Sonderzeichen müssen deshalb nicht maskiert werden.
+- **Mails:**
+  - Betreff `[PubPot] Alarm: …` bzw. `Behoben: …`, Text mit Zusammenfassung, Hinweis und Startzeit.
+  - Gleiche Alarme werden gebündelt, eine Wiederholung kommt alle 4 h.
+  - Ist die App aus, unterdrückt das die zusätzliche Mail „Website von außen nicht erreichbar“.
+- **Prüfungen:**
+  - `amtool check-config` in `check.sh`, ohne Empfänger und mit SMTP-Anmeldung.
+  - Smoke-Test: Regeln geladen, Alertmanager verbunden, im gesunden Stack feuert kein Alarm.
+  - Von Hand: Test-Alarm über Alertmanager kam in Mailpit an, korrekt als UTF-8.
+
 ## E-054 · Blackbox-Exporter prüft über Caddy mit der echten Domain, eigenes Netz `probe`, Domain per Startskript (7.5)
 **Entscheidungen:**
 - **Drei Prüfungen alle 30 s:** `/health/ready` (App und Datenbank), `/de` (Startseite) und `http://` → 308 auf `https://`. Die Antwort muss von der App kommen (Text „Healthy“ bzw. „PubPot“). Eine leere Antwort von Caddy reicht nicht.
