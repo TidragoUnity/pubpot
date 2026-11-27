@@ -5,6 +5,20 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.4 – Prometheus, Grafana, node-exporter, cAdvisor
+- **Profil `monitoring`:** Prometheus (127.0.0.1:9090) und Grafana (127.0.0.1:3000) mit fertiger Datenquelle und dem Dashboard „PubPot – Start“, dazu node-exporter und cAdvisor. Die Konfiguration liegt als Dateien in `deploy/monitoring/` (E-053).
+- **Grafana** startet nur mit `GRAFANA_ADMIN_PASSWORD` und baut keine Verbindungen nach außen auf.
+- **Prüfungen:**
+  - `promtool check config` in `check.sh`.
+  - Der Smoke-Test startet jetzt auch das Monitoring. Er prüft die Ziele in Prometheus, Datenquelle und Dashboard in Grafana und jede Dashboard-Abfrage gegen das echte Prometheus.
+- **Gefunden:**
+  - **Datenbank-Healthcheck zu früh „gesund“:** Er lief über den Socket, beim ersten Start gab es deshalb „connection refused“ für `migrate`. Jetzt läuft er über TCP.
+  - Docker Desktop lehnt `rslave` ab.
+  - Die Festplatte unter Docker Desktop heißt `/var/lib` statt `/`.
+  - `python3` ist unter Windows nur ein Store-Platzhalter.
+- Stand: 429 Tests grün, Smoke-Test mit 13 Prüfungen bestanden.
+- **Als Nächstes:** 7.5 Erreichbarkeit mit dem Blackbox-Exporter.
+
 ## 2026-11-27 · Schritt 7.3 – Metriken des Workers und Push-URL
 - Der Worker liefert `/metrics` auf Port 9464 (HttpListener) mit diesen Werten (E-052):
   - Runden nach Ergebnis

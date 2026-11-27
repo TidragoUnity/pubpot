@@ -59,7 +59,9 @@ services:
       # Skripte in diesem Ordner laufen genau einmal: beim allerersten Start mit leerem Volume.
       - ./db/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      # Über TCP wie die Anwendungen, nicht über den lokalen Socket: Beim allerersten Start läuft kurz ein
+      # temporärer Server nur am Socket (Init-Skripte), dann wäre "gesund" zu früh gemeldet (gefunden in 7.4).
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d postgres"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -185,10 +187,115 @@ services:
       migrate-twitch:
         condition: service_completed_successfully
 
+  # --- Monitoring (Profil "monitoring", E-053) ---------------------------------------------------------------
+  # Starten: docker compose --profile monitoring up -d
+  # Oberflächen nur auf 127.0.0.1, auch auf dem Server. Dort per SSH-Tunnel (F-009), nie offen im Internet.
+
+  # Sammelt alle 15 Sekunden die Messwerte und speichert sie 30 Tage (höchstens 2 GB).
+  prometheus:
+    logging: *logging
+    image: prom/prometheus:v3.16.0
+    profiles: [monitoring]
+    <<: *hardening
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      - --storage.tsdb.retention.size=2GB
+    volumes:
+      - ./monitoring/prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090/-/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  # Dashboards. Datenquelle und Start-Dashboard kommen als Dateien aus monitoring/grafana (kein Klicken nötig).
+  grafana:
+    logging: *logging
+    image: grafana/grafana:13.3.2
+    profiles: [monitoring]
+    <<: *hardening
+    restart: unless-stopped
+    # Ohne Passwort startet Grafana nicht, statt still mit admin/admin zu laufen. (":?" geht hier nicht:
+    # Compose prüft das auch ohne Profil "monitoring" und würde dann jeden Start verhindern.)
+    entrypoint: ["/bin/sh", "-c", '[ -n "$$GF_SECURITY_ADMIN_PASSWORD" ] || { echo "GRAFANA_ADMIN_PASSWORD in deploy/.env setzen" >&2; exit 1; }; exec /run.sh']
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-}
+      GF_SERVER_ROOT_URL: http://localhost:3000
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      # Keine Verbindungen nach außen: keine Statistik, keine Update-Prüfung, kein News-Feed, keine Plugin-Downloads.
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GF_PLUGINS_PREINSTALL_DISABLED: "true"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+
+  # Messwerte des Servers: CPU, Arbeitsspeicher, Festplatte. Liest das Dateisystem des Servers nur lesend.
+  node-exporter:
+    logging: *logging
+    image: prom/node-exporter:v1.13.1
+    profiles: [monitoring]
+    <<: *hardening
+    restart: unless-stopped
+    command:
+      - --path.rootfs=/host
+    pid: host
+    # Ohne "rslave": Docker Desktop lehnt es ab. Es betrifft nur später eingehängte Laufwerke, "/" ist so sichtbar.
+    volumes:
+      - /:/host:ro
+
+  # Messwerte pro Container: CPU und Arbeitsspeicher je Compose-Dienst.
+  # Braucht Lesezugriff auf Docker und den Kernel. Kein Port nach außen, nur Prometheus fragt ihn ab (E-053).
+  cadvisor:
+    logging: *logging
+    image: ghcr.io/google/cadvisor:v0.61.1
+    profiles: [monitoring]
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=15s
+      # Nur das Label mit dem Dienstnamen übernehmen, keine anderen Labels oder Umgebungsvariablen.
+      - --store_container_labels=false
+      - --whitelisted_container_labels=com.docker.compose.service
+      # Messwerte, die wir nicht brauchen und die viele Zeitreihen erzeugen.
+      - --disable_metrics=advtcp,cpu_topology,cpuset,hugetlb,memory_numa,percpu,process,referenced_memory,resctrl,sched,tcp,udp
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+
 volumes:
   pgdata:
   caddy_data:
   caddy_config:
+  prometheus_data:
+  grafana_data:
 
 networks:
   # Festes Subnetz, damit die App weiß, wem sie die Forwarded-Header glauben darf (Proxy__KnownNetworks bei web).

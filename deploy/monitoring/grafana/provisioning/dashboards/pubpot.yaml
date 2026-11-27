@@ -1,0 +1,13 @@
+# Dashboards kommen als JSON-Dateien aus dem Repo (deploy/monitoring/grafana/dashboards).
+# Änderungen in der Oberfläche werden nicht gespeichert: Wer ein Panel dauerhaft ändern will, exportiert das
+# Dashboard als JSON und ersetzt die Datei im Repo (E-053).
+apiVersion: 1
+
+providers:
+  - name: pubpot
+    folder: PubPot
+    type: file
+    allowUiUpdates: false
+    disableDeletion: true
+    options:
+      path: /etc/grafana/dashboards
