@@ -10,7 +10,7 @@ namespace PubPot.Web;
 /// </remarks>
 public static class HealthCheckCommand
 {
-    public const string Name = "healthcheck";
+          public const string Name = "healthcheck";
 
     public const string Path = "/health";
 
