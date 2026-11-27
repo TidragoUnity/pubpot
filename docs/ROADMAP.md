@@ -136,7 +136,7 @@ Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack 
 
 > **Phasen 7 und 8 sind gegenüber dem Auftrag getauscht** (E-013): Erst läuft alles lokal, dann kommt der VPS.
 
-## Phase 7 – Monitoring, Alarme, Backups (lokal) 🔄
+## Phase 7 – Monitoring, Alarme, Backups (lokal) ✅
 Ziel: Du siehst in Grafana, wie es der Anwendung geht, bekommst eine Mail, wenn etwas kaputt ist, und jede Nacht entsteht ein Backup, dessen Wiederherstellung getestet ist. Alles läuft erst lokal (E-013), Alarme gehen an Mailpit. Auf dem VPS (Phase 8) läuft danach dasselbe.
 
 | # | Schritt | Status |
@@ -149,7 +149,7 @@ Ziel: Du siehst in Grafana, wie es der Anwendung geht, bekommst eine Mail, wenn 
 | 7.6 | **Alarme per E-Mail** über Alertmanager (lokal an Mailpit, E-014): Website nicht erreichbar, Worker seit 15 Minuten ohne vollständige Runde, Fehlerquote über 5 % für 5 Minuten, Festplatte über 80 %, Backup fehlgeschlagen oder älter als 26 Stunden. Die Regeln haben **eigene Unit-Tests** (`promtool test rules`), die in der CI laufen | ✅ |
 | 7.7 | **Backups:** Dienst `backup` sichert jede Nacht um 03:00 beide Datenbanken (`pg_dump`, dazu Rollen). Aufbewahrung 7 Tage täglich und 4 Wochen wöchentlich, Ordner per `BACKUP_DIR` (Standard `deploy/backups`, steht in `.gitignore`). Meldet Erfolg und Größe als Metrik. `scripts/restore.sh` stellt eine Datenbank aus einer Datei wieder her | ✅ |
 | 7.8 | **Restore-Test:** automatisch im Smoke-Test der CI (Backup → in leere Datenbank zurückspielen → Anmeldungen und Worker-Daten vergleichen), dazu eine Anleitung für den Test von Hand in der README. Datenschutzerklärung: wie lange Daten in Backups bleiben (TODO, anwaltlich prüfen lassen) | ✅ |
-| 7.9 | **Abnahme:** alles starten, Dashboard ansehen, **jeden Alarm einmal auslösen** (Website stoppen, Worker ohne Twitch, Fehler erzeugen, Backup kaputt machen) und die Mails in Mailpit prüfen. Restore von Hand. README-Abschnitt „Monitoring“ mit Zugängen, Ports und Befehlen | ⬜ |
+| 7.9 | **Abnahme:** alles starten, Dashboard ansehen, **jeden Alarm einmal auslösen** (Website stoppen, Worker ohne Twitch, Fehler erzeugen, Backup kaputt machen) und die Mails in Mailpit prüfen. Restore von Hand. README-Abschnitt „Monitoring“ mit Zugängen, Ports und Befehlen | ✅ |
 
 **Was für alle Schritte gilt**
 - Jeder Schritt ist ein eigener Branch und PR (F-019). Neue Images (Prometheus, Grafana usw.) sind fest auf eine Version gepinnt, Dependabot hält sie aktuell.

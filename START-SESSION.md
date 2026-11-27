@@ -27,13 +27,23 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Texte** stehen immer in `.resx`, Deutsch und Englisch (`*.en.resx`). Der Paritätstest meldet fehlende Übersetzungen.
 
 ## Stand (2026-11-27)
-- **Phasen 0–6 fertig:** Website DE/EN mit Anmeldung, Double-Opt-in, Spam-Schutz, Admin-Bereich, Aufbewahrungsfrist. Docker-Stack hinter Caddy (`https://localhost`).
+- **Phasen 0–7 fertig:** Website DE/EN mit Anmeldung, Double-Opt-in, Spam-Schutz, Admin-Bereich, Aufbewahrungsfrist. Docker-Stack hinter Caddy (`https://localhost`).
 - **Phase 6 (CI):** Jeder PR durchläuft „Build und Tests“ (`check.sh`), „Images und Smoke-Test“ (`smoke-test.sh`, Trivy) und CodeQL. Merges auf `main` legen die Images öffentlich in GHCR ab (`ghcr.io/tidragounity/pubpot-{web,migrate,worker}:<sha>`). Dependabot läuft wöchentlich. `main` ist geschützt: nur PRs, nur Squash, nur mit grüner CI (E-040 bis E-048).
-- 429 Tests grün, 5 Migrationen. Logs im Container als JSON, ein Test prüft, dass keine personenbezogenen Daten im Log landen (7.1). MailKit 5.0 mit SMTP-Test gegen Mailpit (ersetzt Dependabot-PR #7).
+- **Phase 7 (Monitoring, lokal):**
+  - JSON-Logs ohne personenbezogene Daten (E-050).
+  - `/metrics` für Website und Worker auf Port 9464, nur intern (E-051, E-052).
+  - Profil `monitoring`: Prometheus, Grafana mit Start-Dashboard, Alertmanager, Blackbox, node-exporter, cAdvisor (E-053 bis E-055). Elf Alarmregeln mit Unit-Tests.
+  - Dienst `backup` nachts mit `scripts/restore.sh` (E-056). Restore-Test im Smoke-Test (E-057).
+  - Abnahme: jeder Alarm ausgelöst, Mails in Mailpit (E-058). Die README hat den Abschnitt „Monitoring, Alarme und Backups“.
+- 429 Tests, 15 Regel-Tests, Smoke-Test mit 24 Prüfungen, 5 Migrationen.
 - **Keine offenen Rückfragen.** Ideen für nach V1 stehen in `docs/IDEEN.md` (I-01 bis I-04).
 
 ## Nächste Aufgabe
-1. **Phase 7 – Monitoring, Alarme, Backups (lokal)**: Go vom Nutzer am 2026-11-27. Plan in `docs/ROADMAP.md` (7.1–7.9, E-049). 7.1 bis 7.3 fertig: JSON-Logs (E-050), `/metrics` für Website und Worker auf Port 9464 (E-051, E-052), Push-URL `Worker__PushUrl`. 7.4: Prometheus, Grafana, node-exporter, cAdvisor im Profil `monitoring` (E-053). 7.5: Blackbox-Exporter über Caddy (E-054). 7.6: Alarme per Mail über Alertmanager, Regeln mit Unit-Tests (E-055). 7.7: Dienst `backup` (pg_dump nachts, `scripts/restore.sh`, E-056). 7.8: Restore-Test im Smoke-Test (E-057), Datenschutzerklärung ergänzt. Als Nächstes **7.9 Abnahme** (jeden Alarm einmal auslösen, README-Abschnitt „Monitoring“).
+1. **Phase 8 – VPS und CD (Staging, dann Production)** ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt. Vorher F-008 klären (VPS, Backup-Ziel außerhalb des Servers, Domain, SMTP), dann in `docs/ROADMAP.md` fein planen und vorlegen. Mitzunehmen aus Phase 7:
+   - externer Dienst für Server-Ausfall und Worker über `Worker__PushUrl` (E-052, E-058)
+   - Backups zusätzlich außerhalb des Servers (E-056)
+   - Monitoring per SSH-Tunnel
+   - `GRAFANA_ADMIN_PASSWORD` und `ALERT_EMAIL` auf dem Server
 
 **Arbeitsweise seit Phase 6 (F-019, E-040):** Jeder Schritt in einem eigenen Branch (`x.y-kurzname`), PR, warten bis grün (`gh pr checks <nr> --watch`), dann `gh pr merge <nr> --squash --subject "x.y: …"`. Direkt auf `main` geht nicht mehr. Push und Merge sind in `C:\Timo\Docker\.claude\settings.local.json` freigegeben.
 

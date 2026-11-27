@@ -131,7 +131,7 @@ grafana_ready() {
 }
 dashboard_queries() {
   "$python" ../scripts/check-dashboard-queries.py monitoring/grafana/dashboards/pubpot.json http://127.0.0.1:9090 \
-    "Website von außen" "App (intern)" "Zertifikat gültig noch" "Anfragen pro Sekunde" "Anfragen nach Statuscode" "CPU pro Container" "Arbeitsspeicher pro Container" \
+    "Von außen" "App intern" "Anfragen/s" "Anfragen nach Statuscode" "CPU pro Container" "Arbeitsspeicher pro Container" \
     "Festplatte belegt" "Server: CPU und Arbeitsspeicher"
 }
 

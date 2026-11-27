@@ -5,6 +5,21 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.9 – Abnahme, Phase 7 abgeschlossen
+- **Lokaler Stack mit allen Profilen.** Twitch war für den Worker gesperrt, die `.env` des Nutzers blieb unverändert (E-058).
+- **Jeden Alarm ausgelöst:**
+  - Website stoppen → AppNichtErreichbar, danach Behoben.
+  - Datenbank stoppen und Backup → BackupFehlgeschlagen, WebsiteNichtErreichbar, FehlerquoteHoch, danach alle Behoben.
+  - Twitch gesperrt → WorkerOhneVollstaendigeRunde nach 16:41 min.
+
+  Alle Mails kamen in Mailpit an. Die übrigen Regeln sind über Unit-Tests abgedeckt.
+- **Restore von Hand** nach der README-Anleitung: Die Daten in der Test-Datenbank waren gleich.
+- **Dashboard angesehen und verbessert:** kurze Titel, Zertifikat lokal „lokal“ statt rot, „Noch keine Daten“.
+- **README:** neuer Abschnitt „Monitoring, Alarme und Backups“ mit Zugängen, Ports, Alarmen, Test von Hand und Stolperfallen (Grafana-Passwort, Dashboard neu laden).
+- **Aufgeräumt:** Abnahme-Container und Monitoring-Volumes entfernt, die Test-Runden des Workers aus der lokalen DB gelöscht. Die Alarm-Mails liegen zum Ansehen noch in Mailpit.
+- **Phase 7 in 9 PRs (#13 bis #21), dazu der Plan (#12).** Stand: 429 Tests, 15 Regel-Tests, Smoke-Test mit 24 Prüfungen.
+- **Als Nächstes:** Phase 8 (VPS und CD). Vorher F-008 klären, Phase fein planen und das OK abwarten.
+
 ## 2026-11-27 · Schritt 7.8 – Restore-Test
 - **Smoke-Test, Teil „Restore-Test“** (E-057):
   1. Anmeldung über die echte Website (HTTPS über Caddy, Token, Mindestzeit) und eine Zeile im Worker-Schema.
@@ -28,7 +43,7 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 - **Als Nächstes:** 7.8 Restore-Test in der CI.
 
 ## 2026-11-27 · Schritt 7.6 – Alarme per E-Mail
-- **Elf Alarmregeln** für Website, Worker, Server, Monitoring und Backups, mit **16 Unit-Tests** (`promtool test rules`) in `check.sh` und damit in der CI (E-055).
+- **Elf Alarmregeln** für Website, Worker, Server, Monitoring und Backups, mit **15 Unit-Tests** (`promtool test rules`) in `check.sh` und damit in der CI (E-055).
 - **Gefunden durch die Tests:** Im Test „wenig Verkehr“ lag die Testmenge genau auf der Grenze von 10 Anfragen. Die Testdaten wurden korrigiert, die Regel war richtig.
 - **Alertmanager** im Profil `monitoring` (127.0.0.1:9093). Er verschickt über die SMTP-Werte der Website, lokal an Mailpit. Der Empfänger ist `ALERT_EMAIL` bzw. `Notifications__Email`.
 - **Geprüft:**
