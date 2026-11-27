@@ -4,6 +4,7 @@ Dinge, die ich nicht für dich tun kann oder soll, weil sie Konten, Geld, Vertr�
 Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 
 ## Sofort
+- [ ] Optional: Caddys lokalem Zertifikat vertrauen, damit `https://localhost` ohne Warnung lädt (README, „Caddy-Zertifikat vertrauen“). Vorerst klickst du die Warnung weg (F-017)
 - [ ] Twitch Client Secret neu erzeugen, falls die alte `.env.example` irgendwo geteilt wurde (F-002)
 - [x] GitHub CLI installiert, Anmeldung mit Fine-grained-Token nur für `pubpot`
 - [ ] Token-Ablauf: ca. **24.02.2027** bei 90 Tagen. Das ist mitten im Next Fest, deshalb **vorher** erneuern (GitHub → Settings → Developer settings → Fine-grained tokens → Regenerate)
@@ -20,6 +21,8 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 - [ ] VPS nach der Härtungsanleitung absichern (kommt in Phase 8)
 - [ ] Domain `pubpot.games` registrieren
 - [ ] DNS: A/AAAA-Einträge für `pubpot.games`, `www` und `staging` auf den VPS
+- [ ] `deploy/.env` auf dem Server: `SITE_DOMAIN`, `BIND_ADDRESS=0.0.0.0`, SMTP-Zugang, Admin-Hash (`docker compose run --rm --no-deps web hash-password`), bei Bedarf `COMPOSE_PROFILES=worker` mit Twitch-Zugangsdaten. Lange Zufallspasswörter, nur Buchstaben und Ziffern
+- [ ] Firewall: Ports 80 und 443 (TCP) sowie 443/UDP für HTTP/3 öffnen, sonst nichts außer SSH (Anleitung kommt in Phase 8)
 
 ## Bis zum Go-live
 - [ ] SMTP-Anbieter in der EU wählen, Absenderdomain mit SPF, DKIM und DMARC einrichten

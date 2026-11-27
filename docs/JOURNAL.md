@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.7 – `.env.example` und Doku
+- `deploy/.env.example` vollständig: DB-Passwörter, `SITE_DOMAIN`, `BIND_ADDRESS`, `Site__BaseUrl`, SMTP, Admin (mit Befehl `docker compose run --rm --no-deps web hash-password`), Hinweise, Worker mit `COMPOSE_PROFILES`, `IMAGE_TAG`. Jeder Abschnitt sagt, was lokal optional und was auf dem Server Pflicht ist. Dazu der Hinweis auf `$` und `;` in Passwörtern.
+- README: neuer Abschnitt „Alles in Docker starten“ (Ablauf, Dienste, Admin-Hash im Container, Befehle), „Caddy-Zertifikat vertrauen (optional)“ mit `certutil -user` (ohne Admin-Rechte, wieder entfernbar) und eine Tabelle aller Variablen in `deploy/.env`.
+- Checkliste: Server-`.env` und Firewall für Phase 8, optional das Zertifikat vertrauen.
+- **Als Nächstes:** 5.8 Abnahme von Phase 5.
+
 ## 2026-11-27 · Schritt 5.6 – Caddy
 - `deploy/caddy/Caddyfile` und Dienst `caddy` (2.11.9) in `compose.yaml`: Domain aus `SITE_DOMAIN` (Standard `localhost`), Ports über `BIND_ADDRESS` (Standard `127.0.0.1`), Volumes für Zertifikate, Healthcheck über einen internen Port (E-038).
 - Netz `edge` mit festem Subnetz für Caddy und web. Die App vertraut nur diesem Netz (`Proxy__KnownNetworks`). `Site__BaseUrl` ist jetzt standardmäßig `https://${SITE_DOMAIN}`. Der direkte Port 8090 ist wieder entfernt.

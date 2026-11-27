@@ -29,7 +29,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 ## Stand (2026-11-27)
 - **Phasen 0–4 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks. Dazu der **Admin-Bereich** (`/admin`, nur Deutsch): Login mit Sperre, Liste mit Filter und Suche, Detailseite mit Pipeline, CSV-Export, Löschen (DSGVO), Hinweis-Mail bei neuer Anmeldung (Discord optional) und die **Aufbewahrungsfrist** mit Warnmail und Link „Ich möchte dabei bleiben“.
 - 401 Tests grün, 5 Migrationen. Lighthouse auf allen Seiten 100 (Performance, Barrierefreiheit, Best Practices).
-- **Phase 5 in Arbeit** (Schritte 5.1–5.8 in der Roadmap, F-016 und F-017 beantwortet, E-032). Fertig: 5.1 Forwarded Headers (E-033), 5.2 Dockerfile Web (E-034), 5.3 Migrations-Bundle (E-035), 5.4 Worker (E-036), 5.5 Compose (E-037), 5.6 Caddy (E-038). **Keine offenen Rückfragen.**
+- **Phase 5 in Arbeit** (Schritte 5.1–5.8 in der Roadmap, F-016 und F-017 beantwortet, E-032). Fertig: 5.1 bis 5.7 (E-033 bis E-038), offen nur noch 5.8 Abnahme. **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
 ### Phase 5 – Docker und Compose lokal (freigegeben, Schritt für Schritt umsetzen)
