@@ -378,6 +378,25 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-057 · Restore-Test im Smoke-Test mit echten Daten und Vergleich Tabelle für Tabelle (7.8)
+**Entscheidungen:**
+- **Echte Daten statt leerer Tabellen:**
+  - Der Smoke-Test meldet sich über die Website an, wie ein Browser über Caddy mit HTTPS, Formular-Token, Cookie und Mindestausfüllzeit.
+  - Dazu kommt eine Zeile im Worker-Schema.
+  - Nebenbei ist damit die Anmeldung im produktionsnahen Stack geprüft, das fehlte bisher.
+- **Vergleich:**
+  - Das neueste Backup wird mit `scripts/restore.sh` in neue Datenbanken eingespielt (`<db>_restore_check`).
+  - Danach wird jede Tabelle mit Original verglichen: Anzahl Zeilen und eine Prüfsumme über den ganzen Inhalt (`md5` über alle Zeilen, sortiert).
+  - Während Backup und Vergleich ist web gestoppt, sonst ändert der Mail-Ausgang laufend Zeilen.
+- **Echte Wiederherstellung:** `restore.sh` spielt `pubpot` an Ort und Stelle zurück, stoppt und startet web dabei. Danach muss die Website über Caddy bereit sein und die Anmeldung noch da.
+- **Anleitung für den Test von Hand** in der README: Restore in `pubpot_restore_test`, vergleichen, aufräumen.
+- **Datenschutzerklärung:**
+  - Aufbewahrung in Backups ergänzt: 7 Tage täglich, 4 Wochen wöchentlich, also spätestens nach 4 Wochen auch dort gelöscht.
+  - Protokolle: kein Zugriffsprotokoll, 50 MB pro Dienst.
+  - Offen und als TODO markiert (anwaltlich prüfen, steht in der Checkliste): Wie werden Löschanfragen seit dem Backup nach einer Wiederherstellung erneut umgesetzt?
+
+**Gefunden:** Unter Git Bash schreibt Windows `/scripts/backup.sh` in `C:/Program Files/Git/scripts/…` um, wenn es als Argument an `docker compose exec` geht. Der Backup-Container hat jetzt `working_dir: /scripts`, alle Aufrufe lauten `sh backup.sh …` und funktionieren so in jeder Shell.
+
 ## E-056 · Backups mit pg_dump im eigenen Dienst, geprüft vor dem Zählen, Löschen nur nach Erfolg (7.7)
 **Entscheidungen:**
 - **Dienst `backup`** im Postgres-Image (`pg_dump` und `psql` sind dabei, kein eigenes Image). Er läuft immer mit, nicht nur mit einem Profil.

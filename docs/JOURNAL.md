@@ -5,6 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.8 – Restore-Test
+- **Smoke-Test, Teil „Restore-Test“** (E-057):
+  1. Anmeldung über die echte Website (HTTPS über Caddy, Token, Mindestzeit) und eine Zeile im Worker-Schema.
+  2. Backup von Hand.
+  3. Restore beider Datenbanken in neue Datenbanken und Vergleich jeder Tabelle (Zeilen und Prüfsumme).
+  4. Danach eine echte Wiederherstellung von `pubpot` mit `restore.sh`: web wird gestoppt und neu gestartet, die Website ist wieder bereit, die Anmeldung ist da.
+- **README:** Anleitung für den Restore-Test von Hand.
+- **Datenschutzerklärung (DE/EN):** Aufbewahrung in Backups und Protokolle ergänzt. Die offene Rechtsfrage (Löschungen nach einem Restore) steht als TODO und in der Checkliste.
+- **Gefunden:** Git Bash schreibt `/scripts/…` als Argument um. Lösung: Der Backup-Container hat einen Arbeitsordner, die Aufrufe brauchen keinen absoluten Pfad mehr.
+- **Als Nächstes:** 7.9 Abnahme.
+
 ## 2026-11-27 · Schritt 7.7 – Backups
 - **Dienst `backup`:**
   - Er sichert `pubpot`, `twitch` und die Rollen beim ersten Start sofort, dann jede Nacht um 03:00.

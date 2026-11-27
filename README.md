@@ -142,10 +142,20 @@ http://localhost:9093. Alle sind nur auf diesem Rechner erreichbar. Alarm-Mails 
 `deploy/backups/` (nicht im Git), 7 Tage täglich und 4 Wochen wöchentlich.
 
 ```bash
-docker compose exec backup sh /scripts/backup.sh now   # sofort sichern
+docker compose exec backup sh backup.sh now            # sofort sichern
 ./scripts/restore.sh                                     # vorhandene Backups anzeigen
 ./scripts/restore.sh daily/pubpot-<Zeit>.dump            # Datenbank pubpot daraus wiederherstellen (fragt vorher)
 ```
+
+**Restore von Hand prüfen**, ohne die echte Datenbank anzufassen. Der Smoke-Test macht dasselbe automatisch:
+
+1. Frisches Backup: `docker compose exec backup sh backup.sh now`
+2. Dateiname ansehen: `./scripts/restore.sh`
+3. In eine Test-Datenbank einspielen: `./scripts/restore.sh daily/pubpot-<Zeit>.dump pubpot_restore_test`
+4. Vergleichen, z. B. die Anzahl der Anmeldungen in beiden Datenbanken:
+   `docker compose exec db psql -U postgres -d pubpot_restore_test -c "select count(*) from signups"` (und dasselbe mit
+   `-d pubpot`). Oder in Adminer (http://localhost:8081, Server `db`) durch beide Datenbanken klicken.
+5. Aufräumen: `docker compose exec db dropdb -U postgres pubpot_restore_test`
 
 ### Caddy-Zertifikat vertrauen (optional)
 

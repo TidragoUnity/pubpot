@@ -46,7 +46,7 @@
     <value>Hosting auf einem eigenen Server bei Hetzner (TODO: Standort festlegen).</value>
   </data>
   <data name="Facts.Logs" xml:space="preserve">
-    <value>Die Anwendung schreibt keine personenbezogenen Daten in ihre Protokolle (TODO: Zugriffsprotokolle des Webservers festlegen).</value>
+    <value>Die Anwendung schreibt keine personenbezogenen Daten in ihre Protokolle, und der Webserver führt kein Zugriffsprotokoll mit IP-Adressen. Protokolle sind auf 50 MB pro Dienst begrenzt, ältere Einträge werden überschrieben.</value>
   </data>
   <data name="Facts.Antiforgery" xml:space="preserve">
     <value>Sicherheits-Cookie „.AspNetCore.Antiforgery.…“: wird auf Seiten mit Formular gesetzt und schützt vor gefälschten Formularanfragen (CSRF). Es enthält keine Angaben zur Person und wird beim Schließen des Browsers gelöscht.</value>
@@ -55,6 +55,6 @@
     <value>Spam-Schutz: Beim Absenden eines Formulars wird die IP-Adresse kurzzeitig im Arbeitsspeicher verwendet, um zu viele Anfragen von derselben Adresse zu begrenzen (höchstens 10 Minuten). Sie wird weder in der Datenbank gespeichert noch protokolliert.</value>
   </data>
   <data name="Facts.Retention" xml:space="preserve">
-    <value>Aufbewahrung: Unbestätigte Anmeldungen werden 30 Tage nach der letzten Einreichung gelöscht, verschickte Bestätigungsmails 7 Tage nach dem Versand, nicht zustellbare nach 30 Tagen. Bestätigte Anmeldungen: Ist 12 Monate lang nichts passiert (keine Rückmeldung von dir, keine Bearbeitung durch uns), bekommst du eine E-Mail mit dem Link „Ich möchte dabei bleiben“. Ohne Klick löschen wir die Anmeldung 30 Tage nach dieser E-Mail. TODO: Aufbewahrung in Backups ergänzen (Phase 7), anwaltlich prüfen lassen.</value>
+    <value>Aufbewahrung: Unbestätigte Anmeldungen werden 30 Tage nach der letzten Einreichung gelöscht, verschickte Bestätigungsmails 7 Tage nach dem Versand, nicht zustellbare nach 30 Tagen. Bestätigte Anmeldungen: Ist 12 Monate lang nichts passiert (keine Rückmeldung von dir, keine Bearbeitung durch uns), bekommst du eine E-Mail mit dem Link „Ich möchte dabei bleiben“. Ohne Klick löschen wir die Anmeldung 30 Tage nach dieser E-Mail. Backups: Die Datenbank wird jede Nacht gesichert. Tägliche Backups bewahren wir 7 Tage auf, wöchentliche 4 Wochen. Gelöschte Angaben sind deshalb spätestens nach 4 Wochen auch aus den Backups verschwunden. Ein Backup nutzen wir nur, um den Betrieb nach einem Fehler wiederherzustellen. TODO: anwaltlich prüfen lassen, auch wie Löschungen nach einer Wiederherstellung erneut umgesetzt werden.</value>
   </data>
 </root>

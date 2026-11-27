@@ -1,6 +1,7 @@
 #!/bin/sh
 # Backups der Datenbanken pubpot und twitch (Schritt 7.7, E-056). Läuft im Dienst "backup" (Postgres-Image).
 #
+# Aufruf im Container (Arbeitsordner /scripts), z. B. docker compose exec backup sh backup.sh now
 #   sh backup.sh loop                     Dauerbetrieb: gleich beim Start, falls das letzte Backup älter als
 #                                         24 Stunden ist, danach jede Nacht um BACKUP_TIME (Standard 03:00)
 #   sh backup.sh now                      sofort ein Backup (z. B. vor einem Update)
