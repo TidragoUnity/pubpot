@@ -41,7 +41,11 @@ public sealed class DatabaseWebFactory : WebApplicationFactory<Program>, IAsyncL
     {
         builder.UseSetting("ConnectionStrings:Default", ConnectionString);
         TestSettings.Apply(builder);
-        builder.ConfigureTestServices(services => services.AddSingleton<IEmailTransport>(Mail));
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddSingleton<IEmailTransport>(Mail);
+            services.AddTransient<IStartupFilter, FakeLocalPort>();
+        });
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
     }
 

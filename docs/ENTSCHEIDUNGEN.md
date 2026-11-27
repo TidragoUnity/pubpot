@@ -378,6 +378,28 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-051 · Metriken der Website: eingebaute .NET-Messwerte, eigene Zähler, eigener Port mit Prüfung auf den echten Port (7.2)
+**Entscheidungen:**
+- **OpenTelemetry nur als Sammler und Exporter** (`OpenTelemetry.Extensions.Hosting`, `…Exporter.Prometheus.AspNetCore`). Die Messwerte selbst sind in .NET 10 eingebaut: Anfragen und Antwortzeiten, Kestrel, Rate-Limiting, Ausnahmen, Laufzeit (Speicher, GC, Threads, CPU) und ausgehende HTTP-Aufrufe. Dafür braucht es keine weiteren Instrumentierungs-Pakete.
+- **Eigene Zähler** (`Monitoring/PubPotMetrics.cs`, Meter `PubPot.Web`):
+  - `pubpot_signups_total{kind}` und `pubpot_signups_confirmed_total{kind}`
+  - `pubpot_signups_spam_total{reason}`
+  - `pubpot_mails_sent_total` und `pubpot_mails_failed_total`
+  - `pubpot_cleanup_deleted_total{type}`
+
+  Labels haben nur feste Werte, nie E-Mail, IP oder IDs.
+- **`/metrics` nur auf Port 9464.** Kestrel lauscht im Container auf 8080 und 9464 (`ASPNETCORE_HTTP_PORTS`). Caddy leitet nur an 8080 weiter. Entscheidend ist der **Port der Verbindung** (`Connection.LocalPort`), **nicht der Host-Header**: Den kann jeder Besucher über Caddy frei setzen. Auf 9464 gibt es nur `/metrics`, alles andere ist 404. Die Abfragen zählen nicht als Anfragen der Website.
+- **Tests:**
+  - Port-Trennung, gefälschter Host-Header und Prometheus-Format.
+  - Die Zähler werden direkt an den Instrumenten gemessen (`MetricCollector`).
+  - Der Smoke-Test prüft den echten Weg im Container: von außen nicht erreichbar, im Docker-Netz schon.
+
+**Warum:**
+- Prometheus holt die Werte ab („Pull“, E-049) und merkt dadurch sofort, wenn die App nicht antwortet.
+- Ein eigener Port ist einfacher und sicherer als ein Login für `/metrics`.
+
+**Gefunden:** Im Testlauf laufen mehrere Test-Apps im selben Prozess. OpenTelemetry fasst gleichnamige Zähler zusammen, und endet eine Test-App, verschwindet die gemeinsame Reihe. Deshalb messen die Tests die Zähler direkt. In Produktion läuft nur eine App pro Prozess.
+
 ## E-050 · JSON-Logs mit dem eingebauten Formatter, Log-Rotation, Test gegen personenbezogene Daten (7.1)
 **Entscheidungen:**
 - **Eingebauter JSON-Formatter von .NET** (`Logging:Console:FormatterName = json` in `appsettings.json`) statt Serilog. Er schreibt eine Zeile pro Eintrag: Zeit in UTC (`…Z`), Level, Kategorie, fertige Nachricht und jedes Feld einzeln unter `State`, z. B. `SignupId`. Ein Stacktrace bleibt eine Zeile und zerfällt nicht in viele. Bei `dotnet run` (Development) bleibt die lesbare Ausgabe.

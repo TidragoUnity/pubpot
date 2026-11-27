@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using PubPot.Web.Data;
 using PubPot.Web.Forms;
 using PubPot.Web.Localization;
+using PubPot.Web.Monitoring;
 using PubPot.Web.Signups;
 using PubPot.Web.Spam;
 
@@ -18,7 +19,8 @@ public sealed class CreatorModel(
     IOptions<SpamOptions> spam,
     CurrentLanguage language,
     IStringLocalizer<SharedResource> text,
-    ILogger<CreatorModel> logger) : SignupFormPageModel(timing, spam, language, text, logger)
+    PubPotMetrics metrics,
+    ILogger<CreatorModel> logger) : SignupFormPageModel(timing, spam, language, text, metrics, logger)
 {
     /// <summary>Reihenfolge der Plattformen im Formular.</summary>
     public static readonly CreatorPlatforms[] AllPlatforms =

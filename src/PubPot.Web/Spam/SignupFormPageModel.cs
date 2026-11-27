@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using PubPot.Web.Localization;
+using PubPot.Web.Monitoring;
 
 namespace PubPot.Web.Spam;
 
@@ -14,6 +15,7 @@ public abstract class SignupFormPageModel(
     IOptions<SpamOptions> spam,
     CurrentLanguage language,
     IStringLocalizer<SharedResource> text,
+    PubPotMetrics metrics,
     ILogger logger) : PageModel
 {
     /// <summary>Honeypot: für Menschen unsichtbar, Bots füllen es gern aus. Muss leer bleiben.</summary>
@@ -40,13 +42,13 @@ public abstract class SignupFormPageModel(
     {
         if (!string.IsNullOrEmpty(Honeypot))
         {
-            return SilentlyDrop("Honeypot ausgefüllt");
+            return SilentlyDrop(SpamReason.Honeypot);
         }
 
         switch (timing.Check(FormStarted, spam.Value.MinFillSeconds))
         {
             case FormTimingResult.TooFast:
-                return SilentlyDrop("zu schnell ausgefüllt");
+                return SilentlyDrop(SpamReason.TooFast);
             case FormTimingResult.Invalid:
                 ModelState.AddModelError(string.Empty, text["Validation.FormExpired"]);
                 break;
@@ -58,10 +60,12 @@ public abstract class SignupFormPageModel(
     /// <summary>Danke-Seite nach erfolgreicher Anmeldung.</summary>
     protected IActionResult RedirectToThanks() => RedirectToPage("/Signup/Thanks", new { culture = language.Code });
 
-    private RedirectToPageResult SilentlyDrop(string reason)
+    private RedirectToPageResult SilentlyDrop(SpamReason reason)
     {
         // Ohne IP und ohne Formulardaten loggen (personenbezogen) – nur, dass und warum verworfen wurde.
-        logger.LogInformation("Anmeldung als Spam verworfen: {Reason}.", reason);
+        logger.LogInformation("Anmeldung als Spam verworfen: {Reason}.",
+            reason == SpamReason.Honeypot ? "Honeypot ausgefüllt" : "zu schnell ausgefüllt");
+        metrics.SpamDropped(reason);
         return (RedirectToPageResult)RedirectToThanks();
     }
 }

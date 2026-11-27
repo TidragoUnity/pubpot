@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PubPot.Web.Data;
+using PubPot.Web.Monitoring;
 
 namespace PubPot.Web.Email;
 
@@ -14,6 +15,7 @@ public sealed class OutboxProcessor(
     IEmailTransport transport,
     TimeProvider time,
     IOptions<OutboxOptions> options,
+    PubPotMetrics metrics,
     ILogger<OutboxProcessor> log)
 {
     private const int BatchSize = 20;
@@ -38,6 +40,7 @@ public sealed class OutboxProcessor(
                 await transport.SendAsync(email, ct);
                 email.SentAt = time.GetUtcNow();
                 email.LastError = null;
+                metrics.MailSent();
                 log.LogInformation("Mail {MailId} verschickt (Versuch {Attempt}).", email.Id, email.Attempts);
             }
             catch (Exception ex) when (!ct.IsCancellationRequested)
@@ -45,6 +48,7 @@ public sealed class OutboxProcessor(
                 var delay = TimeSpan.FromMinutes(Math.Min(60, Math.Pow(2, email.Attempts - 1)));
                 email.NextAttemptAt = time.GetUtcNow() + delay;
                 email.LastError = Truncate($"{ex.GetType().Name}: {ex.Message}", 1000);
+                metrics.MailFailed();
 
                 // Keine Empfängeradresse im Log (personenbezogen) – die Mail-ID genügt zur Fehlersuche.
                 log.LogWarning("Mail {MailId} fehlgeschlagen (Versuch {Attempt}/{Max}): {Error}. Nächster Versuch in {Delay}.",

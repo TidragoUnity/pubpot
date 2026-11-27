@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using PubPot.Web.Admin;
 using PubPot.Web.Data;
 using PubPot.Web.Localization;
+using PubPot.Web.Monitoring;
 
 namespace PubPot.Web.Signups;
 
@@ -26,6 +27,7 @@ public sealed class SignupRetention(
     LinkBuilder links,
     IStringLocalizer<SharedResource> text,
     IOptions<CleanupOptions> options,
+    PubPotMetrics metrics,
     ILogger<SignupRetention> log)
 {
     public async Task<RetentionResult> RunAsync(CancellationToken ct)
@@ -65,6 +67,7 @@ public sealed class SignupRetention(
         }
 
         await db.SaveChangesAsync(ct);
+        metrics.Deleted("inactive_signups", deleted);
 
         if (deleted + inactive.Count > 0)
         {

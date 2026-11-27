@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using Npgsql;
 using PubPot.Web.Data;
 using PubPot.Web.Localization;
+using PubPot.Web.Monitoring;
 using PubPot.Web.Notifications;
 using PubPot.Web.Spam;
 
@@ -33,6 +34,7 @@ public sealed class SignupService(
     IStringLocalizer<SharedResource> text,
     IOptions<SpamOptions> spam,
     SignupNotifier notifier,
+    PubPotMetrics metrics,
     ILogger<SignupService> log)
 {
     public async Task SubmitAsync(SignupSubmission submission, CancellationToken ct)
@@ -109,6 +111,8 @@ public sealed class SignupService(
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
+        metrics.SignupSaved(signup.Kind);
+
         // Bewusst ohne E-Mail oder Namen im Log (keine personenbezogenen Daten in Logs).
         log.LogInformation("Anmeldung {SignupId} ({Kind}) gespeichert. {MailStatus}",
             signup.Id, signup.Kind,
@@ -163,6 +167,7 @@ public sealed class SignupService(
         if (firstConfirmation)
         {
             notifier.QueueDiscord(signup);
+            metrics.SignupConfirmed(signup.Kind);
         }
 
         log.LogInformation("Anmeldung {SignupId} bestätigt{Kind}.", signup.Id,
