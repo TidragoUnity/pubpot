@@ -1,8 +1,8 @@
-# Build-Kontext ist der Repo-Wurzelordner, weil global.json und Directory.*.props dort liegen:
-#   docker build -f src/TwitchWorker/Dockerfile .
-# (Wird in Phase 5 überarbeitet: Healthcheck, Metriken, gemeinsame Compose-Datei.)
+# Twitch-Worker. Build-Kontext ist die Repo-Wurzel (global.json, Directory.*.props liegen dort):
+#   docker build -f src/TwitchWorker/Dockerfile -t pubpot-worker .
+# Normalerweise baut Compose das Image: cd deploy && docker compose --profile worker build worker
 
-# --- Build (SDK 11, siehe global.json) ---
+# --- Build (SDK 11, siehe global.json und E-007) ---
 FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 
@@ -13,18 +13,18 @@ COPY src/TwitchWorker/TwitchWorker.csproj src/TwitchWorker/
 RUN dotnet restore src/TwitchWorker/TwitchWorker.csproj
 
 COPY src/TwitchWorker/ src/TwitchWorker/
-RUN dotnet publish src/TwitchWorker/TwitchWorker.csproj -c Release -o /app --no-restore
+RUN dotnet publish src/TwitchWorker/TwitchWorker.csproj -c Release -o /app --no-restore -p:UseAppHost=false
 
-# --- Laufzeit (.NET 10, klein, ohne SDK) ---
-FROM mcr.microsoft.com/dotnet/runtime:10.0
+# --- Laufzeit (E-036) ---
+# "chiseled": ohne Shell, ohne Paketmanager, ohne root-Benutzer. Ohne "extra", weil der Worker weder
+# Übersetzungen noch Zeitzonen braucht (alles in UTC).
+FROM mcr.microsoft.com/dotnet/runtime:10.0-noble-chiseled
 WORKDIR /app
 COPY --from=build /app .
+USER $APP_UID
 
-# Nicht als root laufen.
-USER app
-
-# Gesund, solange der Worker in den letzten 15 Minuten eine Runde gespeichert hat.
+# Gesund, solange der Worker in den letzten 15 Minuten eine Runde gespeichert hat (Heartbeat-Datei in /tmp).
 HEALTHCHECK --interval=1m --timeout=5s --start-period=2m \
-  CMD test -n "$(find /tmp/heartbeat -mmin -15 2>/dev/null)" || exit 1
+  CMD ["dotnet", "TwitchWorker.dll", "healthcheck"]
 
 ENTRYPOINT ["dotnet", "TwitchWorker.dll"]

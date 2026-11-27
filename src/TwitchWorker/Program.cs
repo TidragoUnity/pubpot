@@ -1,5 +1,11 @@
 using TwitchWorker;
 
+// Docker-Healthcheck im Container ohne Shell: dotnet TwitchWorker.dll healthcheck (E-036)
+if (args is [HealthCheckCommand.Name])
+{
+    return HealthCheckCommand.Run();
+}
+
 var builder = Host.CreateApplicationBuilder(args);
 
 // Einstellungen kommen aus appsettings.json und werden von Umgebungsvariablen überschrieben,
@@ -24,3 +30,4 @@ builder.Services.AddSingleton(new SampleStore(connectionString));
 builder.Services.AddHostedService<SnapshotWorker>();
 
 builder.Build().Run();
+return 0;

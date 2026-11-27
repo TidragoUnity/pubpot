@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.4 – Worker: Schema-Skript und Dockerfile
+- Schema als `deploy/db/twitch/001_schema.sql` mit Runner `migrate.sh` (läuft im Postgres-Image, merkt sich eingespielte Skripte in `schema_migrations`, eine Transaktion pro Skript). `CREATE TABLE` ist aus dem Worker-Code entfernt. Der Worker prüft beim Start nur noch, ob die Tabellen da sind (E-036).
+- Dockerfile auf `runtime:10.0-noble-chiseled` umgestellt, Healthcheck als Befehl `healthcheck` (Heartbeat höchstens 15 Minuten alt). Die alte `src/TwitchWorker/docker-compose.yml` ist entfernt. Der Worker kommt in 5.5 in `deploy/compose.yaml`.
+- **Probelauf** mit erfundenen Twitch-Zugangsdaten und einer Twitch-Adresse ins Leere, damit nichts die Studie berührt. Ohne Schema wartet der Worker mit klarer Meldung. Nach dem Skript speichert er eine leere, unvollständige Runde und ist `healthy`. Läuft als UID 1654 mit schreibgeschütztem Dateisystem (nur `/tmp` beschreibbar). Image 146 MB.
+- Neues Testprojekt `tests/TwitchWorker.Tests` mit 10 Tests: Healthcheck (frisch, alt, fehlt) und Runner im echten Postgres (erster Lauf, zweiter Lauf ohne Änderung und ohne NOTICE, alte Tabellen bleiben, kaputtes Skript wird zurückgerollt).
+- **Gelernt:** In Git Bash schreibt MSYS Pfade wie `/tmp` in Windows-Pfade um. Für `docker run --tmpfs /tmp` braucht es `MSYS_NO_PATHCONV=1`.
+- **Als Nächstes:** 5.5 Compose für die Anwendung.
+
 ## 2026-11-27 · Schritt 5.3 – Migrations-Bundle
 - Neue Stufe `migrate` im Web-Dockerfile. Sie erzeugt mit `dotnet ef migrations bundle` eine einzelne Datei `efbundle`. Image `ghcr.io/tidragounity/pubpot-migrate:local`, entpackt 295 MB (teilt sich die Basis-Schichten mit dem Web-Image).
 - Neu `AppDbContextFactory`: Bundle und `dotnet ef` brauchen nur noch den Connection-String und starten nicht mehr die ganze App (E-035). `AppDbContext.Configure` bündelt die Einstellungen für App und Werkzeuge.

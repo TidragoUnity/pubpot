@@ -253,6 +253,18 @@ Umsetzung von E-023 (F-013, F-015).
 **Warum die Factory:** Ohne sie startet EF die ganze App bis kurz vor den Webserver. Dann bräuchte schon die Migration SMTP, `Site:BaseUrl` und den Admin-Hash.
 **Getestet:** Gegen eine leere Datenbank (5 Migrationen, Exit 0), noch einmal (nichts zu tun, Exit 0), mit falschem Passwort (Exit 1, ohne das Passwort im Log), gegen die Entwicklungsdatenbank (nichts zu tun). Es läuft auch mit schreibgeschütztem Dateisystem.
 
+## E-036 · Worker: Schema als SQL-Skripte, Image chiseled, eigene Tests
+Umsetzung von E-011 für den Worker.
+**Entscheidungen:**
+- **Versionierte SQL-Skripte** in `deploy/db/twitch/` (`001_schema.sql`, später `002_…`). Der Runner `migrate.sh` läuft als einmaliger Container im Postgres-Image, das `psql` schon mitbringt. Jedes Skript läuft genau einmal und **zusammen mit seinem Eintrag in `schema_migrations` in einer Transaktion**. Ein Fehler rollt alles zurück und beendet den Runner mit Fehlercode, dann startet der Worker nicht.
+- **`001_schema.sql` mit `IF NOT EXISTS`:** Datenbanken, in denen der alte Worker die Tabellen schon selbst angelegt hat (etwa die der Studie, falls wir sie später übernehmen), laufen ohne Fehler durch, die Daten bleiben.
+- **Der Worker legt nichts mehr an.** Beim Start prüft er nur, ob `snapshots` und `stream_samples` da sind. Fehlen sie, versucht er es 30-mal im Abstand von 2 Sekunden und bricht dann mit klarer Meldung ab.
+- **Image `runtime:10.0-noble-chiseled`** ohne „extra“: Der Worker braucht weder Übersetzungen noch Zeitzonen (alles UTC). 146 MB statt 261 MB.
+- **Healthcheck als Befehl** `dotnet TwitchWorker.dll healthcheck`: gesund, solange die Heartbeat-Datei höchstens 15 Minuten alt ist. Vorher hat das `find` in der Shell geprüft, im neuen Image gibt es keine Shell.
+- **Eigenes Testprojekt** `tests/TwitchWorker.Tests`: Healthcheck, und der Runner läuft in Testcontainers im echten Postgres-Image (zweimal hintereinander, auf alten Tabellen, mit kaputtem Skript).
+**Warum kein Werkzeug wie Flyway oder DbUp:** Der Worker hat zwei Tabellen. Ein eigenes Werkzeug wäre ein weiteres Image oder Paket, das gepflegt werden muss. 30 Zeilen Shell mit Tests reichen hier.
+**Vorgemerkt für Phase 7:** Auch eine unvollständige Runde (Twitch nicht erreichbar) schreibt den Heartbeat. Der Healthcheck meldet dann „gesund“, obwohl keine Daten kommen. Für die Alarme sollte zusätzlich zählen, wie viele Runden vollständig waren.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

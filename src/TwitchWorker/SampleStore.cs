@@ -11,39 +11,11 @@ public sealed record SnapshotInfo(
     bool Complete,
     string Filter);
 
-/// <summary>Speichert die Abfragen in PostgreSQL und legt die Tabellen beim Start an.</summary>
+/// <summary>Speichert die Abfragen in PostgreSQL. Die Tabellen legt das SQL-Skript an (E-036).</summary>
 public sealed class SampleStore
 {
-    private const string Schema = """
-        CREATE TABLE IF NOT EXISTS snapshots (
-            id           bigserial PRIMARY KEY,
-            taken_at     timestamptz NOT NULL,
-            stream_count int         NOT NULL,
-            viewer_sum   bigint      NOT NULL,
-            pages        int         NOT NULL,
-            duration_ms  int         NOT NULL,
-            complete     boolean     NOT NULL,
-            filter       text        NOT NULL
-        );
-
-        CREATE TABLE IF NOT EXISTS stream_samples (
-            snapshot_id  bigint      NOT NULL REFERENCES snapshots(id) ON DELETE CASCADE,
-            taken_at     timestamptz NOT NULL,
-            stream_id    text        NOT NULL,
-            user_id      text        NOT NULL,
-            user_login   text        NOT NULL,
-            game_id      text        NOT NULL,
-            game_name    text        NOT NULL,
-            language     text        NOT NULL,
-            viewer_count int         NOT NULL,
-            started_at   timestamptz NOT NULL,
-            PRIMARY KEY (snapshot_id, stream_id)
-        );
-
-        CREATE INDEX IF NOT EXISTS ix_samples_stream ON stream_samples (stream_id);
-        CREATE INDEX IF NOT EXISTS ix_samples_user   ON stream_samples (user_id, taken_at);
-        CREATE INDEX IF NOT EXISTS ix_snapshots_time ON snapshots (taken_at);
-        """;
+    /// <summary>Tabellen, die das Skript deploy/db/twitch/001_schema.sql anlegt.</summary>
+    internal static readonly string[] RequiredTables = ["snapshots", "stream_samples"];
 
     private readonly NpgsqlDataSource _db;
 
@@ -58,11 +30,25 @@ public sealed class SampleStore
         _db = builder.Build();
     }
 
-    public async Task EnsureSchemaAsync(CancellationToken ct)
+    /// <summary>
+    /// Prüft, ob das Schema da ist. Angelegt wird es nicht mehr hier, sondern vorher vom Container
+    /// "migrate-twitch" mit den SQL-Skripten aus deploy/db/twitch (E-011, E-036).
+    /// </summary>
+    public async Task<IReadOnlyList<string>> MissingTablesAsync(CancellationToken ct)
     {
         await using var conn = await _db.OpenConnectionAsync(ct);
-        await using var cmd = new NpgsqlCommand(Schema, conn);
-        await cmd.ExecuteNonQueryAsync(ct);
+        var missing = new List<string>();
+        foreach (var table in RequiredTables)
+        {
+            await using var cmd = new NpgsqlCommand("SELECT to_regclass(@table) IS NOT NULL", conn);
+            cmd.Parameters.AddWithValue("table", table);
+            if (!(bool)(await cmd.ExecuteScalarAsync(ct))!)
+            {
+                missing.Add(table);
+            }
+        }
+
+        return missing;
     }
 
     /// <summary>Zeitpunkt der allerersten Abfrage, damit "StopAfterHours" auch nach einem Neustart stimmt.</summary>

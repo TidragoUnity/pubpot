@@ -158,19 +158,26 @@ public sealed class SnapshotWorker : BackgroundService
         return first is { } start && DateTimeOffset.UtcNow >= start.AddHours(_options.StopAfterHours);
     }
 
-    /// <summary>Beim Start mit Docker ist die Datenbank oft noch nicht bereit. Dann kurz warten.</summary>
+    /// <summary>
+    /// Beim Start mit Docker ist die Datenbank oft noch nicht bereit. Dann kurz warten.
+    /// Fehlt das Schema nach allen Versuchen noch, bricht der Worker mit klarer Meldung ab.
+    /// </summary>
     private async Task WaitForDatabaseAsync(CancellationToken ct)
     {
         for (var attempt = 1; ; attempt++)
         {
             try
             {
-                await _store.EnsureSchemaAsync(ct);
-                return;
+                var missing = await _store.MissingTablesAsync(ct);
+                if (missing.Count == 0)
+                    return;
+
+                throw new InvalidOperationException(
+                    $"Tabellen fehlen: {string.Join(", ", missing)}. Erst das Schema einspielen (Compose-Dienst migrate-twitch, deploy/db/twitch).");
             }
             catch (Exception ex) when (attempt < 30 && !ct.IsCancellationRequested)
             {
-                _log.LogWarning("Datenbank noch nicht erreichbar ({Message}), neuer Versuch in 2s.", ex.Message);
+                _log.LogWarning("Datenbank noch nicht bereit ({Message}), neuer Versuch in 2s.", ex.Message);
                 await Task.Delay(TimeSpan.FromSeconds(2), ct);
             }
         }
