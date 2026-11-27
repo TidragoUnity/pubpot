@@ -5,6 +5,15 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.3 – Migrations-Bundle
+- Neue Stufe `migrate` im Web-Dockerfile. Sie erzeugt mit `dotnet ef migrations bundle` eine einzelne Datei `efbundle`. Image `ghcr.io/tidragounity/pubpot-migrate:local`, entpackt 295 MB (teilt sich die Basis-Schichten mit dem Web-Image).
+- Neu `AppDbContextFactory`: Bundle und `dotnet ef` brauchen nur noch den Connection-String und starten nicht mehr die ganze App (E-035). `AppDbContext.Configure` bündelt die Einstellungen für App und Werkzeuge.
+- **Probleme beim Bauen:** (1) `dotnet ef` braucht die .NET-10-Laufzeit, im SDK-11-Image fehlt sie. Sie wird jetzt aus dem Laufzeit-Image kopiert. (2) Zum Erzeugen braucht EF einen Connection-String. Für diesen einen Befehl gibt es einen Platzhalter, der nicht ins Image kommt.
+- **Probeläufe:** leere Datenbank → 5 Migrationen, Exit 0. Zweiter Lauf → „already up to date“. Falsches Passwort → Exit 1. Entwicklungsdatenbank → nichts zu tun. Alles mit `--read-only`.
+- Die Zeile „Failed executing DbCommand … __EFMigrationsHistory“ beim allerersten Lauf ist normal: Die Tabelle gibt es da noch nicht.
+- 5 neue Tests (`AppDbContextFactoryTests`).
+- **Als Nächstes:** 5.4 Worker (Schema-Skript, Dockerfile).
+
 ## 2026-11-27 · Schritt 5.2 – Dockerfile für die Web-App
 - `src/PubPot.Web/Dockerfile`: Build mit SDK 11, Laufzeit `aspnet:10.0-noble-chiseled-extra` (ohne Shell, ohne Paketmanager, Nicht-Root). Healthcheck mit dem neuen Befehl `healthcheck` (E-034).
 - Probelauf gegen die Entwicklungsdatenbank: `/health`, `/health/ready` und `/de` liefern 200, die deutsche Seite rendert (ICU funktioniert). Der Container läuft als UID 1654 und ist nach dem ersten Healthcheck `healthy`. `docker exec … sh` schlägt fehl, eine Shell gibt es wirklich nicht. Image entpackt 261 MB.

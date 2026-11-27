@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace PubPot.Web.Data;
 
@@ -11,6 +12,17 @@ namespace PubPot.Web.Data;
 public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IDataProtectionKeyContext
 {
     public const int AdminNoteMaxLength = 4000;
+
+    /// <summary>
+    /// Gemeinsame Einstellungen für die App und für Werkzeuge (<c>dotnet ef</c>, Migrations-Bundle).
+    /// </summary>
+    public static DbContextOptionsBuilder Configure(DbContextOptionsBuilder options, string connectionString)
+    {
+        // Kerberos/GSSAPI nutzen wir nicht. Sonst versucht Npgsql, libgssapi zu laden, und schreibt im schlanken
+        // Container-Image eine harmlose, aber verwirrende Fehlermeldung ins Log (wie beim Worker).
+        var connection = new NpgsqlConnectionStringBuilder(connectionString) { GssEncryptionMode = GssEncryptionMode.Disable };
+        return options.UseNpgsql(connection.ConnectionString).UseSnakeCaseNamingConvention();
+    }
 
     public DbSet<Signup> Signups => Set<Signup>();
 

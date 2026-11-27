@@ -243,6 +243,16 @@ Umsetzung von E-023 (F-013, F-015).
 **Warum chiseled:** Was nicht im Image ist, kann ein Angreifer nicht benutzen. Ohne Shell kann eine Lücke in der App nicht einfach `sh` starten. Außerdem meldet ein Image-Scanner weniger Pakete mit bekannten Lücken. Der Preis: `docker exec … sh` geht nicht. Zum Nachsehen nimmt man `docker logs` oder startet einen Debug-Container daneben.
 **Größe:** 261 MB entpackt.
 
+## E-035 · Migrations-Bundle als eigenes Image, nur mit Connection-String
+**Entscheidungen:**
+- **Stufe `migrate` im selben Dockerfile** wie die Web-App. Das Bundle (`efbundle`) ist eine einzelne Datei mit allen Migrationen. Das Image `pubpot-migrate` läuft als einmaliger Container vor der App und endet mit Exit-Code 0 oder 1. Die App migriert nie selbst.
+- **`AppDbContextFactory`** (`IDesignTimeDbContextFactory`): `dotnet ef` und das Bundle erzeugen den DbContext darüber und brauchen nur `ConnectionStrings__Default` (lokal aus den User Secrets). Die Einstellungen (snake_case, ohne GSSAPI) stehen in `AppDbContext.Configure` und gelten für App und Werkzeuge gleich.
+- **Connection-String als Umgebungsvariable**, nicht als `--connection`-Argument. Argumente stehen in `docker inspect` und in der Prozessliste.
+- **.NET-10-Laufzeit in der Build-Stufe:** `dotnet ef` lädt beim Erzeugen die App, und die läuft auf .NET 10. Das SDK-11-Image bringt nur die Laufzeit 11 mit. Die 10er kommt per `COPY --from` aus dem offiziellen Laufzeit-Image, und zwar nur in die Stufe, die das Bundle baut.
+**Warum nicht beim Start der App migrieren:** Bei mehreren Instanzen würden alle gleichzeitig migrieren, und eine fehlgeschlagene Migration ließe eine halb gestartete App zurück. Als eigener Schritt ist die Reihenfolge klar: Migration erfolgreich → App startet. Beim Deploy (Phase 8) kann das Skript außerdem abbrechen, bevor die alte Version gestoppt wird.
+**Warum die Factory:** Ohne sie startet EF die ganze App bis kurz vor den Webserver. Dann bräuchte schon die Migration SMTP, `Site:BaseUrl` und den Admin-Hash.
+**Getestet:** Gegen eine leere Datenbank (5 Migrationen, Exit 0), noch einmal (nichts zu tun, Exit 0), mit falschem Passwort (Exit 1, ohne das Passwort im Log), gegen die Entwicklungsdatenbank (nichts zu tun). Es läuft auch mit schreibgeschütztem Dateisystem.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

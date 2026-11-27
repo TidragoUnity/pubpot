@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using Npgsql;
 using PubPot.Web;
 using PubPot.Web.Admin;
 using PubPot.Web.Data;
@@ -45,14 +44,7 @@ if (string.IsNullOrWhiteSpace(connectionString))
         "ConnectionStrings:Default fehlt. Lokal: siehe README (dotnet user-secrets), in Docker: ConnectionStrings__Default.");
 }
 
-// Kerberos/GSSAPI nutzen wir nicht. Ohne diese Zeile versucht Npgsql, libgssapi zu laden, und schreibt im
-// schlanken Container-Image eine harmlose, aber verwirrende Fehlermeldung ins Log (wie beim Worker).
-connectionString = new NpgsqlConnectionStringBuilder(connectionString) { GssEncryptionMode = GssEncryptionMode.Disable }
-    .ConnectionString;
-
-builder.Services.AddDbContext<AppDbContext>(o => o
-    .UseNpgsql(connectionString)
-    .UseSnakeCaseNamingConvention());
+builder.Services.AddDbContext<AppDbContext>(o => AppDbContext.Configure(o, connectionString));
 builder.Services.AddSingleton(TimeProvider.System);
 
 // --- Sprachen ---
