@@ -51,6 +51,7 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 ## E-012 · Kein externer Erreichbarkeits-Check
 **Entscheidung (F-007):** Nur Uptime Kuma, kein Drittanbieter.
 **Bewusst in Kauf genommen:** Fällt der ganze VPS aus (Hardware, Netz, Kernel-Panik), kommt kein Alarm, weil Uptime Kuma selbst mit ausfällt. Das lässt sich später mit einem externen Check nachrüsten.
+**Abgelöst (27.11.) durch E-060:** Ein kostenloser Totmannschalter bei healthchecks.io kommt mit der VPS-Phase (Phase 9) dazu.
 
 ## E-013 · Erst alles lokal, dann der VPS
 **Entscheidung (F-008, F-009):** Monitoring, Alarme und Backups werden zuerst lokal auf dem PC gebaut und getestet, **vor** dem Deploy auf den VPS. In der Roadmap sind die Phasen 7 und 8 deshalb gegenüber dem Auftrag getauscht. Lokal gehen Alarm-Mails an Mailpit und Backups in einen lokalen Ordner. Auf dem VPS sind die Monitoring-Oberflächen später nur per SSH-Tunnel erreichbar.
@@ -377,6 +378,27 @@ Zwei Funde aus der Abnahme 5.8.
 - **Metriken über `OpenTelemetry.Exporter.Prometheus.AspNetCore`** (Vorschau `1.21.0-beta.1`, übrige OpenTelemetry-Pakete stabil). Prometheus holt die Werte ab („Pull“) und erkennt einen Ausfall sofort (`up = 0`). Bricht ein Update die Schnittstelle, fällt es in der CI auf.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
+
+## E-061 · Erst Twitch-Login und Spiele von Steam, der VPS kommt danach als Phase 9
+**Entscheidung (27.11.):** Bevor wir auf den VPS gehen, kommen Features und Feinschliff: ein echter Twitch-Login für Creator und Spiele von Steam als erster Katalog-Entwurf. Die neue Phase heißt **Phase 8**. Die bisher geplante Phase „VPS und CD“ heißt jetzt **Phase 9**, ihre Schritte heißen 9.1 bis 9.10, und sie wartet auf deinen Start.
+- **Warum:** Ohne Server lässt sich Phase 9 nicht durchgängig testen, ihre Teile lägen bis zum Umzug ungenutzt herum. Login und Katalog zeigen dagegen sofort, wohin die Seite sich entwickeln soll.
+- **Abweichung vom Auftrag:** V1 ist dort nur die Landingpage. Login und Katalog gehen darüber hinaus, auf deinen ausdrücklichen Wunsch. Die Abnahmekriterien des Auftrags bleiben das Ziel von Phase 9.
+- **Zeitplan:** Phase 9 spätestens Anfang Januar 2027 beginnen. Unabhängig davon sollte die anwaltliche Prüfung der Rechtstexte bald starten, sie dauert meist mehrere Wochen.
+- Ältere Einträge (Journal, E-052 bis E-060) schreiben „Phase 8“ und meinen damit den VPS.
+
+**Ausgestaltung (F-029 bis F-031):**
+- **Twitch-Login nur für Creator.** Sie verwalten ihre Daten selbst und sehen pro Spiel, wie viele Zuschauer sie gebracht haben. Die Zahlen kommen aus den Worker-Daten.
+- **Lesender Zugriff der Web-App auf die Worker-Datenbank** über einen eigenen Datenbank-Benutzer mit `SELECT` nur auf `stream_samples` und `snapshots`. Sonst bleibt die Trennung aus E-011 bestehen.
+- **Verkäufe und Einnahmen nur als Beispielrechnung** in einer Vorschau im Admin-Bereich. Echte Creator sehen nie ausgedachte Zahlen.
+- **Der Katalog ist nur im Admin-Bereich sichtbar** (F-030). Spiele wie CS2 machen bei PubPot nicht mit, öffentlich sähe es nach einer Partnerschaft mit Valve aus.
+- **Kein eigener Schritt „Feinschliff“** (F-031).
+
+## E-060 · Phase 8 geplant, Server-Fragen zurückgestellt, Vorschau-Modus und Totmannschalter (F-022 bis F-028)
+**Entschieden:**
+- **Externer Totmannschalter bei healthchecks.io (F-026, ersetzt E-012):** Ein immer feuernder Alarm „Watchdog“ meldet sich über Alertmanager regelmäßig dort. Bleibt die Meldung aus, weil Server, Prometheus oder Alertmanager weg sind, kommt eine Mail von healthchecks.io. Ein zweiter Check empfängt `Worker__PushUrl`. Übertragen wird nur ein Ping, keine Daten. Kommt mit Schritt 9.7 (VPS-Phase, seit E-061 Phase 9).
+- **Vorschau-Modus für Production (F-028):** Bis die Rechtstexte geprüft sind, steht Production hinter einem Passwort (Caddy, Basic Auth). Abschalten geht mit einer Zeile in der `.env`. Deploy, Monitoring und Backups laufen damit schon unter echten Bedingungen.
+
+**Zurückgestellt, bis der Umzug in die Cloud ansteht:** VPS (wahrscheinlich Hetzner, F-022), Domain (F-023), SMTP (für den Anfang kostenlos, F-024), Backup-Ziel (F-025) und eine eigene Twitch-App für den Server (F-027). Bis dahin gilt E-013: Alles läuft lokal, Backups gehen in einen lokalen Ordner.
 
 ## E-059 · Zähler ab dem Start mit 0, Anmeldungen als Tagesbalken (7.10)
 **Fehler (vom Nutzer im Dashboard gefunden):** Die erste Anmeldung jeder Art fehlte im Panel „Anmeldungen pro Tag“. Eine erste Creator-Anmeldung zeigte eine Linie bei 0.

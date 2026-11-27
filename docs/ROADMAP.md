@@ -103,14 +103,14 @@ Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später 
 **Was für alle Schritte gilt**
 - Die bisherigen Wege bleiben: `dotnet run` gegen die Datenbank aus `deploy/` und `./scripts/check.sh` funktionieren weiter.
 - Eine `.env` für alle, aber Compose reicht jedem Container nur seine eigenen Werte weiter (`environment:`, kein `env_file:` mit allem). Die Web-App sieht also nie das Twitch-Secret.
-- Images heißen schon so wie später in der GitHub Container Registry (`ghcr.io/tidragounity/pubpot-web`, `…-worker`, `…-migrate`), mit Tag `${IMAGE_TAG:-local}`. Phase 6 baut und pusht sie, Phase 8 zieht sie auf dem VPS.
-- Getrennte Konfiguration für staging und production kommt in Phase 8. `compose.yaml` ist dafür schon so gebaut, dass nur die `.env` wechselt.
+- Images heißen schon so wie später in der GitHub Container Registry (`ghcr.io/tidragounity/pubpot-web`, `…-worker`, `…-migrate`), mit Tag `${IMAGE_TAG:-local}`. Phase 6 baut und pusht sie, Phase 9 zieht sie auf dem VPS.
+- Getrennte Konfiguration für staging und production kommt in Phase 9. `compose.yaml` ist dafür schon so gebaut, dass nur die `.env` wechselt.
 - `C:\Timo\Docker	witch-worker` und seine Container bleiben unberührt (F-001), siehe F-016.
 
 > Ergebnis der Abnahme: von leerem Volume bis „alles gesund“ in 46 s. Lighthouse über Caddy (`https://localhost/de` und `/de/signup/creator`, mobil und Desktop) **100/100/100/100**. Images entpackt: web 261 MB, migrate 295 MB, worker 146 MB, Caddy 92 MB. HSTS kommt für `localhost` absichtlich nicht (E-038), mit echter Domain prüfen das die Tests aus 5.1.
 
 ## Phase 6 – CI ✅
-Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack gestartet. Nach dem Merge auf `main` liegen fertige Images mit Commit-SHA in der GitHub Container Registry, bereit für den Deploy in Phase 8.
+Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack gestartet. Nach dem Merge auf `main` liegen fertige Images mit Commit-SHA in der GitHub Container Registry, bereit für den Deploy in Phase 9.
 
 **Vorab von dir:** Dein GitHub-Token braucht zusätzlich die Rechte **Workflows** (Lesen und Schreiben, sonst lehnt GitHub den Push von `.github/workflows` ab), **Pull requests** (Lesen und Schreiben) und für 6.7 **Administration** (Lesen und Schreiben). Anleitung in der Checkliste.
 
@@ -128,7 +128,7 @@ Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack 
 **Was für alle Schritte gilt**
 - **Kosten:** keine. GitHub Actions, GHCR, Dependabot, Secret Scanning und CodeQL sind für öffentliche Repos kostenlos.
 - **Lokal = CI:** Die CI ruft dieselben Befehle auf wie du (`check.sh`, `docker compose`). Was lokal grün ist, ist es auch in der CI und umgekehrt.
-- **Keine Secrets in der CI:** Phase 6 braucht nur das automatische `GITHUB_TOKEN`. Die Passwörter für den Smoke-Test entstehen im Lauf und verschwinden mit ihm. Echte Secrets (SSH, Server) kommen erst in Phase 8.
+- **Keine Secrets in der CI:** Phase 6 braucht nur das automatische `GITHUB_TOKEN`. Die Passwörter für den Smoke-Test entstehen im Lauf und verschwinden mit ihm. Echte Secrets (SSH, Server) kommen erst in Phase 9.
 - **Lieferkette:** Fremde Actions sind auf einen Commit-SHA festgenagelt, nicht auf ein Tag wie `v4`, das der Autor jederzeit umbiegen kann. Dependabot hält die SHAs aktuell.
 - Secret Scanning und Push Protection sind im Repo schon an (geprüft).
 
@@ -137,7 +137,7 @@ Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack 
 > **Phasen 7 und 8 sind gegenüber dem Auftrag getauscht** (E-013): Erst läuft alles lokal, dann kommt der VPS.
 
 ## Phase 7 – Monitoring, Alarme, Backups (lokal) ✅
-Ziel: Du siehst in Grafana, wie es der Anwendung geht, bekommst eine Mail, wenn etwas kaputt ist, und jede Nacht entsteht ein Backup, dessen Wiederherstellung getestet ist. Alles läuft erst lokal (E-013), Alarme gehen an Mailpit. Auf dem VPS (Phase 8) läuft danach dasselbe.
+Ziel: Du siehst in Grafana, wie es der Anwendung geht, bekommst eine Mail, wenn etwas kaputt ist, und jede Nacht entsteht ein Backup, dessen Wiederherstellung getestet ist. Alles läuft erst lokal (E-013), Alarme gehen an Mailpit. Auf dem VPS (Phase 9) läuft danach dasselbe.
 
 | # | Schritt | Status |
 |---|---|---|
@@ -156,8 +156,65 @@ Ziel: Du siehst in Grafana, wie es der Anwendung geht, bekommst eine Mail, wenn 
 - Jeder Schritt ist ein eigener Branch und PR (F-019). Neue Images (Prometheus, Grafana usw.) sind fest auf eine Version gepinnt, Dependabot hält sie aktuell.
 - Die Monitoring-Dienste starten nur mit dem Profil `monitoring` (wie der Worker). Lokal: `docker compose --profile monitoring up -d`.
 - Keine personenbezogenen Daten in Metriken: Labels nur mit festen Werten (Art der Anmeldung, Statuscode), nie mit E-Mail, IP oder Pfad mit ID.
-- **Gut zu wissen für Phase 8:** Monitoring auf demselben Server kann nicht melden, dass der Server selbst ausgefallen ist. Dafür braucht es später zusätzlich einen kostenlosen externen Dienst. Die Push-URL aus 7.3 ist dafür schon vorbereitet.
+- **Gut zu wissen für Phase 9 (VPS):** Monitoring auf demselben Server kann nicht melden, dass der Server selbst ausgefallen ist. Dafür braucht es später zusätzlich einen kostenlosen externen Dienst. Die Push-URL aus 7.3 ist dafür schon vorbereitet (healthchecks.io, E-060).
 
-## Phase 8 – VPS und CD: Staging, dann Production ⬜
-Aus Phase 5 mitnehmen: Staging neben Production auf demselben VPS braucht ein eigenes `EDGE_SUBNET` und einen eigenen Compose-Projektnamen. Pro Datenbank läuft nur eine Web-Instanz (E-037). Auf dem Server `BIND_ADDRESS=0.0.0.0`, Firewall auch für 443/UDP.
-Grob: vorher F-008 klären (VPS, Backup-Ziel, Domain, SMTP) · Anleitung VPS-Härtung · Compose-Konfiguration für staging/production · Deploy-Skript (pull, migrate, up, Smoke-Test, automatischer Rollback) · Staging bei Merge auf `main` · Production über Tag `v*` mit manueller Freigabe · Monitoring auf dem VPS, Zugang per SSH-Tunnel (F-009) · Backups auf externen Speicher · README fertig.
+## Phase 8 – Twitch-Login, Spiele von Steam und Creator-Übersicht ⬜
+Ziel: Creator melden sich mit ihrem Twitch-Konto an. Der Kanal ist damit **nachweislich ihrer**. Sie verwalten ihre Daten selbst und sehen, für welche Spiele sie wie viele Zuschauer gebracht haben. Im Admin-Bereich lädst du Spiele direkt von Steam (z. B. CS2, Dota 2) und siehst einen ersten Spielekatalog. Er ist die Vorlage dafür, wie du die Spieleseiten später gestalten willst (I-04). Alles läuft lokal, der VPS folgt in Phase 9.
+
+**Bewusst über V1 hinaus (E-061):** Der Auftrag sieht für V1 nur die Landingpage vor. Login und Katalog sind ein erster Schritt Richtung Plattform. Das hast du so entschieden (27.11.).
+
+**So funktioniert es (F-029, F-030):**
+- **Twitch-Login über OpenID Connect,** den Standard für „Anmelden mit …“, mit dem offiziellen Paket von Microsoft. Twitch bestätigt uns die Twitch-ID, den Kanalnamen und die (bei Twitch bestätigte) E-Mail-Adresse.
+  - Wir speichern nur die Twitch-ID und den Kanalnamen, **kein Zugangs-Token**.
+  - Dafür gibt es eine **eigene Twitch-App** nur für den Login. Die Zugangsdaten deiner Studie bleiben unberührt (F-001).
+- **Der Login ist freiwillig:** YouTuber und alle ohne Twitch melden sich weiter mit dem Formular an. Entwickler bekommen vorerst keinen Login.
+- **Zuschauer pro Spiel aus den Worker-Daten:** Der Worker speichert für jeden Stream, den er sieht, Twitch-ID, Spiel und Zuschauerzahl. Die Web-App liest diese Daten über einen eigenen Datenbank-Benutzer, **nur lesend** und nur die zwei nötigen Tabellen. Die Trennung der Datenbanken (E-011) bleibt sonst bestehen.
+- **Verkäufe und Einnahmen gibt es noch nicht** (keine Kampagnen, keine Verkaufszahlen). Sie erscheinen als **Beispielrechnung** in einer Vorschau im Admin-Bereich. Echte Creator sehen nur echte Zahlen.
+- **Steam-Daten** kommen aus der öffentlichen Store-Schnittstelle von Steam (`appdetails`, ohne API-Schlüssel), auf Deutsch und Englisch.
+  - Titelbild und Screenshots **kopieren wir auf den eigenen Server.** Sonst lüde jeder Besucher Bilder direkt bei Valve und gäbe dabei seine IP-Adresse weiter.
+  - So bleibt auch die CSP streng (`img-src 'self'`).
+
+| # | Schritt | Status |
+|---|---|---|
+| 8.1 | **Twitch-Login, die Technik:** OpenID Connect mit Twitch (`/signin-twitch`), eigenes Cookie für Creator (getrennt vom Admin-Login), Abmelden. Zugangsdaten per `TwitchLogin__ClientId` und `TwitchLogin__ClientSecret`, ohne sie ist der Knopf ausgeblendet. Twitch erlaubt nur `https`-Rücksprungadressen: lokal über Caddy (`https://localhost`) oder `dotnet run` zusätzlich auf `https://localhost:5081` mit dem .NET-Entwicklungszertifikat. Messwerte (Logins nach Ergebnis), keine personenbezogenen Daten im Log. **Tests mit einem nachgebauten Twitch** (Discovery, Token, Schlüssel), auch für manipulierte Antworten (falsches `state`, falsche Signatur, abgelaufenes Token) | ⬜ |
+| 8.2 | **Creator-Anmeldung mit Twitch:** Knopf „Mit Twitch verbinden“ im Creator-Formular. Danach ist der Kanal gesetzt und gesperrt, Name und E-Mail sind vorausgefüllt (änderbar). Gespeichert werden Twitch-ID (eindeutig) und Kanalname, Migration Nr. 6. Double-Opt-in bleibt wie bisher. Im Admin-Bereich ein Kennzeichen „Twitch verifiziert“, in Liste, Detail und Export | ⬜ |
+| 8.3 | **„Mein Bereich“ für Creator** (nach F-029): angemeldet mit Twitch die eigenen Daten und den Status sehen, Angaben ändern, die eigenen Daten als Datei herunterladen und alles löschen (DSGVO, Auskunft und Löschung selbst erledigen). Tests: niemand sieht fremde Daten. Datenschutzerklärung ergänzt (Platzhalter, anwaltlich prüfen lassen) | ⬜ |
+| 8.4 | **Spiele von Steam laden:** Tabelle für Steam-Spiele, Import über `appdetails` (Deutsch und Englisch, Zeitlimit, schonend mit Pausen). Dazu die passende **Twitch-Kategorie** (über die Twitch-Schnittstelle, mit der Login-App, im Admin-Bereich korrigierbar), damit Spiel und Zuschauer zusammenfinden. Titelbild und bis zu 4 Screenshots landen in der Datenbank und sind damit auch im Backup. Admin-Seite „Spiele“: App-ID oder Steam-Link eingeben, laden, aktualisieren, löschen, dazu der Befehl `import-steam 730 570 …` für Testdaten. Tests mit aufgezeichneten Steam-Antworten, ohne Netz | ⬜ |
+| 8.5 | **Katalog-Vorschau im Admin-Bereich** (nach F-030): Übersicht als Kacheln wie bei Steam (Bild, Name, Genres, Release, Preis oder kostenlos, Kurzbeschreibung). Detailseite mit Screenshots und Link zu Steam. Platzhalter für „Creator dabei“ und „Pot“ (I-01, I-04), deutlich als Beispiel markiert. Entwickler-Anmeldungen zeigen ihr Spiel automatisch über die Steam-App-ID, mit Knopf „von Steam laden“ | ⬜ |
+| 8.6 | **Creator-Übersicht „Deine Spiele“:** In „Mein Bereich“ sehen Creator pro Spiel Stunden live, Ø- und Spitzen-Zuschauer, Zuschauerstunden und den letzten Stream, aus den Worker-Daten über ihre Twitch-ID. Bei Einnahmen steht „noch keine“. **Vorschau im Admin-Bereich:** die Übersicht für einen beliebigen Kanal aus den Worker-Daten ansehen, dazu eine Beispielrechnung (Pool 25 % für 3 Monate, Verteilung nach Zuschauerstunden, ausgedachte Verkaufszahlen, deutlich als Beispiel markiert). Damit testest du ohne eigenen Stream | ⬜ |
+| 8.7 | **Abnahme:** echter Twitch-Login lokal mit deiner Login-App: anmelden, bestätigen (Mailpit), „Mein Bereich“, löschen. Der Worker läuft lokal eine Weile mit der Login-App (nicht mit der Studie), danach die Creator-Übersicht für echte Kanäle ansehen. CS2 (730), Dota 2 (570), Stardew Valley (413150), Hollow Knight (367520) und Balatro (2379780) laden und den Katalog ansehen (Screenshots). Smoke-Test ergänzt. In `IDEEN.md` notieren, was wir für I-04 gelernt haben | ⬜ |
+
+**Was für alle Schritte gilt**
+- Jeder Schritt ist ein eigener Branch und PR (F-019). Die CI ruft weder Twitch noch Steam auf. Tests laufen mit nachgebauten Antworten, damit sie ohne Netz und ohne Secrets grün sind.
+- Neue Zähler starten mit 0 (E-059). Neue Texte stehen in `.resx`, Deutsch und Englisch.
+- Vor 8.1 legst du die Twitch-App für den Login an (Checkliste, etwa 2 Minuten). Lokal darf auch der Worker sie benutzen, die Studie bleibt unberührt (F-001).
+
+## Phase 9 – VPS und CD: Staging, dann Production ⏸️
+**Blockiert:** wartet, bis du den Umzug in die Cloud startest (F-022 bis F-025, F-027 zurückgestellt, E-060). Spätestens Anfang Januar 2027 beginnen, damit Production vor dem Next Fest sicher läuft.
+
+Ziel: Ein Merge auf `main` landet automatisch auf Staging (`staging.pubpot.games`). Ein Tag `v*` landet nach deiner Freigabe auf Production (`pubpot.games`). Schlägt ein Deploy fehl, rollt der Server von selbst auf den vorherigen Stand zurück. Monitoring, Alarme und Backups aus Phase 7 laufen auf dem VPS, die Backups liegen zusätzlich außerhalb des Servers.
+
+**So sieht es auf dem Server aus (Vorschlag, wird beim Start der Phase entschieden):**
+- **Ein VPS, zwei Compose-Projekte:** `pubpot-production` und `pubpot-staging`. Beide haben eine eigene Datenbank (eigenes Volume), ein eigenes Netz und eine eigene `.env`. Staging hat nur Testdaten, keinen Worker und schickt Mails nur an sein eigenes Mailpit.
+- **Ein Caddy für beide Domains:** Nur ein Prozess kann die Ports 80 und 443 belegen. Der Caddy des Production-Projekts leitet `pubpot.games` an Production und `staging.pubpot.games` an Staging weiter, `www` auf die Hauptdomain. Staging bekommt `X-Robots-Tag: noindex`, damit Suchmaschinen es nicht aufnehmen.
+- **Jede Umgebung ist ein Git-Checkout** (`/opt/pubpot/production`, `/opt/pubpot/staging`) auf genau dem Commit, dessen Images laufen. Konfiguration und Image passen so immer zusammen, und ein Rollback ist „zurück auf den vorherigen Commit“.
+- **App-Secrets nur in der `.env` auf dem Server**, nicht in GitHub. GitHub kennt nur den SSH-Zugang zum Deploy. Der darf auf dem Server nichts außer dem Deploy-Skript ausführen.
+
+| # | Schritt | Status |
+|---|---|---|
+| 9.1 | **Compose für staging und production, lokal testbar:** `compose.production.yaml` und `compose.staging.yaml` neben der gemeinsamen `compose.yaml`. Ein Caddy für beide Domains, `www` → Hauptdomain, Staging mit `noindex` und Mailpit (nur `127.0.0.1`). Der Smoke-Test startet in der CI beide Projekte nebeneinander und prüft, dass jede Domain bei ihrer eigenen App und Datenbank landet | ⬜ |
+| 9.2 | **Deploy-Skript mit automatischem Rollback** (`scripts/deploy.sh <umgebung> <commit>`): Checkout des Commits, `IMAGE_TAG` setzen, Images ziehen, auf Production vorher ein Backup, Migrations-Bundle, `up -d --wait`, danach Smoke-Test gegen `/health/ready` über Caddy. Schlägt etwas fehl, zurück auf den letzten guten Stand und mit Fehler enden. Ein Verlauf zeigt, was wann deployt wurde. **Getestet in der CI:** ein guter Deploy, dann ein absichtlich kaputtes Image → Rollback, die Seite läuft weiter | ⬜ |
+| 9.3 | **Eingeschränkter SSH-Zugang für GitHub Actions:** eigener Benutzer `deploy`, eigener Schlüssel nur für den Deploy. In `authorized_keys` ist ein fester Befehl hinterlegt (`command=…`): Ein Prüfskript lässt nur `staging` oder `production` und einen 40-stelligen Commit-SHA durch, sonst nichts (keine Shell, keine Weiterleitung). Der Host-Schlüssel des Servers steht fest in GitHub (`known_hosts`), damit sich niemand dazwischenschalten kann. Tests für das Prüfskript | ⬜ |
+| 9.4 | **Anleitung VPS-Härtung und Einrichtung** (`docs/SERVER.md`) mit Prüfskript `scripts/server-check.sh`: Ubuntu 24.04 LTS, SSH nur mit Schlüssel, kein Root-Login, ufw nur 22, 80, 443 (TCP) und 443/UDP, zusätzlich die kostenlose Hetzner-Firewall. Wichtig: Docker umgeht ufw bei veröffentlichten Ports, deshalb binden alle internen Ports an `127.0.0.1`. Automatische Sicherheitsupdates mit Neustart-Fenster, Docker aus dem offiziellen Repo, Ordner und `.env` für beide Umgebungen. **Danach richtest du den VPS ein** (zusammen nach Anleitung), das Prüfskript muss grün sein | ⬜ |
+| 9.5 | **Staging automatisch bei Merge auf `main`:** Job `deploy-staging` in der CI nach `publish`, GitHub-Environment `staging` mit den SSH-Secrets, immer nur ein Deploy gleichzeitig. Erster echter Deploy, `https://staging.pubpot.games` mit echtem Zertifikat, Anmeldung mit Double-Opt-in über das Staging-Mailpit (per SSH-Tunnel) | ⬜ |
+| 9.6 | **Production über Tag `v*` mit Freigabe:** eigener Workflow. Er prüft, dass der Tag auf einem Commit von `main` liegt und die Images dazu in GHCR existieren. Dann wartet er auf deine Freigabe im Environment `production` und deployt mit demselben Skript. Erstes Release `v1.0.0` (Ablauf und Versionsschema in der README) | ⬜ |
+| 9.7 | **Monitoring auf dem VPS:** Profil `monitoring` auf Production, Alarme an deine echte Adresse über den SMTP-Anbieter, Blackbox prüft beide Domains und das echte Zertifikat. Zugang zu Grafana, Prometheus, Alertmanager und Staging-Mailpit per SSH-Tunnel (F-009), ein Befehl dafür in der README. Externer Totmannschalter bei healthchecks.io (F-026, E-060) | ⬜ |
+| 9.8 | **Backups außerhalb des Servers** (Ziel nach F-025): Nach jedem nächtlichen Backup verschlüsselt auf den externen Speicher, dort dieselbe Aufbewahrung (7 Tage täglich, 4 Wochen wöchentlich). Messwert und Alarm, wenn die externe Kopie älter als 26 Stunden ist. Ein Restore direkt aus der externen Kopie wird einmal geprüft | ⬜ |
+| 9.9 | **README fertig** (Abnahmekriterien des Auftrags): Architektur mit Diagramm, lokale Entwicklung, alle Umgebungsvariablen, Deploy, Rollback, Backup und Restore, Zugang zum Monitoring. Checkliste mit allen GitHub-Secrets und Environments | ⬜ |
+| 9.10 | **Abnahme:** Merge → Staging automatisch. Tag → Freigabe → Production. Ein absichtlich kaputter Deploy auf Staging rollt von selbst zurück. Ein Alarm kommt als echte Mail an. Restore aus der externen Kopie in eine Test-Datenbank | ⬜ |
+
+**Was für alle Schritte gilt**
+- Jeder Schritt ist ein eigener Branch und PR (F-019). 9.1 bis 9.4 lassen sich ohne VPS bauen und in der CI testen. Ab 9.5 brauchen wir den Server, die Domain und den SMTP-Anbieter (Rückfragen F-022 bis F-028).
+- **Migrationen müssen abwärtskompatibel sein:** Nach einem Rollback läuft die alte App auf der neuen Datenbank. Spalten also erst hinzufügen und erst in einem späteren Release entfernen. Das steht als Regel in der README.
+- Aus Phase 5: Pro Datenbank läuft nur eine Web-Instanz (E-037). Auf dem Server `BIND_ADDRESS=0.0.0.0` nur für Caddy, alle anderen Ports bleiben auf `127.0.0.1`.
+- Was du selbst erledigen musst (Konten, Kosten, DNS), steht in `CHECKLISTE-SELBST.md`.

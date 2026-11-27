@@ -10,7 +10,60 @@ So funktioniert es:
 
 ## Offen
 
-*Zurzeit keine offenen Fragen.*
+Fragen für die VPS-Phase (Phase 9, bis E-061 „Phase 8“). Sie ersetzen F-008 („vorerst“). **Zurückgestellt** heißt: Die Frage kommt wieder, wenn der Umzug in die Cloud ansteht (27.11.). Preise sind Netto-Richtwerte von November 2026, bitte vor der Bestellung auf der Seite des Anbieters prüfen.
+
+### F-022 · VPS · zurückgestellt
+**Wichtig ab:** Schritt 9.4.
+**Vorschlag:**
+- Hetzner Cloud **CX23** (2 vCPU, 4 GB RAM, 40 GB SSD, x86), Standort Deutschland (Nürnberg oder Falkenstein), Ubuntu 24.04 LTS. Laut Vergleichsseiten seit der Preisanpassung im Juni 2026 etwa 5,50 €/Monat, mit IPv4 etwa 6 €/Monat.
+- **x86, nicht ARM (CAX):** Unsere Images werden nur für x86 gebaut.
+- **Speicher:** 4 GB reichen für Production mit Monitoring und Staging, geschätzt 2 GB Bedarf.
+- **Falls CX23 nicht bestellbar ist:** der nächstgrößere x86-Tarif.
+- **Einrichtung:** Du legst den Server an und hinterlegst deinen SSH-Schlüssel. Die Einrichtung nach `docs/SERVER.md` machen wir zusammen: Du führst die Befehle aus, oder ich mache es per SSH nach deinem OK pro Befehl.
+
+**Antwort (27.11.):** Wahrscheinlich Hetzner, noch nicht entschieden. Kommt beim Umzug in die Cloud wieder auf den Tisch.
+
+### F-023 · Domain und DNS · zurückgestellt
+**Wichtig ab:** Schritt 9.5 (Let's Encrypt braucht eine echte Domain).
+**Kontext:** `pubpot.games` ist laut Auftrag noch nicht registriert. `.games` kostet je nach Anbieter etwa 25–45 €/Jahr. Wichtig ist der Verlängerungspreis, nicht das Angebot fürs erste Jahr.
+**Vorschlag:** Domain bei einem Anbieter deiner Wahl registrieren, DNS kostenlos bei Hetzner (alles an einem Ort). Einträge: `pubpot.games`, `www` und `staging` als A- und AAAA-Eintrag auf den VPS.
+**Frage:** Ist die Domain schon registriert, und wenn ja, wo?
+**Antwort (27.11.):** Noch nicht registriert. Kommt, sobald es eine schöne Version gibt.
+
+### F-024 · SMTP-Anbieter für Production · zurückgestellt
+**Wichtig ab:** Schritt 9.6 (Staging schickt nur an Mailpit).
+**Kontext:**
+- Production braucht echten Mailversand: Bestätigungsmails, Hinweise an dich, Alarme.
+- Hetzner sperrt bei neuen Servern ausgehend die Ports 25 und 465. Wir nehmen deshalb Port 587 mit StartTLS, das ist ohnehin unser Standard.
+- Der Anbieter braucht SPF, DKIM und DMARC für die Domain, sonst landen die Mails im Spam.
+
+**Vorschlag:** **Brevo** (Frankreich, EU). Der kostenlose Tarif erlaubt 300 Mails am Tag, für die Landingpage reicht das weit. Laut Brevo-Hilfe tragen Mails im Gratis-Tarif einen Brevo-Hinweis. Ob das auch für einzelne Mails über SMTP gilt, prüfen wir beim Einrichten.
+
+**Alternative:** ein anderer EU-Anbieter (z. B. Scaleway Transactional Email), bezahlt pro Mail.
+**Antwort (27.11.):** Für den Anfang etwas Kostenloses. Entscheidung beim Umzug in die Cloud.
+
+### F-025 · Backups außerhalb des Servers · zurückgestellt
+**Wichtig ab:** Schritt 9.8.
+**Kontext:** Der Auftrag verlangt externen Speicher. Heute liegen die Backups nur auf demselben Server: Ist er weg, sind sie es auch.
+**Vorschlag:**
+- **Hetzner Storage Box BX11** (1 TB, etwa 3,20 €/Monat), erreichbar per SSH.
+- Darauf **restic**: verschlüsselt auf deinem Rechner bzw. dem VPS, bevor etwas den Server verlässt (Anmeldedaten sind personenbezogen). Hetzner sieht nur verschlüsselte Blöcke.
+- Aufbewahrung wie lokal.
+- **Wichtig:** Das restic-Passwort gehört zusätzlich in deinen Passwort-Manager. Ohne es sind die Backups wertlos.
+
+**Alternative:** S3-kompatibler Speicher (z. B. Hetzner Object Storage), ebenfalls mit restic.
+**Antwort (27.11.):** Noch Zukunft. Bis dahin bleiben die Backups lokal (E-013).
+
+### F-027 · Worker auf Production · zurückgestellt
+**Wichtig ab:** Schritt 9.6.
+**Kontext:** Deine Studie läuft bis etwa 03.12. mit deinen Twitch-Zugangsdaten (F-001, F-016). Zwei Worker mit derselben Client-ID teilen sich das Twitch-Limit.
+**Möglichkeiten:**
+- **(a)** Worker auf dem VPS erst nach Ende der Studie einschalten, mit deinen bisherigen Zugangsdaten.
+- **(b)** Eine zweite Twitch-App (kostenlos) nur für den Server anlegen, dann sofort.
+- **(c)** In V1 gar nicht auf dem Server.
+
+**Vorschlag:** (b). Eigene Zugangsdaten pro Umgebung sind ohnehin sauberer, und ein Leck auf dem Server betrifft dann nicht deine Studie.
+**Antwort (27.11.):** Zweite Twitch-App kommt, sobald der Umzug in die Cloud ansteht.
 
 ---
 
@@ -55,7 +108,7 @@ So funktioniert es:
 **Vorschlag:** Zusätzlich ein kostenloser externer Check (z. B. Healthchecks.io oder UptimeRobot), der nur `/health` von außen abfragt.
 **Antwort (26.11.):** Nein, nur Uptime Kuma. → E-012
 
-### F-008 · Kostenpflichtige Dienste · beantwortet (vorerst)
+### F-008 · Kostenpflichtige Dienste · beantwortet (vorerst, abgelöst durch F-022 bis F-025)
 **Kontext:** Folgende Dinge kosten Geld. Ich führe sie nur nach deinem OK ein:
 - Hetzner VPS: Empfehlung **CX23 oder vergleichbar (2 vCPU, 4 GB RAM)**, ca. 4–6 €/Monat.
 - Backup-Ziel: Hetzner Storage Box BX11 (1 TB), ca. 3–4 €/Monat, oder S3-kompatibler Speicher.
@@ -148,6 +201,63 @@ So funktioniert es:
 ### F-021 · Erreichbarkeit: Uptime Kuma oder Blackbox-Exporter? · beantwortet
 **Wichtig ab:** Schritt 7.5.
 **Kontext:** Der Auftrag nennt „Uptime Kuma (oder vergleichbar)“ für die Erreichbarkeit der Website und als Push-Monitor für den Worker. Uptime Kuma hat eine schöne Oberfläche, wird aber **nur dort eingerichtet**, per Klick. Es gibt keine offizielle Konfiguration als Datei. Außerdem hat es eigene Benachrichtigungen, also gäbe es zwei Stellen, an denen Alarme entstehen.
-**Möglichkeiten:** (a) **Uptime Kuma:** Container im Profil `monitoring`, du richtest die zwei Monitore und die Mail-Benachrichtigung einmal nach meiner Anleitung ein (etwa 5 Minuten). Die Einstellungen liegen in seinem Volume. (b) **Blackbox-Exporter von Prometheus:** prüft die Website über Caddy (Status, HTTPS, Zertifikat). Den Worker überwacht Prometheus über seine Metriken aus 7.3. Alles steht als Datei im Repo, ist getestet und läuft über **einen** Alarmweg (Alertmanager). Die Push-URL des Workers gibt es trotzdem, für einen externen Dienst in Phase 8.
+**Möglichkeiten:** (a) **Uptime Kuma:** Container im Profil `monitoring`, du richtest die zwei Monitore und die Mail-Benachrichtigung einmal nach meiner Anleitung ein (etwa 5 Minuten). Die Einstellungen liegen in seinem Volume. (b) **Blackbox-Exporter von Prometheus:** prüft die Website über Caddy (Status, HTTPS, Zertifikat). Den Worker überwacht Prometheus über seine Metriken aus 7.3. Alles steht als Datei im Repo, ist getestet und läuft über **einen** Alarmweg (Alertmanager). Die Push-URL des Workers gibt es trotzdem, für einen externen Dienst in Phase 8 (heute Phase 9).
 **Vorschlag:** (b). Alles als Code, nichts muss von Hand nachgebaut werden, wenn ein Volume verloren geht, und alle Alarme kommen aus einer Quelle. Wenn dir eine Status-Oberfläche wie bei Kuma wichtig ist, nehmen wir (a).
 **Antwort (27.11.):** Klingt gut, der Blackbox-Exporter gefällt mir. → (b)
+
+### F-026 · Externer Wächter für den Ausfall des ganzen Servers · beantwortet
+**Wichtig ab:** Schritt 9.7.
+**Kontext:**
+- In F-007 hast du einen externen Check abgelehnt (E-012). Damals war Uptime Kuma geplant.
+- Heute überwacht Prometheus alles auf demselben Server. Fällt der VPS ganz aus, kommt **kein** Alarm.
+- Der Auftrag nennt eine Push-URL für den Worker. Gebaut ist sie (`Worker__PushUrl`), aber niemand empfängt sie.
+
+**Möglichkeiten:**
+- **(a) wie entschieden, nichts Externes:** Die Push-URL bleibt leer. Den Worker überwacht weiter der Alarm „WorkerOhneVollstaendigeRunde“ aus Prometheus.
+- **(b) kostenloser „Totmannschalter“ bei healthchecks.io** (EU-Firma, Gratis-Tarif):
+  - Prometheus hat einen Alarm „Watchdog“, der immer feuert. Alertmanager meldet ihn alle paar Minuten an healthchecks.io.
+  - Bleibt die Meldung aus (Server weg, Prometheus weg, Alertmanager weg), schickt healthchecks.io dir eine Mail.
+  - Dazu ein zweiter Check für `Worker__PushUrl`.
+  - Übertragen wird nur ein „Ping“, keine Daten.
+
+**Vorschlag:** (b). Es kostet nichts und deckt genau die Lücke ab, die wir in E-058 gefunden haben.
+**Antwort (27.11.):** Klingt gut. → (b), Totmannschalter bei healthchecks.io, umgesetzt mit Schritt 9.7. → E-060
+
+### F-028 · Production vor der Prüfung der Rechtstexte · beantwortet
+**Wichtig ab:** Schritt 9.6.
+**Kontext:** Impressum, Datenschutzerklärung und Einwilligung sind noch Platzhalter („anwaltlich prüfen lassen“). Eine öffentlich erreichbare Seite, die Anmeldungen (personenbezogene Daten) sammelt, sollte vorher geprüfte Texte haben.
+**Möglichkeiten:**
+- **(a) Vorschau-Modus:** Production läuft, ist aber bis zum Go-live hinter einem Passwort (Caddy, Basic Auth, per `.env` abschaltbar). Deploy, Monitoring und Backups laufen damit schon echt.
+- **(b)** Production erst deployen, wenn die Texte geprüft sind. Bis dahin nur Staging.
+- **(c)** Ohne Schutz live gehen. Das ist dein Risiko, ich rate davon ab.
+
+**Vorschlag:** (a). So ist die ganze Kette vor dem Next Fest (22.02.2027) getestet, und das Go-live ist nur noch eine Zeile in der `.env`.
+**Antwort (27.11.):** Ja, Vorschau-Modus. → (a) → E-060
+
+### F-029 · Was soll der Twitch-Login können? · beantwortet
+**Wichtig ab:** Schritt 8.2.
+**Vorschlag:**
+- **Freiwillig und nur für Creator:** „Mit Twitch verbinden“ im Creator-Formular. Der Kanal ist damit nachweislich echt, niemand kann sich als fremder Streamer ausgeben. YouTuber und alle ohne Twitch nutzen das Formular wie bisher.
+- **Double-Opt-in bleibt.** Auch wenn Twitch die E-Mail-Adresse schon bestätigt hat: Ein einheitlicher Ablauf, und die Einwilligung ist sauber belegt. Wer eine andere Adresse als bei Twitch angibt, muss sie ohnehin bestätigen.
+- **„Mein Bereich“:** Angemeldete Creator sehen ihre Daten und den Status, ändern Angaben, laden ihre Daten herunter und löschen alles selbst.
+- **Nicht dabei:** Login für Entwickler (z. B. später „Mit Steam anmelden“) und ein Admin-Login über Twitch. Der Admin-Login bleibt getrennt.
+
+**Frage:** Passt das so, oder soll der Login etwas anderes können (z. B. ohne Formular, nur mit Twitch)?
+**Antwort (27.11.):** Nur für Creator. Sie sollen sehen, für welche Spiele sie Zuschauer gebracht und Verkäufe ausgelöst haben und was sie verdienen.
+**Daraus folgt (Plan, Schritt 8.6):**
+- **Zuschauer pro Spiel sind echt:** Der Worker speichert für jeden gesehenen Stream die Twitch-ID, das Spiel und die Zuschauerzahl. Daraus entstehen Stunden live, Ø- und Spitzen-Zuschauer und Zuschauerstunden pro Spiel.
+- **Verkäufe und Einnahmen gibt es noch nicht:** Es fehlen Kampagnen, Verkaufszahlen der Entwickler und Abrechnung. Sie erscheinen deshalb als **Beispielrechnung** in einer Vorschau im Admin-Bereich.
+  - Pool: 25 % des Nettoerlöses für 3 Monate.
+  - Annahme für das Beispiel: Verteilung nach Zuschauerstunden.
+- **Echte Creator** sehen in „Mein Bereich“ nur echte Zahlen und bei Einnahmen „noch keine“.
+
+### F-030 · Wer sieht den Spielekatalog? · beantwortet
+**Wichtig ab:** Schritt 8.5.
+**Kontext:** CS2 oder Dota 2 machen bei PubPot nicht mit. Stünden sie öffentlich auf der Seite, sähe das nach einer Partnerschaft mit Valve aus. Das wäre irreführend und markenrechtlich heikel.
+**Vorschlag:** Der Katalog ist vorerst **nur im Admin-Bereich** sichtbar, als Entwurf für deine Gestaltung. Öffentlich wird er erst mit echten Pilot-Spielen und ihrer Zustimmung. Bilder liegen auf unserem Server, nicht bei Valve verlinkt.
+**Antwort (27.11.):** Nur im Admin-Bereich, zum Ausprobieren, wie es aussehen soll.
+
+### F-031 · Was soll beim Feinschliff passieren? · beantwortet
+**Wichtig ab:** Schritt 8.6.
+**Frage:** Was stört dich an der Seite oder am Admin-Bereich? Texte, Design, Abläufe, alles ist möglich. Schreib einfach eine Liste, gern auch nach und nach. Ich ordne sie dann in Schritt 8.6 ein. Wenn dir nichts einfällt, schaue ich die Seiten mit Screenshots durch und schlage dir selbst eine Liste vor.
+**Antwort (27.11.):** Kein konkretes Problem. Mit Feinschliff waren vor allem mehr Funktionen gemeint. → Kein eigener Schritt, stattdessen die Creator-Übersicht (8.6).
