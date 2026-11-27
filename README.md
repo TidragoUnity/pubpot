@@ -118,7 +118,8 @@ docker compose up -d web          # übernimmt die geänderte .env
 Weitere Befehle:
 
 ```bash
-docker compose logs -f web                     # Log der Website
+docker compose logs -f web                     # Log der Website (eine JSON-Zeile pro Eintrag)
+docker compose logs --no-log-prefix web | jq -r '"\(.Timestamp) \(.LogLevel) \(.Message)"'  # lesbar, mit jq
 docker compose up -d --build web               # nach einer Code-Änderung neu bauen und starten
 docker compose --profile worker up -d --build  # mit Twitch-Worker (Zugangsdaten in .env)
 docker compose down                            # alles stoppen, Daten bleiben

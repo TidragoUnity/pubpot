@@ -5,6 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.1 – JSON-Logs ohne personenbezogene Daten
+- **Format:** Web und Worker loggen im Container als JSON, eine Zeile pro Eintrag, Zeit in UTC, ohne Scopes. Bei `dotnet run` bleibt die lesbare Ausgabe, jetzt mit Uhrzeit (E-050).
+- **Log-Rotation** für alle Dienste in `compose.yaml`: höchstens 5 × 10 MB pro Container.
+- **Tests:**
+  - `LogFormatTests` schreibt einen Eintrag mit den echten appsettings von Web und Worker und prüft das JSON, auch mit mehrzeiligem Stacktrace.
+  - `LogPrivacyTests` spielt den ganzen Ablauf durch und sucht im Log nach E-Mail, Name, Kanal, IP, Token, Passwort, Cookie und Notiz. Nichts gefunden. Gegenprobe mit absichtlichem Leck: Der Test schlägt an.
+  - Der Smoke-Test prüft, dass das Web-Log im Container nur aus JSON-Zeilen besteht.
+- Beim Durchsehen: Der bestehende Code hielt sich schon an die Regel. Der Mail-Ausgang loggt nur die Mail-ID, Discord nur den Statuscode, und der HttpClient für den Webhook loggt die URL nicht.
+- Stand: 409 Tests grün.
+- **Als Nächstes:** 7.2 Metriken der Website.
+
 ## 2026-11-27 · Phase 7 geplant
 - Phase 7 in 9 Schritte aufgeteilt (7.1 JSON-Logs bis 7.9 Abnahme).
 - F-020: Prometheus-Endpunkt mit dem Vorschau-Paket von OpenTelemetry. F-021: Blackbox-Exporter statt Uptime Kuma (E-049).

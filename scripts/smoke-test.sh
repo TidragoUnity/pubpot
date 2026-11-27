@@ -43,6 +43,12 @@ check() { # check <Beschreibung> <Befehl …>
   if "$@"; then echo "  ok   $desc"; else echo "  FEHLER $desc"; failed=1; fi
 }
 
+# Jede Log-Zeile der Website ist ein JSON-Objekt, das mit der Zeit in UTC beginnt (E-050). Mindestens eine Zeile.
+web_log_is_json() {
+  log=$(compose logs --no-log-prefix --no-color web)
+  [ -n "$log" ] && ! printf '%s\n' "$log" | grep -v '^{"Timestamp":"[0-9-]*T[0-9:.]*Z",.*}$' | grep -q .
+}
+
 echo "==> Starte Stack (IMAGE_TAG=${IMAGE_TAG:-local})"
 if ! compose up -d --wait --wait-timeout 180 --no-build; then failed=1; exit 1; fi
 compose --profile worker run --rm --no-deps migrate-twitch || failed=1
@@ -54,6 +60,7 @@ check "/health/ready über Caddy: 200" curl -fsk -o /dev/null https://localhost/
 check "/de liefert die Startseite" sh -c 'curl -fsk https://localhost/de | grep -q "<title>.*PubPot"'
 check "HTTP leitet auf HTTPS um (308)" sh -c '[ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost/de)" = 308 ]'
 check "kein Server-Header" sh -c '! curl -sk -D - -o /dev/null https://localhost/de | grep -qi "^server:"'
+check "Web-Log: jede Zeile JSON mit UTC-Zeit" web_log_is_json
 
 if [ "$failed" -ne 0 ]; then exit 1; fi
 echo "==> Smoke-Test bestanden."

@@ -34,8 +34,17 @@ x-hardening: &hardening
   cap_drop:
     - ALL
 
+# Log-Rotation für alle Dienste (E-050). Ohne Grenze schreibt Docker die Logs endlos weiter, bis die Platte voll ist.
+# Pro Container höchstens 5 Dateien zu 10 MB. "docker compose logs" liest sie weiterhin.
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
 services:
   db:
+    logging: *logging
     image: postgres:16.16
     restart: unless-stopped
     environment:
@@ -58,6 +67,7 @@ services:
 
   # Einmaliger Container: spielt die EF-Migrationen der Web-App ein und beendet sich (E-035).
   migrate:
+    logging: *logging
     image: ghcr.io/tidragounity/pubpot-migrate:${IMAGE_TAG:-local}
     <<: *hardening
     restart: "no"
@@ -68,6 +78,7 @@ services:
         condition: service_healthy
 
   web:
+    logging: *logging
     image: ghcr.io/tidragounity/pubpot-web:${IMAGE_TAG:-local}
     <<: *hardening
     restart: unless-stopped
@@ -101,6 +112,7 @@ services:
 
   # Reverse Proxy mit automatischem HTTPS (E-038). Der einzige Dienst mit Ports nach außen.
   caddy:
+    logging: *logging
     image: caddy:2.11.9
     <<: *hardening
     restart: unless-stopped
@@ -130,6 +142,7 @@ services:
   # Einmaliger Container: spielt die SQL-Skripte des Workers ein (deploy/db/twitch, E-036).
   # Läuft im Postgres-Image, weil das psql schon mitbringt.
   migrate-twitch:
+    logging: *logging
     image: postgres:16.16
     profiles: [worker]
     <<: *hardening
@@ -150,6 +163,7 @@ services:
   # Twitch-Worker. Startet nur mit dem Profil "worker" (F-016, E-032):
   #   docker compose --profile worker up -d     oder dauerhaft COMPOSE_PROFILES=worker in der .env
   worker:
+    logging: *logging
     image: ghcr.io/tidragounity/pubpot-worker:${IMAGE_TAG:-local}
     profiles: [worker]
     <<: *hardening

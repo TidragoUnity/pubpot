@@ -378,6 +378,26 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-050 · JSON-Logs mit dem eingebauten Formatter, Log-Rotation, Test gegen personenbezogene Daten (7.1)
+**Entscheidungen:**
+- **Eingebauter JSON-Formatter von .NET** (`Logging:Console:FormatterName = json` in `appsettings.json`) statt Serilog. Er schreibt eine Zeile pro Eintrag: Zeit in UTC (`…Z`), Level, Kategorie, fertige Nachricht und jedes Feld einzeln unter `State`, z. B. `SignupId`. Ein Stacktrace bleibt eine Zeile und zerfällt nicht in viele. Bei `dotnet run` (Development) bleibt die lesbare Ausgabe.
+- **Keine Scopes im Log.** ASP.NET Core hängt sonst Anfragepfad und Verbindungs-ID an jeden Eintrag.
+- **Log-Rotation in Compose** (`x-logging`): Docker schreibt Logs sonst ohne Grenze weiter, bis die Platte voll ist. Höchstens 5 × 10 MB pro Container.
+- **Test `LogPrivacyTests`** spielt den ganzen Ablauf durch:
+  - Anmeldungen, Zusammenführen, Bot und Mailausfall
+  - Bestätigen
+  - Admin: Fehlversuch, Login, Ändern, Export, Löschen, Logout
+  - Aufräum-Jobs
+
+  Danach prüft er, dass keine E-Mail-Adresse, kein Name, kein Kanal, keine IP, kein Token, kein Passwort, kein Cookie und keine Admin-Notiz im Log steht. Gegenprobe: Mit absichtlich eingebauter E-Mail-Adresse schlägt er fehl. Der Smoke-Test prüft zusätzlich, dass im Container jede Zeile JSON ist.
+
+**Warum:**
+- JSON lässt sich später ohne Umbau maschinell auswerten (Filtern, Zählen, z. B. mit `jq` oder einem Log-Dienst).
+- Der eingebaute Formatter braucht kein zusätzliches Paket.
+- Der Test schützt vor dem typischen Fehler, beim Debuggen „nur kurz“ die E-Mail mitzuloggen.
+
+**Gut zu wissen:** Die Log-Stufe `Microsoft.AspNetCore` bleibt auf `Warning`. Auf `Information` würde ASP.NET Core jede URL samt Bestätigungs-Token schreiben.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
