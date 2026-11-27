@@ -1,0 +1,45 @@
+# CI: Build, Code-Stil und Tests bei jedem Pull Request und auf main (E-041).
+# Die Prüfungen selbst stehen in scripts/check.sh – dieselben wie lokal. Was lokal grün ist, ist es auch hier.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Standardmäßig darf der Workflow nur lesen. Jobs, die mehr brauchen, fordern es einzeln an.
+permissions:
+  contents: read
+
+# Ein neuer Push auf denselben PR bricht den alten Lauf ab. Auf main laufen alle Läufe zu Ende.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build-test:
+    name: Build und Tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      # Fremde Actions sind auf einen Commit-SHA festgenagelt (Lieferkette). Dependabot hält sie aktuell.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # SDK 11 aus global.json zum Bauen, dazu .NET 10 für die Laufzeit der Tests (Ziel ist net10.0, E-007).
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: global.json
+          dotnet-version: 10.0.x
+
+      # NuGet-Pakete zwischenspeichern. Der Schlüssel ändert sich nur, wenn sich Paketversionen ändern.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      # Build (Warnungen als Fehler), dotnet format, beide Testprojekte. Testcontainers nutzt das Docker des Runners.
+      - name: Prüfen wie lokal (scripts/check.sh)
+        run: ./scripts/check.sh

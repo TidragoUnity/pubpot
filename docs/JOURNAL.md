@@ -5,6 +5,15 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 6.1 – CI-Workflow Build und Tests
+- `.github/workflows/ci.yml`: Job „Build und Tests“ bei jedem Pull Request und Push auf `main`. SDK 11 und .NET 10, NuGet-Cache, dann `./scripts/check.sh` (E-041).
+- `scripts/check.sh` gliedert seine Ausgabe in GitHub Actions in einklappbare Gruppen, lokal bleibt sie wie bisher.
+- Actions auf Commit-SHA festgenagelt (checkout v7.0.1, setup-dotnet v6.1.0, cache v6.1.0), nur Leserechte, alte PR-Läufe werden abgebrochen.
+- Geprüft mit `actionlint` (im Docker-Container), lokal `check.sh` grün.
+- **Erster Schritt im neuen Ablauf (F-019):** Branch `6.1-ci`, Pull Request, Merge bei grüner CI.
+- **Abweichung:** keine Testergebnisse als Artefakt. Dafür bräuchte es ein Zusatzpaket, das Log reicht (E-041).
+- **Als Nächstes:** 6.2 Images bauen und Compose-Smoke-Test.
+
 ## 2026-11-27 · Phase 6 geplant
 - Phase 6 in 8 Schritte aufgeteilt (6.1 CI-Workflow bis 6.8 Abnahme), mit Trivy und CodeQL als kostenlose Ergänzungen.
 - F-018: Die Images in GHCR werden öffentlich. F-019: Jeder Schritt bekommt einen eigenen Branch und Pull Request, Merge bei grüner CI (E-040).

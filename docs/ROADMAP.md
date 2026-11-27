@@ -108,14 +108,14 @@ Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später 
 
 > Ergebnis der Abnahme: von leerem Volume bis „alles gesund“ in 46 s. Lighthouse über Caddy (`https://localhost/de` und `/de/signup/creator`, mobil und Desktop) **100/100/100/100**. Images entpackt: web 261 MB, migrate 295 MB, worker 146 MB, Caddy 92 MB. HSTS kommt für `localhost` absichtlich nicht (E-038), mit echter Domain prüfen das die Tests aus 5.1.
 
-## Phase 6 – CI ⬜
+## Phase 6 – CI 🔄
 Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack gestartet. Nach dem Merge auf `main` liegen fertige Images mit Commit-SHA in der GitHub Container Registry, bereit für den Deploy in Phase 8.
 
 **Vorab von dir:** Dein GitHub-Token braucht zusätzlich die Rechte **Workflows** (Lesen und Schreiben, sonst lehnt GitHub den Push von `.github/workflows` ab), **Pull requests** (Lesen und Schreiben) und für 6.7 **Administration** (Lesen und Schreiben). Anleitung in der Checkliste.
 
 | # | Schritt | Status |
 |---|---|---|
-| 6.1 | **CI-Workflow Build und Tests** (`.github/workflows/ci.yml`): bei jedem Pull Request und Push auf `main`. SDK 11 aus `global.json` plus .NET-10-Laufzeit, NuGet-Cache, dann `./scripts/check.sh`, also genau dieselben Prüfungen wie lokal (Build mit Warnungen als Fehler, Format, beide Testprojekte mit Testcontainers). Testergebnisse als Artefakt, wenn etwas fehlschlägt. Minimale Rechte (`contents: read`), Actions auf Commit-SHA festgenagelt, alte Läufe desselben PRs werden abgebrochen | ⬜ |
+| 6.1 | **CI-Workflow Build und Tests** (`.github/workflows/ci.yml`): bei jedem Pull Request und Push auf `main`. SDK 11 aus `global.json` plus .NET-10-Laufzeit, NuGet-Cache, dann `./scripts/check.sh`, also genau dieselben Prüfungen wie lokal (Build mit Warnungen als Fehler, Format, beide Testprojekte mit Testcontainers). Testergebnisse als Artefakt, wenn etwas fehlschlägt. Minimale Rechte (`contents: read`), Actions auf Commit-SHA festgenagelt, alte Läufe desselben PRs werden abgebrochen | ✅ |
 | 6.2 | **Images bauen und Compose-Smoke-Test:** die drei Images (web, migrate, worker) mit Buildx und Build-Cache bauen, in PRs ohne Push. Danach `docker compose up --wait` mit Wegwerf-Passwörtern: migrate muss mit 0 enden, `https://localhost/health/ready` und `/de` müssen 200 liefern, `migrate-twitch` läuft auch. Bei Fehlern landen die Container-Logs im Lauf | ⬜ |
 | 6.3 | **Push nach GHCR** nur bei Merge auf `main` und nur, wenn 6.1 und 6.2 grün sind: Tags `<commit-sha>` (unveränderlich, für den Deploy) und `main` (zeigt immer auf den neuesten Stand). OCI-Labels (Quelle, Commit), SBOM und Herkunftsnachweis (Provenance) am Image. Schreibrecht für Packages nur in diesem Job | ⬜ |
 | 6.4 | **Image-Scan mit Trivy:** sucht in den drei Images nach bekannten Sicherheitslücken. Ergebnis als Tabelle in der Zusammenfassung des Laufs, rot nur bei **kritischen** Lücken, für die es schon ein Update gibt | ⬜ |
