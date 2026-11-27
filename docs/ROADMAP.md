@@ -121,7 +121,7 @@ Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack 
 | 6.4 | **Image-Scan mit Trivy:** sucht in den drei Images nach bekannten Sicherheitslücken. Ergebnis als Tabelle in der Zusammenfassung des Laufs, rot nur bei **kritischen** Lücken, für die es schon ein Update gibt | ✅ |
 | 6.5 | **Dependabot** (`.github/dependabot.yml`): NuGet, Dockerfiles, Compose-Dateien und GitHub Actions, wöchentlich, Updates gebündelt. .NET-, EF-Core- und Npgsql-Pakete sowie die Laufzeit-Images bleiben auf 10.x (E-007), Postgres auf 16. Dazu „Dependabot security updates“ einschalten | ✅ |
 | 6.6 | **CodeQL** (Code-Scanning für C#, für öffentliche Repos kostenlos): findet typische Sicherheitsfehler im Code, bei PRs und wöchentlich. Funde erscheinen im Reiter „Security“ | ✅ |
-| 6.7 | **Regeln für `main`** (Ruleset): Änderungen nur per Pull Request, die Prüfungen aus 6.1, 6.2 und 6.6 müssen grün sein, kein Force-Push, kein Löschen. Ab hier arbeiten wir mit Pull Requests (siehe F-019). README: CI-Badge und Abschnitt „CI“ | ⬜ |
+| 6.7 | **Regeln für `main`** (Ruleset): Änderungen nur per Pull Request, die Prüfungen aus 6.1, 6.2 und 6.6 müssen grün sein, kein Force-Push, kein Löschen. Ab hier arbeiten wir mit Pull Requests (siehe F-019). README: CI-Badge und Abschnitt „CI“ | ✅ |
 | 6.8 | **Abnahme:** Test-PR mit absichtlichem Formatfehler → rot und Merge gesperrt. Korrigiert → grün → Merge → Images mit SHA in GHCR. Lokal die Images aus GHCR ziehen und starten (`IMAGE_TAG=<sha>`, ohne Build). Erste Dependabot-PRs laufen durch die CI | ⬜ |
 
 **Was für alle Schritte gilt**

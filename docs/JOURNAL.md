@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 6.7 – Regeln für `main`
+- Ruleset „main schützen“ per API angelegt, Quelle `.github/rulesets/main.json`: nur PR, nur Squash, lineare Historie, kein Force-Push und kein Löschen, 5 Pflicht-Prüfungen (nur von GitHub Actions), Code Scanning als Sperre, keine Ausnahmen (E-047).
+- Repo-Einstellungen: nur Squash-Merge mit PR-Titel als Commit-Titel, Branches werden nach dem Merge gelöscht.
+- README: Badges für CI und CodeQL, neuer Abschnitt „CI und Arbeitsablauf“ mit Workflows und Ablauf für eine Änderung. Die Ordnertabelle ist ergänzt.
+- Dieser PR ist der erste, der selbst durch die Regeln muss.
+- **Als Nächstes:** 6.8 Abnahme.
+
 ## 2026-11-27 · Schritt 6.6 – CodeQL
 - `.github/workflows/codeql.yml`: CodeQL für C# (mit Build), GitHub Actions und JavaScript, Regelsatz `security-extended`, bei PRs, auf `main` und wöchentlich (E-046).
 - Vorher geprüft: GitHubs „Default setup“ ist aus, es gibt also keinen Konflikt mit dem eigenen Workflow.
