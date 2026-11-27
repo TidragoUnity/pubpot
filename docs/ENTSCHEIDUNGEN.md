@@ -378,6 +378,37 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-058 · Abnahme Phase 7: jeden Alarm auslösen, ohne Twitch und ohne die `.env` zu ändern (7.9)
+**Vorgehen:**
+- Der lokale Stack lief mit den Profilen `worker` und `monitoring`, dazu eine Abnahme-Datei aus dem Scratchpad mit Grafana-Passwort und Dummy-Zugangsdaten für Twitch.
+- Für den Worker zeigten `id.twitch.tv` und `api.twitch.tv` auf 127.0.0.1. So ging keine Anfrage an Twitch, und die Zugangsdaten der Studie blieben außen vor (F-001).
+- Die `deploy/.env` des Nutzers blieb unverändert. Gelesen wurden nur die Namen der Schlüssel.
+
+**Ergebnis, alle Mails in Mailpit:**
+
+| Auslöser | Mail | Zeit danach |
+|---|---|---|
+| `stop web` | Alarm: AppNichtErreichbar (WebsiteNichtErreichbar unterdrückt, wie geplant) | 2:47 min |
+| `start web` | Behoben: AppNichtErreichbar | 4:47 min |
+| `stop db` + `backup.sh now` | Alarm: BackupFehlgeschlagen (2) | 0:51 min |
+| `stop db` | Alarm: FehlerquoteHoch (35,7 %) | 7:00 min |
+| `stop db` | Alarm: WebsiteNichtErreichbar (2) | 7:30 min (Gruppe vom ersten Test, Intervall 5 min) |
+| Twitch gesperrt | Alarm: WorkerOhneVollstaendigeRunde | 16:41 min nach Start |
+| `start db` + `backup.sh now` | Behoben: BackupFehlgeschlagen, WebsiteNichtErreichbar, FehlerquoteHoch | 3 bis 9 min |
+
+- Festplatte, Zertifikat, Backup zu alt und Backup fehlt lassen sich lokal nicht sinnvoll auslösen. Sie sind über die Unit-Tests der Regeln abgedeckt.
+- Restore von Hand nach README: ein Backup in `pubpot_restore_test` eingespielt, Anmeldungen, Mails und Migrationen gleich, danach gelöscht.
+- Dashboard im Browser angesehen (Screenshot, headless). Ausfall der Datenbank, 503-Spitze, 10 s Antwortzeit, fehlgeschlagene Worker-Runden und RAM pro Container sind gut zu sehen.
+
+**Gefunden und behoben:**
+- Die Titel der Kacheln waren abgeschnitten. Sie sind jetzt kurz, Details stehen im Info-Text.
+- Die Kachel „Zertifikat“ war lokal rot (Caddys lokale Zertifikate laufen nach Stunden ab). Jetzt zeigt sie lokal ein blaues „lokal“, gezählt werden nur echte Zertifikate.
+- Statt „No data“ steht „Noch keine Daten“ (Zähler entstehen erst beim ersten Ereignis).
+- Grafana bemerkt geänderte Dashboard-Dateien unter Docker Desktop nicht, `docker compose restart grafana` hilft. Steht in der README.
+- Grafana übernimmt das Admin-Passwort nur beim ersten Start. Deshalb wurde das Volume nach der Abnahme gelöscht. Steht in der README.
+
+**Bekannte Grenze:** Wird der Worker-Container ganz entfernt, meldet kein Alarm etwas, weil Prometheus ihn per DNS nicht mehr findet. Das ist eine bewusste Entscheidung (E-053). In Phase 8 übernimmt das ein externer Dienst über `Worker__PushUrl`, der auch einen Ausfall des ganzen Servers bemerkt.
+
 ## E-057 · Restore-Test im Smoke-Test mit echten Daten und Vergleich Tabelle für Tabelle (7.8)
 **Entscheidungen:**
 - **Echte Daten statt leerer Tabellen:**
@@ -435,7 +466,7 @@ Zwei Funde aus der Abnahme 5.8.
   - Festplatte über 80 % (10 min)
   - Monitoring-Dienst aus
   - Backup fehlgeschlagen, älter als 26 h oder ohne Messwerte
-- **Unit-Tests** (`tests/alerts_test.yml`, `promtool test rules`, 16 Fälle) in `check.sh`, also auch in der CI. Jede Regel wird geprüft, ob sie nach der richtigen Zeit feuert und ob sie in den Fällen stumm bleibt, in denen sie es soll: wenig Verkehr, 1 % Fehler, lokales Zertifikat, geplantes Worker-Ende, tmpfs, 70 % Belegung.
+- **Unit-Tests** (`tests/alerts_test.yml`, `promtool test rules`, 15 Fälle) in `check.sh`, also auch in der CI. Jede Regel wird geprüft, ob sie nach der richtigen Zeit feuert und ob sie in den Fällen stumm bleibt, in denen sie es soll: wenig Verkehr, 1 % Fehler, lokales Zertifikat, geplantes Worker-Ende, tmpfs, 70 % Belegung.
 - **Alertmanager** nutzt die SMTP-Werte der Website (`Smtp__*`). Empfänger ist `ALERT_EMAIL`, sonst `Notifications__Email`. Ohne Empfänger sind die Alarme nur in den Oberflächen sichtbar (Hinweis im Log).
 - **`start.sh`** setzt die Werte ein, weil auch Alertmanager keine Umgebungsvariablen liest. Die Werte werden auf erlaubte Zeichen geprüft. Das Passwort landet in einer eigenen Datei (`umask 077`), nie in der Konfiguration. Sonderzeichen müssen deshalb nicht maskiert werden.
 - **Mails:**

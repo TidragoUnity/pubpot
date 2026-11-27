@@ -20,6 +20,8 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 
 ## Bis Phase 8 (Server) – vorher F-008 klären
 - [ ] Hetzner VPS anlegen (F-008), SSH-Schlüssel hinterlegen
+- [ ] Lokal ausprobieren (optional): `GRAFANA_ADMIN_PASSWORD` in `deploy/.env` setzen, `docker compose --profile monitoring up -d`, Grafana unter http://localhost:3000 (README, „Monitoring, Alarme und Backups“)
+- [ ] Auf dem Server in `deploy/.env`: `GRAFANA_ADMIN_PASSWORD` (lang, zufällig) und `ALERT_EMAIL` (wohin Alarme gehen), `COMPOSE_PROFILES=worker,monitoring`
 - [ ] Datenschutzerklärung, Abschnitt Backups, anwaltlich prüfen lassen: Wie werden Löschanfragen seit dem letzten Backup nach einer Wiederherstellung erneut umgesetzt? (TODO in der Datenschutzerklärung, E-057)
 - [ ] VPS nach der Härtungsanleitung absichern (kommt in Phase 8)
 - [ ] Domain `pubpot.games` registrieren

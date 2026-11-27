@@ -128,34 +128,7 @@ docker compose down                            # alles stoppen, Daten bleiben
 Smoke-Test wie in der CI (startet den Stack ohne Override mit fertigen Images in einem eigenen Projekt, prüft ihn
 und räumt wieder auf): `./scripts/smoke-test.sh`. Vorher die Images bauen (`docker compose build`).
 
-**Monitoring** (Profil `monitoring`): erst `GRAFANA_ADMIN_PASSWORD` in `deploy/.env` setzen, dann
-
-```bash
-docker compose --profile monitoring up -d   # Prometheus, Grafana, node-exporter, cAdvisor
-```
-
-Grafana: http://localhost:3000 (Dashboard „PubPot – Start“), Prometheus: http://localhost:9090, Alertmanager:
-http://localhost:9093. Alle sind nur auf diesem Rechner erreichbar. Alarm-Mails landen lokal in Mailpit
-(http://localhost:8025). Die Konfiguration liegt in `deploy/monitoring/`.
-
-**Backups** (Dienst `backup`, läuft immer mit): beim ersten Start sofort, danach jede Nacht um 03:00. Ablage in
-`deploy/backups/` (nicht im Git), 7 Tage täglich und 4 Wochen wöchentlich.
-
-```bash
-docker compose exec backup sh backup.sh now            # sofort sichern
-./scripts/restore.sh                                     # vorhandene Backups anzeigen
-./scripts/restore.sh daily/pubpot-<Zeit>.dump            # Datenbank pubpot daraus wiederherstellen (fragt vorher)
-```
-
-**Restore von Hand prüfen**, ohne die echte Datenbank anzufassen. Der Smoke-Test macht dasselbe automatisch:
-
-1. Frisches Backup: `docker compose exec backup sh backup.sh now`
-2. Dateiname ansehen: `./scripts/restore.sh`
-3. In eine Test-Datenbank einspielen: `./scripts/restore.sh daily/pubpot-<Zeit>.dump pubpot_restore_test`
-4. Vergleichen, z. B. die Anzahl der Anmeldungen in beiden Datenbanken:
-   `docker compose exec db psql -U postgres -d pubpot_restore_test -c "select count(*) from signups"` (und dasselbe mit
-   `-d pubpot`). Oder in Adminer (http://localhost:8081, Server `db`) durch beide Datenbanken klicken.
-5. Aufräumen: `docker compose exec db dropdb -U postgres pubpot_restore_test`
+Monitoring, Alarme und Backups: siehe [eigener Abschnitt](#monitoring-alarme-und-backups).
 
 ### Caddy-Zertifikat vertrauen (optional)
 
@@ -193,6 +166,99 @@ Die Vorlage mit Kommentaren ist [`deploy/.env.example`](deploy/.env.example).
 
 `Proxy__KnownNetworks` folgt automatisch aus `EDGE_SUBNET`. Weitere Einstellungen wie Spam-Schutz,
 Aufräum-Job und Mail-Ausgang haben Standardwerte in `appsettings.json`. Compose reicht sie bewusst nicht durch.
+
+## Monitoring, Alarme und Backups
+
+Läuft im Compose-Profil `monitoring` neben der Website. Die ganze Konfiguration liegt als Dateien in
+`deploy/monitoring/` (Entscheidungen E-050 bis E-057).
+
+**Starten**
+
+1. In `deploy/.env`: `GRAFANA_ADMIN_PASSWORD=<langes Passwort>` (ohne startet Grafana nicht). Optional `ALERT_EMAIL`
+   für die Alarm-Mails, sonst gehen sie an `Notifications__Email`.
+2. `cd deploy && docker compose --profile monitoring up -d`
+
+| Was | Adresse | Zugang |
+|---|---|---|
+| Grafana, Dashboard „PubPot – Start“ | http://localhost:3000 | `admin` und `GRAFANA_ADMIN_PASSWORD` |
+| Prometheus: Messwerte, Alarme, Ziele (Status → Targets) | http://localhost:9090 | ohne Login |
+| Alertmanager: aktive Alarme, stummschalten | http://localhost:9093 | ohne Login |
+| Mailpit: Alarm-Mails (lokal) | http://localhost:8025 | – |
+
+Alle Ports hängen nur an `127.0.0.1`, auch auf dem Server. Dort geht der Zugang per SSH-Tunnel (Phase 8), z. B.
+`ssh -L 3000:127.0.0.1:3000 <server>`.
+
+**Was überwacht wird**
+
+- **Website von außen:** Der Blackbox-Exporter prüft über Caddy mit HTTPS `/health/ready`, die Startseite und die
+  Umleitung von http auf https.
+- **Website intern:** Anfragen, Fehlerquote, Antwortzeiten, Anmeldungen, Mails, Spam. `/metrics` liegt auf Port 9464
+  und ist nur im Docker-Netz erreichbar.
+- **Twitch-Worker:** Runden, Streams, letzte vollständige Runde (ebenfalls Port 9464).
+- **Server und Container:** CPU, Arbeitsspeicher, Festplatte (node-exporter, cAdvisor).
+- **Backups:** Erfolg, Alter und Größe.
+
+**Alarme** gehen per Mail über die SMTP-Werte der Website. Die Regeln stehen in
+`deploy/monitoring/prometheus/rules/alerts.yml` und haben Unit-Tests (`promtool test rules` in `check.sh`).
+
+| Alarm | Wann |
+|---|---|
+| WebsiteNichtErreichbar | Prüfung über Caddy schlägt 2 min lang fehl |
+| AppNichtErreichbar | `/metrics` der Website antwortet 2 min lang nicht |
+| FehlerquoteHoch | über 5 % Serverfehler (5xx) für 5 min, ab 10 Anfragen in 5 min |
+| ZertifikatLaeuftAb | Zertifikat läuft in unter 14 Tagen ab (nur mit echter Domain) |
+| WorkerOhneVollstaendigeRunde | 15 min keine vollständige Runde (nicht nach geplantem Ende) |
+| WorkerNichtErreichbar | `/metrics` des Workers antwortet 5 min lang nicht |
+| FestplatteFastVoll | Festplatte über 80 % für 10 min |
+| MonitoringTeilAusgefallen | ein Monitoring-Dienst antwortet 5 min lang nicht |
+| BackupFehlgeschlagen | letzter Backup-Lauf ohne gültiges Backup (sofort) |
+| BackupZuAlt | neuestes Backup älter als 26 h |
+| BackupFehlt | 1 h lang keine Backup-Messwerte |
+
+**Einen Alarm selbst auslösen** (so in der Abnahme 7.9 geprüft). Die Mails erscheinen in Mailpit:
+
+- `docker compose stop web` → nach etwa 3 min „Alarm: AppNichtErreichbar“. Nach `docker compose start web` kommt
+  „Behoben“.
+- `docker compose stop db`, dann `docker compose exec backup sh backup.sh now`:
+  - nach etwa 1 min „BackupFehlgeschlagen“
+  - nach einigen Minuten „WebsiteNichtErreichbar“ und „FehlerquoteHoch“
+
+  Danach `docker compose start db` und noch einmal `backup.sh now`.
+
+**Gut zu wissen**
+
+- **Grafana-Passwort:** Grafana speichert das Admin-Passwort beim ersten Start in seinem Volume. Ändert man es
+  später in der `.env`, greift das nicht. Entweder das Passwort in Grafana ändern oder das Volume neu anlegen:
+  `docker compose rm -sf grafana`, dann `docker volume rm pubpot_grafana_data`. Dashboards gehen dabei nicht
+  verloren, sie kommen aus Dateien.
+- **Dashboard ändern:** In Grafana bearbeiten, als JSON exportieren und
+  `deploy/monitoring/grafana/dashboards/pubpot.json` ersetzen. Unter Docker Desktop danach
+  `docker compose restart grafana`, sonst bemerkt Grafana die geänderte Datei nicht.
+- **Worker ganz weg:** Ist der Worker-Container ganz entfernt, meldet kein Alarm etwas. Prometheus findet ihn per DNS
+  nicht mehr, absichtlich, damit es ohne Profil `worker` kein rotes Ziel gibt. Solche Fälle und einen Ausfall des
+  ganzen Servers fängt in Phase 8 ein externer Dienst über `Worker__PushUrl` ab.
+- **Zeiten:** Alarm-Mails zeigen sie in UTC, Backup-Dateinamen in deutscher Zeit.
+
+### Backups und Wiederherstellung
+
+Der Dienst `backup` läuft immer mit, auch ohne Profil `monitoring`. Er sichert beim ersten Start sofort, danach
+jede Nacht um 03:00. Ablage in `deploy/backups/` (nicht im Git), 7 Tage täglich und 4 Wochen wöchentlich.
+
+```bash
+docker compose exec backup sh backup.sh now            # sofort sichern
+./scripts/restore.sh                                     # vorhandene Backups anzeigen
+./scripts/restore.sh daily/pubpot-<Zeit>.dump            # Datenbank pubpot daraus wiederherstellen (fragt vorher)
+```
+
+**Restore von Hand prüfen**, ohne die echte Datenbank anzufassen. Der Smoke-Test macht dasselbe automatisch:
+
+1. Frisches Backup: `docker compose exec backup sh backup.sh now`
+2. Dateiname ansehen: `./scripts/restore.sh`
+3. In eine Test-Datenbank einspielen: `./scripts/restore.sh daily/pubpot-<Zeit>.dump pubpot_restore_test`
+4. Vergleichen, z. B. die Anzahl der Anmeldungen in beiden Datenbanken:
+   `docker compose exec db psql -U postgres -d pubpot_restore_test -c "select count(*) from signups"` (und dasselbe mit
+   `-d pubpot`). Oder in Adminer (http://localhost:8081, Server `db`) durch beide Datenbanken klicken.
+5. Aufräumen: `docker compose exec db dropdb -U postgres pubpot_restore_test`
 
 ## Website lokal starten
 

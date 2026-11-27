@@ -37,7 +37,7 @@
     },
     {
       "type": "stat",
-      "title": "Website von außen",
+      "title": "Von außen",
       "description": "Über Caddy mit HTTPS und der echten Domain (Blackbox-Exporter): /health/ready, Startseite und Umleitung von http auf https. OK nur, wenn alle drei Prüfungen bestehen.",
       "targets": [
         {
@@ -120,7 +120,7 @@
     },
     {
       "type": "stat",
-      "title": "App (intern)",
+      "title": "App intern",
       "description": "Prometheus erreicht /metrics der Website direkt im Docker-Netz (up).",
       "targets": [
         {
@@ -203,8 +203,8 @@
     },
     {
       "type": "stat",
-      "title": "Zertifikat gültig noch",
-      "description": "Bis zum Ablauf des HTTPS-Zertifikats. Caddy verlängert automatisch, Alarm unter 14 Tagen (nur mit echter Domain, 7.6). Lokal stellt Caddy kurzlebige Zertifikate aus (wenige Stunden), das ist normal.",
+      "title": "Zertifikat",
+      "description": "Zeit bis zum Ablauf des HTTPS-Zertifikats. Caddy verlängert automatisch, Alarm unter 14 Tagen. „lokal“: Mit localhost stellt Caddy eigene Zertifikate mit wenigen Stunden Laufzeit aus, die hier nicht zählen.",
       "targets": [
         {
           "refId": "A",
@@ -212,7 +212,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "min(probe_ssl_earliest_cert_expiry{job=\"website\"}) - time()",
+          "expr": "(min(probe_ssl_earliest_cert_expiry{job=\"website\",tls=\"public\"}) - time()) or on() (0 * max(probe_ssl_earliest_cert_expiry{job=\"website\",tls=\"local\"}) - 1)",
           "legendFormat": "__auto",
           "instant": true,
           "range": false
@@ -242,7 +242,18 @@
               }
             ]
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "-1": {
+                  "text": "lokal",
+                  "color": "blue",
+                  "index": 0
+                }
+              }
+            }
+          ],
           "decimals": 0
         },
         "overrides": []
@@ -275,7 +286,7 @@
     },
     {
       "type": "stat",
-      "title": "Anfragen pro Sekunde",
+      "title": "Anfragen/s",
       "description": "Alle Anfragen an die Website, Mittel über 5 Minuten.",
       "targets": [
         {
@@ -339,7 +350,7 @@
     },
     {
       "type": "stat",
-      "title": "Fehlerquote (5xx)",
+      "title": "Fehlerquote",
       "description": "Anteil der Antworten mit Statuscode 5xx, Mittel über 5 Minuten. Alarm ab 5 % (7.6).",
       "targets": [
         {
@@ -411,7 +422,7 @@
     },
     {
       "type": "stat",
-      "title": "Bestätigte Anmeldungen (24 h)",
+      "title": "Anmeldungen",
       "description": "Double-Opt-in abgeschlossen, letzte 24 Stunden, Creator und Entwickler zusammen.",
       "targets": [
         {
@@ -475,7 +486,7 @@
     },
     {
       "type": "stat",
-      "title": "Worker: letzte vollständige Runde",
+      "title": "Worker",
       "description": "Zeit seit der letzten vollständigen Runde. Alarm ab 15 Minuten (7.6). „–“: Der Worker läuft nicht (Profil worker).",
       "targets": [
         {
@@ -547,7 +558,7 @@
     },
     {
       "type": "stat",
-      "title": "Freier Speicherplatz",
+      "title": "Freier Platz",
       "description": "Freier Platz auf der Festplatte mit den Docker-Daten (/ bzw. /var/lib). Alarm unter 20 % (7.6).",
       "targets": [
         {
@@ -662,6 +673,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -730,6 +742,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -798,6 +811,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -875,6 +889,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -947,6 +962,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -1006,6 +1022,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -1078,6 +1095,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -1137,6 +1155,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
@@ -1199,6 +1218,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -1280,6 +1300,7 @@
           "color": {
             "mode": "palette-classic"
           },
+          "noValue": "Noch keine Daten",
           "min": 0
         },
         "overrides": []
