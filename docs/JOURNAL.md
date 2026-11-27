@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 6.6 – CodeQL
+- `.github/workflows/codeql.yml`: CodeQL für C# (mit Build), GitHub Actions und JavaScript, Regelsatz `security-extended`, bei PRs, auf `main` und wöchentlich (E-046).
+- Vorher geprüft: GitHubs „Default setup“ ist aus, es gibt also keinen Konflikt mit dem eigenen Workflow.
+- **Als Nächstes:** 6.7 Regeln für `main`.
+
 ## 2026-11-27 · Schritt 6.5 – Dependabot
 - `.github/dependabot.yml` für NuGet, `global.json`, die Dockerfiles, die Compose-Dateien und GitHub Actions: wöchentlich, gebündelt, keine Hauptversionen für .NET, EF Core, Npgsql, das SDK, die .NET-Images und Postgres (E-045).
 - Per API eingeschaltet: Dependabot-Warnungen (`vulnerability-alerts`) und automatische Sicherheitsupdates (`automated-security-fixes`).
