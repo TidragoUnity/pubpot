@@ -178,6 +178,7 @@ services:
       Worker__StopAfterHours: ${Worker__StopAfterHours:-0}
       Worker__GameIds: ${Worker__GameIds:-}
       Worker__UserLogins: ${Worker__UserLogins:-}
+      Worker__PushUrl: ${Worker__PushUrl:-}
     depends_on:
       db:
         condition: service_healthy

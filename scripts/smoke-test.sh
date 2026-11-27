@@ -54,6 +54,27 @@ metrics_inside() {
   compose exec -T caddy wget -qO- http://web:9464/metrics | grep -q '^http_server_request_duration_seconds_count'
 }
 
+# Worker ohne Netz starten (kein Twitch, keine Datenbank) und /metrics aus seinem Netz-Namespace abfragen (E-052).
+# wget kommt aus dem Caddy-Image, das Worker-Image hat bewusst keine Werkzeuge.
+worker_metrics() {
+  id=$(MSYS_NO_PATHCONV=1 docker run -d --network none --read-only --tmpfs /tmp --cap-drop ALL \
+    --security-opt no-new-privileges:true -e Twitch__ClientId=smoke -e Twitch__ClientSecret=smoke \
+    -e "ConnectionStrings__Default=Host=db.invalid;Database=x;Username=x;Password=x" \
+    "ghcr.io/tidragounity/pubpot-worker:${IMAGE_TAG:-local}") || return 1
+  wget_image=$(docker inspect -f '{{.Config.Image}}' "$(compose ps -q caddy)")
+  result=1
+  for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+    if docker run --rm --network "container:$id" --entrypoint wget "$wget_image" -qO- --header "Host: worker:9464" \
+      http://127.0.0.1:9464/metrics 2>/dev/null | grep -q '^pubpot_worker_last_complete_round_time_seconds'; then
+      result=0
+      break
+    fi
+    sleep 1
+  done
+  docker rm -f "$id" >/dev/null
+  return $result
+}
+
 echo "==> Starte Stack (IMAGE_TAG=${IMAGE_TAG:-local})"
 if ! compose up -d --wait --wait-timeout 180 --no-build; then failed=1; exit 1; fi
 compose --profile worker run --rm --no-deps migrate-twitch || failed=1
@@ -70,6 +91,7 @@ check "Web-Log: jede Zeile JSON mit UTC-Zeit" web_log_is_json
 check "/metrics von außen nicht erreichbar" sh -c '! curl -sk https://localhost/metrics | grep -q "# TYPE"'
 check "/metrics auch nicht mit Host-Header :9464" sh -c '! curl -sk -H "Host: localhost:9464" https://localhost/metrics | grep -q "# TYPE"'
 check "/metrics im Docker-Netz (web:9464) mit Anfragen-Metrik" metrics_inside
+check "Worker: /metrics im Container (ohne Netz, ohne Twitch)" worker_metrics
 
 if [ "$failed" -ne 0 ]; then exit 1; fi
 echo "==> Smoke-Test bestanden."

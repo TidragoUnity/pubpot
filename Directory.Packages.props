@@ -30,6 +30,7 @@
   <!-- Metriken (E-049): Prometheus-Exporter ist noch Vorschau, die übrigen Pakete stabil -->
   <ItemGroup>
     <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.21.0-beta.1" />
+    <PackageVersion Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.21.0-beta.1" />
     <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
   </ItemGroup>
 

@@ -5,6 +5,19 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.3 – Metriken des Workers und Push-URL
+- Der Worker liefert `/metrics` auf Port 9464 (HttpListener) mit diesen Werten (E-052):
+  - Runden nach Ergebnis
+  - Streams der letzten Runde
+  - Zeitpunkt der letzten vollständigen Runde (vor der ersten Runde: Startzeit)
+  - „geplante Laufzeit erreicht“
+  - Laufzeit-Werte von .NET
+- Optional `Worker__PushUrl` für einen externen Heartbeat-Monitor: wird nur nach vollständigen Runden aufgerufen, die URL steht nie im Log.
+- **Gefunden:** Mit `*` als Host startete der Worker im Container nicht (`UriFormatException`). Behoben über den `ConfigureHttpListener`-Haken. Neuer Smoke-Test: Worker-Image ohne Netz starten und `/metrics` abfragen.
+- **Tests:** Zähler und Gauges, echter `/metrics`-Endpunkt, Push-URL (Aufruf, aus, Fehler ohne URL im Log, Prüfung der Adresse).
+- Stand: 429 Tests grün.
+- **Als Nächstes:** 7.4 Prometheus, Grafana, node-exporter, cAdvisor.
+
 ## 2026-11-27 · Schritt 7.2 – Metriken der Website
 - **OpenTelemetry mit Prometheus-Exporter.** Erfasst werden:
   - die eingebauten Messwerte von .NET: Anfragen, Antwortzeiten, Rate-Limiting, Ausnahmen, Speicher, GC, Threads und ausgehende HTTP-Aufrufe
