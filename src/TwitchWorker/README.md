@@ -14,9 +14,10 @@ Kanäle der Teilnehmer (`Worker__UserLogins`).
 | `Program.cs` | Start, Einstellungen, Verdrahtung |
 | `TwitchClient.cs` | Zugangsschlüssel holen, `Get Streams` durchblättern, Rate-Limit und Fehler behandeln |
 | `SnapshotWorker.cs` | Die Schleife: alle X Minuten abfragen, Doppelte entfernen, speichern, Heartbeat |
-| `SampleStore.cs` | Tabellen anlegen und Runden per `COPY` in PostgreSQL schreiben |
+| `SampleStore.cs` | Prüfen, ob die Tabellen da sind, und Runden per `COPY` in PostgreSQL schreiben |
 | `sql/analysis.sql` | Auswertung: Verteilung, Zielgruppe, Kategorien, Punkte pro Stream, CSV-Export |
-| `docker-compose.yml` | Datenbank und Worker zusammen starten |
+| `HealthCheckCommand.cs` | Docker-Healthcheck: Heartbeat-Datei höchstens 15 Minuten alt |
+| `../../deploy/db/twitch/` | Schema als SQL-Skripte (`001_schema.sql`) und der Runner `migrate.sh` |
 
 Die Datenbank hat zwei Tabellen:
 
@@ -34,13 +35,20 @@ Die Datenbank hat zwei Tabellen:
 
 ## 2. Starten mit Docker
 
-Voraussetzung: Docker mit Compose (lokal oder auf dem VPS).
+Der Worker läuft mit in der gemeinsamen Compose-Datei `deploy/compose.yaml`, mit eigener Datenbank `twitch`
+und eigenem DB-Benutzer (E-011). Er startet nur mit dem **Profil `worker`** (E-032), damit ein einfaches
+`docker compose up` ihn nicht versehentlich mitstartet.
 
 ```bash
-cp .env.example .env      # dann Client-ID, Secret und ein DB-Passwort eintragen
-docker compose up -d --build
-docker compose logs -f worker
+cd deploy
+# In deploy/.env eintragen: Twitch__ClientId, Twitch__ClientSecret (Vorlage: .env.example)
+docker compose --profile worker up -d --build
+docker compose --profile worker logs -f worker
 ```
+
+Vor dem Worker läuft einmal der Container `migrate-twitch`. Er spielt die SQL-Skripte aus
+`deploy/db/twitch` ein, der Worker legt keine Tabellen mehr selbst an. Auf dem Server schaltet
+`COMPOSE_PROFILES=worker` in der `.env` das Profil dauerhaft ein.
 
 Im Log sollte nach wenigen Sekunden so etwas stehen:
 
@@ -56,7 +64,8 @@ Im DB-Passwort keine Semikolons verwenden, sonst bricht die Verbindungszeichenke
 
 ## 3. Einstellungen
 
-Alle Werte stehen in `.env` (Umgebungsvariablen überschreiben `appsettings.json`):
+Alle Werte stehen in `deploy/.env` (Umgebungsvariablen überschreiben `appsettings.json`). Compose reicht
+sie nur an den Worker weiter, die Web-App sieht sie nicht:
 
 | Variable | Standard | Bedeutung |
 |---|---|---|
@@ -71,9 +80,11 @@ einem Neustart zählt die Zeit ab der allerersten Runde, die Messung beginnt als
 
 ## 4. Auswerten
 
-Jederzeit möglich, auch während die Messung noch läuft:
+Jederzeit möglich, auch während die Messung noch läuft. Lokal hängt `compose.override.yaml` die Ordner
+`sql/` und `export/` in den Datenbank-Container ein:
 
 ```bash
+cd deploy
 docker compose exec db psql -U twitch -d twitch -f /sql/analysis.sql
 ```
 
@@ -115,14 +126,15 @@ docker compose exec db psql -U twitch -d twitch -c \
   in der Auswertung ignoriert.
 - **Datenschutz:** Gespeichert werden nur öffentliche Daten, aber Kanalnamen sind personenbezogen.
   Für die Studie nur zusammengefasste Zahlen weitergeben (der CSV-Export enthält keine Namen) und die
-  Rohdaten nach der Auswertung löschen: `docker compose down -v` entfernt Container und Datenbank.
-- **Datenbank nicht öffentlich:** In `docker-compose.yml` ist bewusst kein Port freigegeben. Willst du
-  lokal mit einem Datenbank-Tool darauf zugreifen, beim Dienst `db` vorübergehend
-  `ports: ["127.0.0.1:5432:5432"]` ergänzen, auf dem VPS nie ohne `127.0.0.1`.
+  Rohdaten nach der Auswertung löschen, und zwar nur die Tabellen des Workers:
+  `docker compose exec db psql -U twitch -d twitch -c "TRUNCATE snapshots CASCADE"`.
+  **Nicht** `docker compose down -v`: Das löscht das gemeinsame Volume und damit auch alle PubPot-Anmeldungen.
+- **Datenbank nicht öffentlich:** In `deploy/compose.yaml` ist bewusst kein Port freigegeben. Nur lokal
+  gibt `compose.override.yaml` den Port an `127.0.0.1:5432` frei, für Datenbank-Werkzeuge und `dotnet run`.
 
 ## 6. Ohne Docker entwickeln (z. B. in Rider oder Visual Studio)
 
-Du brauchst das .NET SDK 11 (Version siehe `global.json` im Repo-Wurzelordner, Ziel ist .NET 10) und eine erreichbare PostgreSQL-Datenbank. Dann im Projektordner:
+Du brauchst das .NET SDK 11 (Version siehe `global.json` im Repo-Wurzelordner, Ziel ist .NET 10) und eine erreichbare PostgreSQL-Datenbank. Das Schema einmal einspielen (`cd deploy && docker compose --profile worker run --rm migrate-twitch`), dann im Projektordner:
 
 ```bash
 dotnet user-secrets init

@@ -28,13 +28,18 @@ Die Datenbank-Tests brauchen ein laufendes Docker, weil Testcontainers ein eigen
 
 ## Lokale Hilfsdienste (Docker)
 
-Datenbank, Mail-Fänger und Datenbank-Oberfläche laufen in Docker:
+Datenbank, Mail-Fänger und Datenbank-Oberfläche laufen in Docker. Für die Entwicklung mit `dotnet run`
+nur diese drei Dienste starten:
 
 ```bash
 cd deploy
 cp .env.example .env        # einmalig, dann Passwörter eintragen
-docker compose up -d
+docker compose up -d db mailpit adminer
 ```
+
+Ein einfaches `docker compose up -d --build` startet zusätzlich die Web-App als Container (unter
+http://localhost:8090, ab Schritt 5.6 hinter Caddy). **Nicht beides gleichzeitig** gegen dieselbe Datenbank
+laufen lassen: Zwei Instanzen würden sich die Hintergrund-Jobs teilen und Mails doppelt verschicken (E-037).
 
 | Dienst | Adresse | Zweck |
 |---|---|---|
@@ -43,7 +48,7 @@ docker compose up -d
 | Adminer | http://localhost:8081 | Datenbank im Browser ansehen (Server: `db`) |
 
 Alle Ports sind nur auf `127.0.0.1` gebunden, also nur vom eigenen Rechner aus erreichbar.
-Stoppen: `docker compose down`. Alles inklusive Daten löschen: `docker compose down -v`.
+Stoppen: `docker compose down`. Alles inklusive Daten löschen: `docker compose down -v` (auch die Daten des Workers, beide Datenbanken liegen im selben Volume).
 
 ## Website lokal starten
 

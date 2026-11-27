@@ -1,5 +1,6 @@
 # Nur für die lokale Entwicklung. Wird von "docker compose" automatisch zusätzlich zu compose.yaml geladen,
-# solange beide im selben Ordner liegen. Auf dem Server gibt es diese Datei nicht.
+# solange beide im selben Ordner liegen. Auf dem Server gibt es diese Datei nicht: Dort werden fertige Images
+# aus der GitHub Container Registry gezogen (Phase 8), statt sie zu bauen.
 #
 # Alle Ports sind an 127.0.0.1 gebunden: erreichbar nur von deinem Rechner, nicht aus dem Netzwerk.
 
@@ -8,6 +9,41 @@ services:
     ports:
       # Damit "dotnet run" und Werkzeuge wie DBeaver die Datenbank lokal erreichen.
       - "127.0.0.1:5432:5432"
+    volumes:
+      # Auswertung der Twitch-Studie (src/TwitchWorker/README.md, Abschnitt "Auswerten").
+      - ../src/TwitchWorker/sql:/sql:ro
+      - ../src/TwitchWorker/export:/export
+
+  # Lokal bauen statt aus der Registry ziehen. Build-Kontext ist die Repo-Wurzel (global.json, Directory.*.props).
+  migrate:
+    build:
+      context: ..
+      dockerfile: src/PubPot.Web/Dockerfile
+      target: migrate
+
+  web:
+    build:
+      context: ..
+      dockerfile: src/PubPot.Web/Dockerfile
+      target: web
+    # Lokale Werte, solange in der .env nichts anderes steht: Mails gehen an Mailpit.
+    environment:
+      Site__BaseUrl: ${Site__BaseUrl:-http://localhost:8090}
+      Smtp__Host: ${Smtp__Host:-mailpit}
+      Smtp__Port: ${Smtp__Port:-1025}
+      Smtp__Security: ${Smtp__Security:-None}
+      Smtp__FromAddress: ${Smtp__FromAddress:-pubpot@localhost.test}
+      Notifications__Email: ${Notifications__Email:-team@localhost.test}
+    # Vorübergehend direkt erreichbar, bis Caddy davorsteht (Schritt 5.6). 8080 ist von der Studie belegt.
+    ports:
+      - "127.0.0.1:8090:8080"
+    depends_on:
+      - mailpit
+
+  worker:
+    build:
+      context: ..
+      dockerfile: src/TwitchWorker/Dockerfile
 
   # Fängt alle Mails ab, die die App lokal verschickt. Oberfläche: http://localhost:8025
   mailpit:

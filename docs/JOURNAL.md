@@ -5,6 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.5 – Compose für die Anwendung
+- `deploy/compose.yaml` hat jetzt die Dienste `migrate`, `web`, `migrate-twitch` und `worker` (die beiden letzten nur mit Profil `worker`). Die Startreihenfolge läuft über `depends_on` mit `service_healthy` bzw. `service_completed_successfully` (E-037).
+- `compose.override.yaml`: Build aus dem Repo, lokale Werte für Mailpit, Web vorübergehend unter `127.0.0.1:8090` (bis 5.6 Caddy davorsteht), Ordner `sql/` und `export/` für die Auswertung der Studie im DB-Container.
+- Härtung geprüft: `ReadonlyRootfs=true`, `CapDrop=[ALL]`, `no-new-privileges`, UID 1654, keine Fehler im Log.
+- **Abnahme im Kleinen:** `docker compose up -d --build` → migrate „already up to date“ (Exit 0) → web `healthy`. Anmeldung im Browser über den Container, Bestätigungsmail und Hinweis-Mail in Mailpit, ohne Konsolenfehler. Test-Anmeldung danach gelöscht.
+- **Worker-Profil:** `migrate-twitch` hat das Schema in die lokale `twitch`-Datenbank eingespielt. Ohne Twitch-Zugangsdaten bricht der Worker mit klarer Meldung ab, danach wieder entfernt. Es ging keine Anfrage an Twitch.
+- `docker compose run --rm --no-deps web hash-password` funktioniert im Container (mit Pipe getestet).
+- `deploy/.env.example` hat alle neuen Variablen, `src/TwitchWorker/.env.example` ist entfernt. Die Worker-README beschreibt den Start über `deploy/`. Wichtig: `docker compose down -v` löscht jetzt auch die PubPot-Daten. Die README nennt deshalb `TRUNCATE` für die Studiendaten.
+- **Erkannt:** Der Mail-Ausgang sperrt keine Zeilen. Deshalb gilt: eine Web-Instanz pro Datenbank, lokal nicht `dotnet run` und Container gleichzeitig (README, E-037).
+- **Als Nächstes:** 5.6 Caddy.
+
 ## 2026-11-27 · Schritt 5.4 – Worker: Schema-Skript und Dockerfile
 - Schema als `deploy/db/twitch/001_schema.sql` mit Runner `migrate.sh` (läuft im Postgres-Image, merkt sich eingespielte Skripte in `schema_migrations`, eine Transaktion pro Skript). `CREATE TABLE` ist aus dem Worker-Code entfernt. Der Worker prüft beim Start nur noch, ob die Tabellen da sind (E-036).
 - Dockerfile auf `runtime:10.0-noble-chiseled` umgestellt, Healthcheck als Befehl `healthcheck` (Heartbeat höchstens 15 Minuten alt). Die alte `src/TwitchWorker/docker-compose.yml` ist entfernt. Der Worker kommt in 5.5 in `deploy/compose.yaml`.

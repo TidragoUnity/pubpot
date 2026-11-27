@@ -13,7 +13,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddOptions<TwitchOptions>()
     .Bind(builder.Configuration.GetSection("Twitch"))
     .Validate(o => !string.IsNullOrWhiteSpace(o.ClientId) && !string.IsNullOrWhiteSpace(o.ClientSecret),
-        "Twitch__ClientId und Twitch__ClientSecret müssen gesetzt sein (siehe .env.example).")
+        "Twitch__ClientId und Twitch__ClientSecret müssen gesetzt sein (siehe deploy/.env.example).")
     .ValidateOnStart();
 
 builder.Services.AddOptions<WorkerOptions>()

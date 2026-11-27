@@ -1,17 +1,35 @@
 # PubPot – Docker Compose
 #
 # Diese Datei gilt in ALLEN Umgebungen (lokal, staging, production).
-# Lokal lädt Docker Compose automatisch zusätzlich compose.override.yaml (Mailpit, Adminer, lokale Ports).
+# Lokal lädt Docker Compose automatisch zusätzlich compose.override.yaml (Mailpit, Adminer, lokale Werte, Build).
 #
-# Starten (aus diesem Ordner):   docker compose up -d
+# Starten (aus diesem Ordner):   docker compose up -d --build
+# Mit Twitch-Worker:             docker compose --profile worker up -d --build
 # Status:                        docker compose ps
-# Logs:                          docker compose logs -f db
+# Logs:                          docker compose logs -f web
 #
-# Die Passwörter kommen aus der Datei .env in diesem Ordner (Vorlage: .env.example, nie committen).
+# Passwörter und Einstellungen kommen aus der Datei .env in diesem Ordner (Vorlage: .env.example, nie committen).
+# Compose liest die .env nur zum Einsetzen der ${…}-Werte unten. Jeder Container bekommt ausschließlich die
+# Variablen, die bei ihm unter "environment:" stehen. Die Web-App sieht also nie das Twitch-Secret.
 #
-# Phase 3: nur die Datenbank. Phase 5 ergänzt web, worker, migrate und caddy.
+# Startreihenfolge: db gesund → migrate erfolgreich beendet → web.
+#                   db gesund → migrate-twitch erfolgreich beendet → worker (nur mit Profil "worker").
 
 name: pubpot
+
+# Gemeinsame Härtung für unsere eigenen Container (E-037). "<<: *hardening" fügt diese Zeilen in den Dienst ein.
+x-hardening: &hardening
+  # Dateisystem schreibgeschützt: Ein Angreifer kann im Container nichts ablegen oder verändern.
+  read_only: true
+  # Ausnahme /tmp, nur im Arbeitsspeicher (Heartbeat des Workers, temporäre Dateien von .NET).
+  tmpfs:
+    - /tmp
+  # Prozesse können sich keine zusätzlichen Rechte verschaffen (z. B. über setuid-Programme).
+  security_opt:
+    - no-new-privileges:true
+  # Alle Linux-Sonderrechte entziehen. Unsere Programme brauchen keine (Port 8080 liegt über 1024).
+  cap_drop:
+    - ALL
 
 services:
   db:
@@ -34,6 +52,86 @@ services:
       timeout: 3s
       retries: 20
     # Bewusst kein "ports:" – die Datenbank ist nur im internen Docker-Netz erreichbar, nie aus dem Internet.
+
+  # Einmaliger Container: spielt die EF-Migrationen der Web-App ein und beendet sich (E-035).
+  migrate:
+    image: ghcr.io/tidragounity/pubpot-migrate:${IMAGE_TAG:-local}
+    <<: *hardening
+    restart: "no"
+    environment:
+      ConnectionStrings__Default: Host=db;Database=pubpot;Username=pubpot;Password=${PUBPOT_DB_PASSWORD:?PUBPOT_DB_PASSWORD in deploy/.env setzen}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    image: ghcr.io/tidragounity/pubpot-web:${IMAGE_TAG:-local}
+    <<: *hardening
+    restart: unless-stopped
+    # Leere Werte sind hier erlaubt: Die App prüft beim Start selbst, ob alles Nötige da ist, und bricht sonst
+    # mit klarer Meldung ab (SMTP, Site__BaseUrl). Lokale Werte stehen in compose.override.yaml.
+    environment:
+      ConnectionStrings__Default: Host=db;Database=pubpot;Username=pubpot;Password=${PUBPOT_DB_PASSWORD:?PUBPOT_DB_PASSWORD in deploy/.env setzen}
+      Site__BaseUrl: ${Site__BaseUrl:-}
+      Smtp__Host: ${Smtp__Host:-}
+      Smtp__Port: ${Smtp__Port:-587}
+      Smtp__Security: ${Smtp__Security:-StartTls}
+      Smtp__Username: ${Smtp__Username:-}
+      Smtp__Password: ${Smtp__Password:-}
+      Smtp__FromAddress: ${Smtp__FromAddress:-}
+      Smtp__FromName: ${Smtp__FromName:-PubPot}
+      Admin__Username: ${Admin__Username:-admin}
+      Admin__PasswordHash: ${Admin__PasswordHash:-}
+      Notifications__Email: ${Notifications__Email:-}
+      Notifications__DiscordWebhookUrl: ${Notifications__DiscordWebhookUrl:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  # Einmaliger Container: spielt die SQL-Skripte des Workers ein (deploy/db/twitch, E-036).
+  # Läuft im Postgres-Image, weil das psql schon mitbringt.
+  migrate-twitch:
+    image: postgres:16.16
+    profiles: [worker]
+    <<: *hardening
+    restart: "no"
+    user: postgres
+    entrypoint: ["sh", "/migrations/migrate.sh"]
+    environment:
+      PGHOST: db
+      PGDATABASE: twitch
+      PGUSER: twitch
+      PGPASSWORD: ${TWITCH_DB_PASSWORD:?TWITCH_DB_PASSWORD in deploy/.env setzen}
+    volumes:
+      - ./db/twitch:/migrations:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # Twitch-Worker. Startet nur mit dem Profil "worker" (F-016, E-032):
+  #   docker compose --profile worker up -d     oder dauerhaft COMPOSE_PROFILES=worker in der .env
+  worker:
+    image: ghcr.io/tidragounity/pubpot-worker:${IMAGE_TAG:-local}
+    profiles: [worker]
+    <<: *hardening
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Default: Host=db;Database=twitch;Username=twitch;Password=${TWITCH_DB_PASSWORD:?TWITCH_DB_PASSWORD in deploy/.env setzen}
+      # Fehlen die Zugangsdaten, bricht der Worker beim Start mit klarer Meldung ab.
+      Twitch__ClientId: ${Twitch__ClientId:-}
+      Twitch__ClientSecret: ${Twitch__ClientSecret:-}
+      Worker__Languages: ${Worker__Languages:-de}
+      Worker__IntervalMinutes: ${Worker__IntervalMinutes:-5}
+      Worker__StopAfterHours: ${Worker__StopAfterHours:-0}
+      Worker__GameIds: ${Worker__GameIds:-}
+      Worker__UserLogins: ${Worker__UserLogins:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate-twitch:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:

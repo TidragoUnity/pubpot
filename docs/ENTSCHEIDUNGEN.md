@@ -265,6 +265,17 @@ Umsetzung von E-011 für den Worker.
 **Warum kein Werkzeug wie Flyway oder DbUp:** Der Worker hat zwei Tabellen. Ein eigenes Werkzeug wäre ein weiteres Image oder Paket, das gepflegt werden muss. 30 Zeilen Shell mit Tests reichen hier.
 **Vorgemerkt für Phase 7:** Auch eine unvollständige Runde (Twitch nicht erreichbar) schreibt den Heartbeat. Der Healthcheck meldet dann „gesund“, obwohl keine Daten kommen. Für die Alarme sollte zusätzlich zählen, wie viele Runden vollständig waren.
 
+## E-037 · Compose für die Anwendung: Reihenfolge, wenige Variablen pro Container, Härtung
+**Entscheidungen:**
+- **Startreihenfolge über `depends_on` mit Bedingungen:** `db` gesund → `migrate` mit Exit-Code 0 beendet → `web`. Genauso `db` → `migrate-twitch` → `worker`. Schlägt eine Migration fehl, startet die Anwendung gar nicht erst.
+- **Jeder Container bekommt nur seine Variablen** (`environment:` mit `${…}`, kein `env_file:`). Die `.env` dient Compose nur zum Einsetzen. Die Web-App sieht also nie das Twitch-Secret, der Worker nie das SMTP-Passwort.
+- **Variablennamen wie in der App** (`Smtp__Host`, `Admin__PasswordHash`), nur Infrastruktur in Großbuchstaben (`POSTGRES_PASSWORD`, `IMAGE_TAG`). So gibt es für jede Einstellung genau einen Namen.
+- **Pflicht nur für die DB-Passwörter** (`:?` in Compose). Für alles andere setzt Compose leere oder sinnvolle Standardwerte, und die App prüft beim Start selbst (fail fast, mit klarer Meldung). Sonst würde Compose schon `docker compose up -d db` verweigern, solange ein App-Wert fehlt.
+- **Lokale Werte nur in `compose.override.yaml`:** Mailpit als SMTP, `team@localhost.test` für die Hinweise, `build:` statt Image aus der Registry. Auf dem Server gibt es diese Datei nicht.
+- **Härtung** für `web`, `worker` und die Migrationen: `read_only`, `/tmp` als tmpfs, `no-new-privileges`, `cap_drop: ALL`. Die Datenbank bleibt ohne, weil das Postgres-Image beim Start Rechte wechselt und in sein Volume schreibt.
+- **Images** heißen schon wie in der Registry (`ghcr.io/tidragounity/pubpot-web` usw.) mit `IMAGE_TAG` (lokal `local`).
+**Grenze: eine Web-Instanz pro Datenbank.** Der Mail-Ausgang sperrt keine Zeilen, und die Login-Sperre zählt im Arbeitsspeicher (E-026). Zwei Instanzen würden Mails doppelt verschicken. Für diese Seite reicht eine Instanz. Lokal heißt das: entweder `dotnet run` oder der Web-Container, nicht beides. Für mehrere Instanzen bräuchte der Ausgang `FOR UPDATE SKIP LOCKED`.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
