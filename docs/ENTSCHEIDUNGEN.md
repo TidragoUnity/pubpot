@@ -367,6 +367,11 @@ Zwei Funde aus der Abnahme 5.8.
 - **Die Regeln liegen als JSON im Repo** und werden per `gh api -X POST repos/TidragoUnity/pubpot/rulesets --input .github/rulesets/main.json` angelegt (bzw. per `PUT …/rulesets/<id>` geändert). So ist nachvollziehbar, was gilt und seit wann.
 **Folge:** Auch Doku-Änderungen und Dependabot-Updates gehen über PRs. Für Updates von Dependabot muss der Branch oft erst auf den neuesten Stand gebracht werden. Dependabot macht das selbst (Rebase), sobald `main` sich ändert.
 
+## E-048 · Abnahme Phase 6
+- **Direkter Push auf `main`:** abgelehnt („push declined due to repository rule violations“).
+- **PR mit absichtlichem Formatfehler** (PR #9): „Build und Tests“ rot (`dotnet format` meldet WHITESPACE), Merge-Status `BLOCKED`, `gh pr merge` abgewiesen. Ausnahmen gibt es keine (`bypass_actors` leer).
+- **Erster Dependabot-PR** (#7, MailKit 4.18.2 → 5.0.0): Die CI hat ihn gestoppt. MailKit 5 hat die `Send`-Methoden in Erweiterungsmethoden verschoben, der Build schlug fehl. Genau dafür ist die CI da: Ohne sie wäre das erst beim nächsten lokalen Build aufgefallen oder, schlimmer, mit einem ungetesteten Versand. Folge-PR: Anpassung plus ein neuer Test, der echt über SMTP an Mailpit schickt. Bisher prüfte kein Test den echten Versand.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

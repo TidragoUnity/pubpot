@@ -108,7 +108,7 @@ Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später 
 
 > Ergebnis der Abnahme: von leerem Volume bis „alles gesund“ in 46 s. Lighthouse über Caddy (`https://localhost/de` und `/de/signup/creator`, mobil und Desktop) **100/100/100/100**. Images entpackt: web 261 MB, migrate 295 MB, worker 146 MB, Caddy 92 MB. HSTS kommt für `localhost` absichtlich nicht (E-038), mit echter Domain prüfen das die Tests aus 5.1.
 
-## Phase 6 – CI 🔄
+## Phase 6 – CI ✅
 Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack gestartet. Nach dem Merge auf `main` liegen fertige Images mit Commit-SHA in der GitHub Container Registry, bereit für den Deploy in Phase 8.
 
 **Vorab von dir:** Dein GitHub-Token braucht zusätzlich die Rechte **Workflows** (Lesen und Schreiben, sonst lehnt GitHub den Push von `.github/workflows` ab), **Pull requests** (Lesen und Schreiben) und für 6.7 **Administration** (Lesen und Schreiben). Anleitung in der Checkliste.
@@ -122,7 +122,7 @@ Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack 
 | 6.5 | **Dependabot** (`.github/dependabot.yml`): NuGet, Dockerfiles, Compose-Dateien und GitHub Actions, wöchentlich, Updates gebündelt. .NET-, EF-Core- und Npgsql-Pakete sowie die Laufzeit-Images bleiben auf 10.x (E-007), Postgres auf 16. Dazu „Dependabot security updates“ einschalten | ✅ |
 | 6.6 | **CodeQL** (Code-Scanning für C#, für öffentliche Repos kostenlos): findet typische Sicherheitsfehler im Code, bei PRs und wöchentlich. Funde erscheinen im Reiter „Security“ | ✅ |
 | 6.7 | **Regeln für `main`** (Ruleset): Änderungen nur per Pull Request, die Prüfungen aus 6.1, 6.2 und 6.6 müssen grün sein, kein Force-Push, kein Löschen. Ab hier arbeiten wir mit Pull Requests (siehe F-019). README: CI-Badge und Abschnitt „CI“ | ✅ |
-| 6.8 | **Abnahme:** Test-PR mit absichtlichem Formatfehler → rot und Merge gesperrt. Korrigiert → grün → Merge → Images mit SHA in GHCR. Lokal die Images aus GHCR ziehen und starten (`IMAGE_TAG=<sha>`, ohne Build). Erste Dependabot-PRs laufen durch die CI | ⬜ |
+| 6.8 | **Abnahme:** Test-PR mit absichtlichem Formatfehler → rot und Merge gesperrt. Korrigiert → grün → Merge → Images mit SHA in GHCR. Lokal die Images aus GHCR ziehen und starten (`IMAGE_TAG=<sha>`, ohne Build). Erste Dependabot-PRs laufen durch die CI | ✅ |
 
 **Was für alle Schritte gilt**
 - **Kosten:** keine. GitHub Actions, GHCR, Dependabot, Secret Scanning und CodeQL sind für öffentliche Repos kostenlos.
@@ -130,6 +130,8 @@ Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack 
 - **Keine Secrets in der CI:** Phase 6 braucht nur das automatische `GITHUB_TOKEN`. Die Passwörter für den Smoke-Test entstehen im Lauf und verschwinden mit ihm. Echte Secrets (SSH, Server) kommen erst in Phase 8.
 - **Lieferkette:** Fremde Actions sind auf einen Commit-SHA festgenagelt, nicht auf ein Tag wie `v4`, das der Autor jederzeit umbiegen kann. Dependabot hält die SHAs aktuell.
 - Secret Scanning und Push Protection sind im Repo schon an (geprüft).
+
+> Ergebnis der Abnahme: Direkter Push auf `main` wird abgelehnt („repository rule violations“). Ein PR mit absichtlichem Formatfehler wird rot, Merge-Status `BLOCKED`, Merge-Versuch abgewiesen. Nach der Korrektur grün und gemergt. Die Images liegen öffentlich in GHCR (SHA und `main`). Der erste Dependabot-PR (MailKit 5.0) wurde von der CI gestoppt, weil sich die API geändert hat. CI-Laufzeit pro PR: etwa 2 Minuten (Tests) bzw. 2 bis 3 Minuten (Images, Smoke-Test, Trivy), parallel.
 
 > **Phasen 7 und 8 sind gegenüber dem Auftrag getauscht** (E-013): Erst läuft alles lokal, dann kommt der VPS.
 

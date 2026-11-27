@@ -27,16 +27,17 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Texte** stehen immer in `.resx`, Deutsch und Englisch (`*.en.resx`). Der Paritätstest meldet fehlende Übersetzungen.
 
 ## Stand (2026-11-27)
-- **Phasen 0–5 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks, Admin-Bereich (`/admin`) mit Pipeline, Export, Löschen, Hinweis-Mails und Aufbewahrungsfrist.
-- **Phase 5 (Docker):** `cd deploy && docker compose up -d --build` startet alles hinter Caddy unter `https://localhost` (Zertifikatswarnung wegklicken, F-017). Images „chiseled“ ohne Shell, Nicht-Root, eingebaute Healthchecks. Migrationen als eigener Container (EF-Bundle bzw. SQL-Skripte für den Worker). Worker nur mit `--profile worker` (F-016). Forwarded Headers nur vom Netz „edge“ (E-033). Entscheidungen E-032 bis E-039.
-- 402 Tests grün (`PubPot.Web.Tests`, `TwitchWorker.Tests`), 5 Migrationen. Lighthouse überall 100, auch über Caddy.
-- **Phase 6 in Arbeit** (6.1–6.8, F-018 und F-019 beantwortet, E-040). Fertig: 6.1 bis 6.7 (E-041 bis E-047). `main` ist geschützt: nur PRs mit grüner CI. Images liegen öffentlich in GHCR. **Keine offenen Rückfragen.**
+- **Phasen 0–6 fertig:** Website DE/EN mit Anmeldung, Double-Opt-in, Spam-Schutz, Admin-Bereich, Aufbewahrungsfrist. Docker-Stack hinter Caddy (`https://localhost`).
+- **Phase 6 (CI):** Jeder PR durchläuft „Build und Tests“ (`check.sh`), „Images und Smoke-Test“ (`smoke-test.sh`, Trivy) und CodeQL. Merges auf `main` legen die Images öffentlich in GHCR ab (`ghcr.io/tidragounity/pubpot-{web,migrate,worker}:<sha>`). Dependabot läuft wöchentlich. `main` ist geschützt: nur PRs, nur Squash, nur mit grüner CI (E-040 bis E-048).
+- 402 Tests grün, 5 Migrationen.
+- **Offen:** Dependabot-PR #7 (MailKit 5.0) ist rot. Die Send-API hat sich geändert, die Anpassung kommt als eigener PR mit SMTP-Test gegen Mailpit.
+- **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
-### Phase 6 – CI (geplant und freigegeben, Schritt für Schritt umsetzen)
-Nächster offener Schritt laut `docs/ROADMAP.md`. **Ab 6.1 jeder Schritt in einem eigenen Branch** (`x.y-kurzname`) mit Pull Request. Ist die CI grün, mergt Claude per „Squash and merge“ mit dem Titel `x.y: …` (F-019, E-040).
-- Images in GHCR sind öffentlich (F-018), automatisch beim ersten Push.
-- Das Token braucht die Rechte Workflows, Pull requests und Administration (Checkliste). Lehnt GitHub den Push von `.github/workflows` ab, fehlt das Recht „Workflows“.
+1. **MailKit 5:** eigener PR (`deps-mailkit-5`) mit Versionssprung, `using MailKit;` in `Email/IEmailTransport.cs` und einem Test, der über Testcontainers echt an Mailpit sendet. PR #7 schließt Dependabot danach selbst.
+2. **Phase 7 – Monitoring, Alarme, Backups (lokal)** ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt. Vorher in `docs/ROADMAP.md` fein planen und vorlegen. Mitzunehmen ist der Punkt aus Phase 5: Auch unvollständige Worker-Runden schreiben den Heartbeat (E-036).
+
+**Arbeitsweise seit Phase 6 (F-019, E-040):** Jeder Schritt in einem eigenen Branch (`x.y-kurzname`), PR, warten bis grün (`gh pr checks <nr> --watch`), dann `gh pr merge <nr> --squash --subject "x.y: …"`. Direkt auf `main` geht nicht mehr. Push und Merge sind in `C:\Timo\Docker\.claude\settings.local.json` freigegeben.
 
 **Hilfreich zu wissen:** Lokal entweder `dotnet run` (dann nur `docker compose up -d db mailpit adminer`) oder der Web-Container, nicht beides gegen dieselbe Datenbank (E-037). Beim Testlauf erscheint zweimal „An error occurred while reading the key ring“. Das ist harmlos und kommt aus den Migrations-Tests aus Phase 4.
 
