@@ -36,5 +36,19 @@ for domain in localhost pubpot.example; do
     --entrypoint sh "$prometheus_image" /etc/prometheus/start.sh check
 done
 
+# Unit-Tests der Alarmregeln (E-055).
+MSYS_NO_PATHCONV=1 docker run --rm -v "$monitoring_dir/prometheus:/etc/prometheus:ro" --entrypoint promtool \
+  "$prometheus_image" test rules /etc/prometheus/tests/alerts_test.yml
+
+# Alertmanager-Konfiguration: einmal ohne Mail-Empfänger, einmal mit SMTP-Anmeldung wie auf dem Server.
+section "Alertmanager-Konfiguration (amtool)"
+alertmanager_image=$(sed -n 's|^ *image: \(prom/alertmanager:.*\)$|\1|p' deploy/compose.yaml)
+MSYS_NO_PATHCONV=1 docker run --rm -v "$monitoring_dir/alertmanager:/etc/alertmanager:ro" \
+  --entrypoint sh "$alertmanager_image" /etc/alertmanager/start.sh check
+MSYS_NO_PATHCONV=1 docker run --rm -v "$monitoring_dir/alertmanager:/etc/alertmanager:ro" \
+  -e ALERT_EMAIL=ops@pubpot.example -e ALERT_SMTP_HOST=smtp.pubpot.example -e ALERT_SMTP_FROM=noreply@pubpot.example \
+  -e ALERT_SMTP_USERNAME=noreply@pubpot.example -e ALERT_SMTP_PASSWORD=geheim \
+  --entrypoint sh "$alertmanager_image" /etc/alertmanager/start.sh check
+
 [ -n "${in_group:-}" ] && echo "::endgroup::"
 echo "==> Alles grün."

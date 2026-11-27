@@ -1,0 +1,294 @@
+# Unit-Tests der Alarmregeln (Schritt 7.6, E-055):  promtool test rules alerts_test.yml
+# Jede Gruppe spielt Messwerte über die Zeit ab ("values": ein Wert pro "interval") und prüft zu bestimmten
+# Zeitpunkten, welche Alarme feuern. Schreibweise: "1x4" = viermal 1, "0+60x20" = bei 0 starten, 20 Mal um 60 steigen.
+rule_files:
+  - ../rules/alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  # --- Website --------------------------------------------------------------------------------------------
+  - name: Website von außen nicht erreichbar, erst nach 2 Minuten
+    interval: 1m
+    input_series:
+      - series: 'probe_success{job="website",instance="https://localhost/health/ready"}'
+        values: "1 0 0 0 0"
+      - series: 'probe_success{job="website",instance="https://localhost/de"}'
+        values: "1 1 1 1 1"
+    alert_rule_test:
+      - eval_time: 2m
+        alertname: WebsiteNichtErreichbar
+        exp_alerts: []
+      - eval_time: 3m
+        alertname: WebsiteNichtErreichbar
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              instance: https://localhost/health/ready
+            exp_annotations:
+              summary: "Website nicht erreichbar: https://localhost/health/ready"
+              description: "Die Prüfung über Caddy schlägt seit 2 Minuten fehl. Erste Schritte: docker compose ps, docker compose logs web caddy."
+
+  - name: App intern nicht erreichbar
+    interval: 1m
+    input_series:
+      - series: 'up{job="web",instance="web:9464"}'
+        values: "1 0 0 0"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: AppNichtErreichbar
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: web
+              instance: web:9464
+            exp_annotations:
+              summary: "Prometheus erreicht die Website-App nicht"
+              description: "/metrics auf web:9464 antwortet seit 2 Minuten nicht. Läuft der Container? docker compose ps web"
+
+  - name: Fehlerquote über 5 Prozent bei genug Anfragen
+    interval: 1m
+    input_series:
+      # 60 erfolgreiche und 6 fehlerhafte Anfragen pro Minute: rund 9 % Fehler.
+      - series: 'http_server_request_duration_seconds_count{job="web",http_response_status_code="200"}'
+        values: "0+60x20"
+      - series: 'http_server_request_duration_seconds_count{job="web",http_response_status_code="500"}'
+        values: "0+6x20"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: FehlerquoteHoch
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: "Fehlerquote der Website bei 9.091%"
+              description: "Mehr als 5 % der Antworten sind seit 5 Minuten Serverfehler (5xx). Ursache im Log: docker compose logs web"
+
+  - name: Kein Fehlerquoten-Alarm bei wenig Verkehr
+    interval: 2m
+    input_series:
+      # Wenig Verkehr: alle 2 Minuten eine gute und eine fehlerhafte Anfrage. Die Hälfte sind Fehler, aber
+      # in 5 Minuten sind es nur 5 Anfragen (Grenze: 10).
+      - series: 'http_server_request_duration_seconds_count{job="web",http_response_status_code="200"}'
+        values: "0+1x20"
+      - series: 'http_server_request_duration_seconds_count{job="web",http_response_status_code="503"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: FehlerquoteHoch
+        exp_alerts: []
+
+  - name: Keine Meldung bei 1 Prozent Fehlern
+    interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="web",http_response_status_code="200"}'
+        values: "0+99x20"
+      - series: 'http_server_request_duration_seconds_count{job="web",http_response_status_code="500"}'
+        values: "0+1x20"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: FehlerquoteHoch
+        exp_alerts: []
+
+  - name: Zertifikat läuft bald ab, nur mit echter Domain
+    interval: 1m
+    input_series:
+      # Ablaufdatum als Unix-Zeit: 10 Tage nach Teststart. Das lokale Zertifikat läuft schon nach 12 Stunden ab.
+      - series: 'probe_ssl_earliest_cert_expiry{job="website",tls="public",instance="https://pubpot.example/health/ready"}'
+        values: "864000x80"
+      - series: 'probe_ssl_earliest_cert_expiry{job="website",tls="local",instance="https://localhost/health/ready"}'
+        values: "43200x80"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: ZertifikatLaeuftAb
+        exp_alerts: []
+      - eval_time: 70m
+        alertname: ZertifikatLaeuftAb
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              instance: https://pubpot.example/health/ready
+            exp_annotations:
+              summary: "HTTPS-Zertifikat läuft in 9d 22h 50m 0s ab"
+              description: "Caddy verlängert normalerweise 30 Tage vorher. Klappt das nicht, steht der Grund im Log: docker compose logs caddy"
+
+  # --- Worker ---------------------------------------------------------------------------------------------
+  - name: Worker ohne vollständige Runde seit über 15 Minuten
+    interval: 1m
+    input_series:
+      # Letzte vollständige Runde zum Teststart (Unix-Zeit 0), danach keine mehr.
+      - series: 'pubpot_worker_last_complete_round_time_seconds{job="worker",instance="172.20.0.9:9464"}'
+        values: "0x30"
+      - series: 'pubpot_worker_finished{job="worker",instance="172.20.0.9:9464"}'
+        values: "0x30"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: WorkerOhneVollstaendigeRunde
+        exp_alerts: []
+      - eval_time: 17m
+        alertname: WorkerOhneVollstaendigeRunde
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: worker
+              instance: 172.20.0.9:9464
+            exp_annotations:
+              summary: "Twitch-Worker seit 17m 0s ohne vollständige Runde"
+              description: "Abfragen bei Twitch schlagen fehl oder das Speichern klappt nicht. docker compose logs worker"
+
+  - name: Kein Worker-Alarm bei regelmäßigen Runden oder nach geplantem Ende
+    interval: 1m
+    input_series:
+      # Alle 5 Minuten eine vollständige Runde.
+      - series: 'pubpot_worker_last_complete_round_time_seconds{job="worker",instance="a:9464"}'
+        values: "0 0 0 0 0 300 300 300 300 300 600 600 600 600 600 900 900 900 900 900 1200 1200 1200 1200 1200 1500"
+      - series: 'pubpot_worker_finished{job="worker",instance="a:9464"}'
+        values: "0x25"
+      # Geplante Laufzeit erreicht: keine Runden mehr, aber absichtlich.
+      - series: 'pubpot_worker_last_complete_round_time_seconds{job="worker",instance="b:9464"}'
+        values: "0x25"
+      - series: 'pubpot_worker_finished{job="worker",instance="b:9464"}'
+        values: "1x25"
+    alert_rule_test:
+      - eval_time: 25m
+        alertname: WorkerOhneVollstaendigeRunde
+        exp_alerts: []
+
+  - name: Worker nicht erreichbar
+    interval: 1m
+    input_series:
+      - series: 'up{job="worker",instance="172.20.0.9:9464"}'
+        values: "0x7"
+    alert_rule_test:
+      - eval_time: 4m
+        alertname: WorkerNichtErreichbar
+        exp_alerts: []
+      - eval_time: 6m
+        alertname: WorkerNichtErreichbar
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: worker
+              instance: 172.20.0.9:9464
+            exp_annotations:
+              summary: "Prometheus erreicht den Twitch-Worker nicht"
+              description: "/metrics auf worker:9464 antwortet seit 5 Minuten nicht. docker compose ps worker"
+
+  # --- Server ---------------------------------------------------------------------------------------------
+  - name: Festplatte über 80 Prozent, tmpfs zählt nicht
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{job="node",mountpoint="/",fstype="ext4",device="/dev/sda1"}'
+        values: "15x15"
+      - series: 'node_filesystem_size_bytes{job="node",mountpoint="/",fstype="ext4",device="/dev/sda1"}'
+        values: "100x15"
+      # Fast voll, aber nur Arbeitsspeicher (tmpfs): kein Alarm deswegen.
+      - series: 'node_filesystem_avail_bytes{job="node",mountpoint="/var/lib",fstype="tmpfs",device="tmpfs"}'
+        values: "1x15"
+      - series: 'node_filesystem_size_bytes{job="node",mountpoint="/var/lib",fstype="tmpfs",device="tmpfs"}'
+        values: "100x15"
+    alert_rule_test:
+      - eval_time: 5m
+        alertname: FestplatteFastVoll
+        exp_alerts: []
+      - eval_time: 11m
+        alertname: FestplatteFastVoll
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: "Festplatte zu 85% belegt"
+              description: "Platz schaffen, bevor Datenbank und Backups nicht mehr schreiben können. Größte Verbraucher: docker system df"
+
+  - name: Festplatte zu 70 Prozent belegt ist kein Alarm
+    interval: 1m
+    input_series:
+      - series: 'node_filesystem_avail_bytes{job="node",mountpoint="/",fstype="ext4",device="/dev/sda1"}'
+        values: "30x15"
+      - series: 'node_filesystem_size_bytes{job="node",mountpoint="/",fstype="ext4",device="/dev/sda1"}'
+        values: "100x15"
+    alert_rule_test:
+      - eval_time: 15m
+        alertname: FestplatteFastVoll
+        exp_alerts: []
+
+  - name: Monitoring-Dienst ausgefallen
+    interval: 1m
+    input_series:
+      - series: 'up{job="cadvisor",instance="cadvisor:8080"}'
+        values: "0x7"
+      # web und worker haben eigene Regeln und zählen hier nicht.
+      - series: 'up{job="web",instance="web:9464"}'
+        values: "0x7"
+    alert_rule_test:
+      - eval_time: 6m
+        alertname: MonitoringTeilAusgefallen
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: cadvisor
+              instance: cadvisor:8080
+            exp_annotations:
+              summary: "Monitoring-Dienst cadvisor antwortet nicht"
+              description: "Ein Teil der Überwachung fehlt, Alarme aus diesem Bereich kommen nicht mehr an. docker compose --profile monitoring ps"
+
+  # --- Backup ---------------------------------------------------------------------------------------------
+  - name: Backup fehlgeschlagen meldet sofort
+    interval: 1m
+    input_series:
+      - series: 'pubpot_backup_last_run_success{job="node",instance="node-exporter:9100",database="pubpot"}'
+        values: "0"
+      - series: 'pubpot_backup_last_run_success{job="node",instance="node-exporter:9100",database="twitch"}'
+        values: "1"
+    alert_rule_test:
+      - eval_time: 0m
+        alertname: BackupFehlgeschlagen
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: node
+              instance: node-exporter:9100
+              database: pubpot
+            exp_annotations:
+              summary: "Backup der Datenbank pubpot fehlgeschlagen"
+              description: "Der letzte Lauf hat kein gültiges Backup erzeugt. docker compose logs backup"
+
+  - name: Backup älter als 26 Stunden
+    interval: 1h
+    input_series:
+      # Letztes erfolgreiches Backup zum Teststart, danach keins mehr.
+      - series: 'pubpot_backup_last_success_timestamp_seconds{job="node",instance="node-exporter:9100",database="twitch"}'
+        values: "0x30"
+    alert_rule_test:
+      - eval_time: 25h
+        alertname: BackupZuAlt
+        exp_alerts: []
+      - eval_time: 27h
+        alertname: BackupZuAlt
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: node
+              instance: node-exporter:9100
+              database: twitch
+            exp_annotations:
+              summary: "Letztes Backup der Datenbank twitch ist 1d 3h 0m 0s alt"
+              description: "Jede Nacht um 03:00 sollte ein neues entstehen. Läuft der Dienst? docker compose ps backup"
+
+  - name: Keine Backup-Messwerte
+    interval: 1m
+    input_series:
+      - series: 'up{job="node",instance="node-exporter:9100"}'
+        values: "1x70"
+    alert_rule_test:
+      - eval_time: 30m
+        alertname: BackupFehlt
+        exp_alerts: []
+      - eval_time: 61m
+        alertname: BackupFehlt
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+            exp_annotations:
+              summary: "Keine Backup-Messwerte vorhanden"
+              description: "Seit einer Stunde meldet der Backup-Dienst nichts. Läuft er? docker compose ps backup"

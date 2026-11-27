@@ -36,6 +36,16 @@ services:
     depends_on:
       - mailpit
 
+  # Alarm-Mails lokal an Mailpit (http://localhost:8025), wie die Mails der Website.
+  alertmanager:
+    environment:
+      ALERT_EMAIL: ${ALERT_EMAIL:-${Notifications__Email:-team@localhost.test}}
+      ALERT_SMTP_HOST: ${Smtp__Host:-mailpit}
+      ALERT_SMTP_PORT: ${Smtp__Port:-1025}
+      ALERT_SMTP_SECURITY: ${Smtp__Security:-None}
+      ALERT_SMTP_FROM: ${Smtp__FromAddress:-pubpot@localhost.test}
+    depends_on:
+      - mailpit
   worker:
     build:
       context: ..

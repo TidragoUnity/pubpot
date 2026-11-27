@@ -85,11 +85,17 @@ done
 prom() { curl -sG --data-urlencode "query=$1" http://127.0.0.1:9090/api/v1/query; }
 prometheus_targets_up() {
   for _ in $(seq 1 30); do
-    prom 'count(up{job=~"prometheus|web|node|cadvisor|blackbox"} == 1)' | grep -q '"5"\]' && return 0
+    prom 'count(up{job=~"prometheus|web|node|cadvisor|blackbox|alertmanager"} == 1)' | grep -q '"6"\]' && return 0
     sleep 2
   done
   prom 'up' >&2
   return 1
+}
+# Alarme (E-055): Regeln geladen, Alertmanager verbunden, und im gesunden Stack feuert nichts.
+alerting_ready() {
+  curl -s http://127.0.0.1:9090/api/v1/rules | grep -q '"name":"WebsiteNichtErreichbar"' &&
+    prom 'prometheus_notifications_alertmanagers_discovered' | grep -q '"1"\]' &&
+    prom 'ALERTS{alertstate="firing"}' | grep -q '"result":\[\]'
 }
 # Blackbox (E-054): /health/ready und Startseite per HTTPS, Umleitung von http auf https. Alle drei bestanden.
 website_probes() {
@@ -128,7 +134,8 @@ check "/metrics von außen nicht erreichbar" sh -c '! curl -sk https://localhost
 check "/metrics auch nicht mit Host-Header :9464" sh -c '! curl -sk -H "Host: localhost:9464" https://localhost/metrics | grep -q "# TYPE"'
 check "/metrics im Docker-Netz (web:9464) mit Anfragen-Metrik" metrics_inside
 check "Worker: /metrics im Container (ohne Netz, ohne Twitch)" worker_metrics
-check "Prometheus erreicht web, node-exporter, cAdvisor, Blackbox und sich selbst" prometheus_targets_up
+check "Prometheus erreicht web, node-exporter, cAdvisor, Blackbox, Alertmanager und sich selbst" prometheus_targets_up
+check "Alarmregeln geladen, Alertmanager verbunden, kein Alarm aktiv" alerting_ready
 check "Blackbox: Website per HTTPS über Caddy, http leitet um" website_probes
 check "Grafana: Datenquelle OK, Start-Dashboard vorhanden" grafana_ready
 check "Dashboard: alle Abfragen gültig, wichtige mit Daten" dashboard_queries

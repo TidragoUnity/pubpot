@@ -5,6 +5,16 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.6 – Alarme per E-Mail
+- **Elf Alarmregeln** für Website, Worker, Server, Monitoring und Backups, mit **16 Unit-Tests** (`promtool test rules`) in `check.sh` und damit in der CI (E-055).
+- **Gefunden durch die Tests:** Im Test „wenig Verkehr“ lag die Testmenge genau auf der Grenze von 10 Anfragen. Die Testdaten wurden korrigiert, die Regel war richtig.
+- **Alertmanager** im Profil `monitoring` (127.0.0.1:9093). Er verschickt über die SMTP-Werte der Website, lokal an Mailpit. Der Empfänger ist `ALERT_EMAIL` bzw. `Notifications__Email`.
+- **Geprüft:**
+  - `amtool check-config` in zwei Varianten.
+  - Smoke-Test: Regeln geladen, Alertmanager verbunden, kein Alarm im gesunden Stack (17 Prüfungen).
+  - Von Hand: Ein Test-Alarm kam als Mail in Mailpit an. Betreff, Absender, Empfänger und Umlaute (UTF-8) stimmen.
+- **Als Nächstes:** 7.7 Backups.
+
 ## 2026-11-27 · Schritt 7.5 – Erreichbarkeit mit dem Blackbox-Exporter
 - **Blackbox-Exporter** im Profil `monitoring`. Er prüft alle 30 s über Caddy mit HTTPS und der echten Domain: `/health/ready`, Startseite und die Umleitung von http auf https. Die Antwort muss von der App stammen (E-054).
 - **Eigenes Netz `probe`** (nur Blackbox und Caddy). Die Domain kommt per `start.sh` in die Prometheus-Konfiguration. `check.sh` prüft sie für `localhost` und für eine echte Domain.

@@ -1,0 +1,126 @@
+# Alarmregeln (Schritt 7.6, E-055). Prometheus wertet sie alle 15 s aus, Alertmanager verschickt die Mails.
+# Jede Regel hat Unit-Tests in ../tests/alerts_test.yml ("promtool test rules", läuft in scripts/check.sh und der CI).
+#
+# "for": So lange muss die Bedingung ununterbrochen gelten, bevor der Alarm feuert. Das verhindert Mails bei
+# kurzen Aussetzern, etwa einem Neustart.
+# severity: critical = sofort ansehen, warning = bald ansehen.
+
+groups:
+  - name: website
+    rules:
+      - alert: WebsiteNichtErreichbar
+        expr: min by (instance) (probe_success{job=~"website|website_redirect"}) == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Website nicht erreichbar: {{ $labels.instance }}"
+          description: "Die Prüfung über Caddy schlägt seit 2 Minuten fehl. Erste Schritte: docker compose ps, docker compose logs web caddy."
+
+      - alert: AppNichtErreichbar
+        expr: up{job="web"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus erreicht die Website-App nicht"
+          description: "/metrics auf web:9464 antwortet seit 2 Minuten nicht. Läuft der Container? docker compose ps web"
+
+      # Mindestens 10 Anfragen in 5 Minuten, damit 1 Fehler bei 2 Anfragen nicht schon „50 %“ ist.
+      - alert: FehlerquoteHoch
+        expr: |
+          (
+            (sum(rate(http_server_request_duration_seconds_count{job="web",http_response_status_code=~"5.."}[5m])) or vector(0))
+              / sum(rate(http_server_request_duration_seconds_count{job="web"}[5m]))
+          ) > 0.05
+          and sum(increase(http_server_request_duration_seconds_count{job="web"}[5m])) >= 10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Fehlerquote der Website bei {{ $value | humanizePercentage }}"
+          description: "Mehr als 5 % der Antworten sind seit 5 Minuten Serverfehler (5xx). Ursache im Log: docker compose logs web"
+
+      # Nur mit echter Domain: Lokal stellt Caddy Zertifikate mit wenigen Stunden Laufzeit aus (E-054).
+      - alert: ZertifikatLaeuftAb
+        expr: min by (instance) (probe_ssl_earliest_cert_expiry{job="website",tls="public"}) - time() < 14 * 86400
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "HTTPS-Zertifikat läuft in {{ $value | humanizeDuration }} ab"
+          description: "Caddy verlängert normalerweise 30 Tage vorher. Klappt das nicht, steht der Grund im Log: docker compose logs caddy"
+
+  - name: worker
+    rules:
+      # Der Zeitpunkt startet mit der Startzeit des Workers (E-052). Keine Meldung, wenn die geplante Laufzeit
+      # (Worker__StopAfterHours) erreicht ist und der Worker absichtlich nichts mehr abfragt.
+      - alert: WorkerOhneVollstaendigeRunde
+        expr: |
+          (time() - pubpot_worker_last_complete_round_time_seconds > 900)
+          and on (job, instance) (pubpot_worker_finished == 0)
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Twitch-Worker seit {{ $value | humanizeDuration }} ohne vollständige Runde"
+          description: "Abfragen bei Twitch schlagen fehl oder das Speichern klappt nicht. docker compose logs worker"
+
+      - alert: WorkerNichtErreichbar
+        expr: up{job="worker"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Prometheus erreicht den Twitch-Worker nicht"
+          description: "/metrics auf worker:9464 antwortet seit 5 Minuten nicht. docker compose ps worker"
+
+  - name: server
+    rules:
+      - alert: FestplatteFastVoll
+        expr: |
+          max(1 - node_filesystem_avail_bytes{mountpoint=~"/|/var/lib",fstype!~"tmpfs|overlay|squashfs"}
+                / node_filesystem_size_bytes{mountpoint=~"/|/var/lib",fstype!~"tmpfs|overlay|squashfs"}) > 0.8
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Festplatte zu {{ $value | humanizePercentage }} belegt"
+          description: "Platz schaffen, bevor Datenbank und Backups nicht mehr schreiben können. Größte Verbraucher: docker system df"
+
+      - alert: MonitoringTeilAusgefallen
+        expr: up{job=~"prometheus|node|cadvisor|blackbox|alertmanager"} == 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Monitoring-Dienst {{ $labels.job }} antwortet nicht"
+          description: "Ein Teil der Überwachung fehlt, Alarme aus diesem Bereich kommen nicht mehr an. docker compose --profile monitoring ps"
+
+  - name: backup
+    rules:
+      # Messwerte schreibt der Backup-Dienst (7.7) für den node-exporter, Label "database" = pubpot oder twitch.
+      - alert: BackupFehlgeschlagen
+        expr: pubpot_backup_last_run_success == 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backup der Datenbank {{ $labels.database }} fehlgeschlagen"
+          description: "Der letzte Lauf hat kein gültiges Backup erzeugt. docker compose logs backup"
+
+      - alert: BackupZuAlt
+        expr: time() - pubpot_backup_last_success_timestamp_seconds > 26 * 3600
+        labels:
+          severity: critical
+        annotations:
+          summary: "Letztes Backup der Datenbank {{ $labels.database }} ist {{ $value | humanizeDuration }} alt"
+          description: "Jede Nacht um 03:00 sollte ein neues entstehen. Läuft der Dienst? docker compose ps backup"
+
+      - alert: BackupFehlt
+        expr: absent(pubpot_backup_last_success_timestamp_seconds)
+        for: 1h
+        labels:
+          severity: critical
+        annotations:
+          summary: "Keine Backup-Messwerte vorhanden"
+          description: "Seit einer Stunde meldet der Backup-Dienst nichts. Läuft er? docker compose ps backup"

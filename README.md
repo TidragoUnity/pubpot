@@ -134,8 +134,9 @@ und räumt wieder auf): `./scripts/smoke-test.sh`. Vorher die Images bauen (`doc
 docker compose --profile monitoring up -d   # Prometheus, Grafana, node-exporter, cAdvisor
 ```
 
-Grafana: http://localhost:3000 (Dashboard „PubPot – Start“), Prometheus: http://localhost:9090. Beide sind nur auf
-diesem Rechner erreichbar. Die Konfiguration liegt in `deploy/monitoring/`.
+Grafana: http://localhost:3000 (Dashboard „PubPot – Start“), Prometheus: http://localhost:9090, Alertmanager:
+http://localhost:9093. Alle sind nur auf diesem Rechner erreichbar. Alarm-Mails landen lokal in Mailpit
+(http://localhost:8025). Die Konfiguration liegt in `deploy/monitoring/`.
 
 ### Caddy-Zertifikat vertrauen (optional)
 
