@@ -13,7 +13,7 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 ## Bis Phase 6 (CI) bzw. 8 (CD)
 - [x] GitHub-Repo angelegt (öffentlich) und gepusht: https://github.com/TidragoUnity/pubpot
 - [ ] **Vor Phase 6:** Token-Rechte erweitern. GitHub → Settings → Developer settings → Fine-grained tokens → dein Token für `pubpot` → Edit → Repository permissions: **Workflows** „Read and write“, **Pull requests** „Read and write“, **Administration** „Read and write“ (nur für die Regeln auf `main` in 6.7). Speichern genügt, das Token selbst bleibt gleich
-- [ ] **Nach dem ersten Image-Push (6.3):** die drei Packages `pubpot-web`, `pubpot-migrate` und `pubpot-worker` öffentlich machen (GitHub → dein Profil → Packages → Package → Package settings → Change visibility → Public, F-018)
+- [x] Images in GHCR öffentlich: GitHub hat das beim ersten Push automatisch so angelegt, nichts zu tun (F-018, E-043)
 - [ ] GitHub Environments `staging` und `production` anlegen
 - [ ] GitHub-Secrets eintragen (genaue Liste folgt in Phase 8)
 - [ ] Branch-Schutz für `main`: PR mit grüner CI erforderlich

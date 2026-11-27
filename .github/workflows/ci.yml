@@ -6,6 +6,11 @@ on:
   pull_request:
   push:
     branches: [main]
+  # Montags 05:17 UTC: neue Sicherheitslücken werden bekannt, auch wenn sich am Code nichts ändert (Trivy, E-044).
+  schedule:
+    - cron: "17 5 * * 1"
+  # Lauf von Hand starten (Reiter Actions → CI → Run workflow).
+  workflow_dispatch:
 
 # Standardmäßig darf der Workflow nur lesen. Jobs, die mehr brauchen, fordern es einzeln an.
 permissions:
@@ -98,6 +103,32 @@ jobs:
       # Startet den Stack aus deploy/compose.yaml wie auf dem Server und prüft ihn (E-042).
       - name: Compose-Smoke-Test (scripts/smoke-test.sh)
         run: ./scripts/smoke-test.sh
+
+      # Trivy aus einem unveränderlichen Release, Version fest (E-044). Die trivy-action wurde im März 2026
+      # über umgebogene Tags kompromittiert. Deshalb nur festgenagelte SHAs und eine feste Trivy-Version.
+      - uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: v0.76.2
+          cache: true
+
+      # Bericht: hohe und kritische Lücken, für die es ein Update gibt. Rot wird der Lauf nur bei kritischen.
+      - name: Image-Scan (Trivy)
+        run: |
+          status=0
+          echo "### Image-Scan (Trivy): hohe und kritische Lücken mit verfügbarem Update" >> "$GITHUB_STEP_SUMMARY"
+          for image in web migrate worker; do
+            ref="ghcr.io/tidragounity/pubpot-$image:$IMAGE_TAG"
+            echo "::group::Trivy pubpot-$image"
+            trivy image --quiet --scanners vuln --ignore-unfixed --severity HIGH,CRITICAL               --format table --output "trivy-$image.txt" "$ref"
+            cat "trivy-$image.txt"
+            if ! trivy image --quiet --skip-db-update --scanners vuln --ignore-unfixed --severity CRITICAL                  --exit-code 1 --format table --output /dev/null "$ref"; then
+              echo "::error title=Trivy pubpot-$image::Kritische Lücke mit verfügbarem Update gefunden"
+              status=1
+            fi
+            echo "::endgroup::"
+            { echo "#### pubpot-$image"; echo '```'; cat "trivy-$image.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          done
+          exit "$status"
 
       - name: Image-Größen
         if: always()
