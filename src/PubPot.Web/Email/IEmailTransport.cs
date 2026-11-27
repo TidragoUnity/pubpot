@@ -1,3 +1,5 @@
+// MailKit 5: Send/SendAsync(message) sind Erweiterungsmethoden in MailKit.IMailTransportExtensions.
+using MailKit;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Options;
