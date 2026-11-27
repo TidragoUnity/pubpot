@@ -372,6 +372,12 @@ Zwei Funde aus der Abnahme 5.8.
 - **PR mit absichtlichem Formatfehler** (PR #9): „Build und Tests“ rot (`dotnet format` meldet WHITESPACE), Merge-Status `BLOCKED`, `gh pr merge` abgewiesen. Ausnahmen gibt es keine (`bypass_actors` leer).
 - **Erster Dependabot-PR** (#7, MailKit 4.18.2 → 5.0.0): Die CI hat ihn gestoppt. MailKit 5 hat die `Send`-Methoden in Erweiterungsmethoden verschoben, der Build schlug fehl. Genau dafür ist die CI da: Ohne sie wäre das erst beim nächsten lokalen Build aufgefallen oder, schlimmer, mit einem ungetesteten Versand. Folge-PR: Anpassung plus ein neuer Test, der echt über SMTP an Mailpit schickt. Bisher prüfte kein Test den echten Versand.
 
+## E-049 · Rahmen für Phase 7: Prometheus-Endpunkt per Vorschau-Paket, Blackbox-Exporter statt Uptime Kuma
+**Entscheidungen (F-020, F-021):**
+- **Metriken über `OpenTelemetry.Exporter.Prometheus.AspNetCore`** (Vorschau `1.21.0-beta.1`, übrige OpenTelemetry-Pakete stabil). Prometheus holt die Werte ab („Pull“) und erkennt einen Ausfall sofort (`up = 0`). Bricht ein Update die Schnittstelle, fällt es in der CI auf.
+- **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
+**Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
