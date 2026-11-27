@@ -378,6 +378,32 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-056 · Backups mit pg_dump im eigenen Dienst, geprüft vor dem Zählen, Löschen nur nach Erfolg (7.7)
+**Entscheidungen:**
+- **Dienst `backup`** im Postgres-Image (`pg_dump` und `psql` sind dabei, kein eigenes Image). Er läuft immer mit, nicht nur mit einem Profil.
+  - Beim Start sichert er sofort, falls kein Backup der letzten 24 h existiert. Danach jede Nacht um `BACKUP_TIME` (03:00, Europe/Berlin).
+  - Ein einfaches Shell-Skript mit `sleep` bis zur nächsten Uhrzeit ersetzt cron. Das ist eine Abhängigkeit weniger und läuft auch schreibgeschützt.
+- **Format:**
+  - Pro Datenbank ein `pg_dump` im Custom-Format: komprimiert, mit `pg_restore` auch teilweise einspielbar.
+  - Dazu `pg_dumpall --roles-only` (Benutzer und Passwort-Hashes). Das darf nur der Superuser.
+- **Gültig ist ein Backup erst nach Prüfung:** Es wird in eine `.tmp`-Datei geschrieben, `pg_restore --list` muss das Archiv lesen können, dann wird es umbenannt. Eine halbe Datei zählt nie.
+- **Aufbewahrung:** `daily/` 7 Tage, `weekly/` (Kopie am Sonntag) 4 Wochen. Gelöscht wird **nur nach einem erfolgreichen Lauf**. Fallen Backups eine Woche lang aus, sind die alten also noch da, und der Alarm meldet es.
+- **Rechte:** Dateien nur für den Eigentümer lesbar (`umask 077`), denn Backups enthalten personenbezogene Daten. `BACKUP_DIR` steht in `.gitignore`.
+- **Messwerte** für die Alarme aus 7.6 schreibt das Skript als Textdatei, der node-exporter liest sie (Textfile-Collector, gemeinsames Volume):
+  - `pubpot_backup_last_run_success`
+  - `pubpot_backup_last_success_timestamp_seconds`
+  - `pubpot_backup_last_size_bytes`
+
+  Sie werden aus dem Zustand auf der Platte berechnet und stimmen deshalb auch nach einem Neustart.
+- **Wiederherstellen:** `scripts/restore.sh <Datei> [Datenbank]`.
+  - Es fragt nach und stoppt nur die Dienste, die die Datenbank benutzen (web bzw. worker).
+  - Die Datenbank wird gelöscht und mit dem richtigen Eigentümer neu angelegt, `REVOKE … FROM PUBLIC` wie beim ersten Start.
+  - Danach `pg_restore`, dann laufen die Dienste wieder.
+  - Mit anderem Zielnamen (z. B. `pubpot_restore_test`) lässt sich ein Backup prüfen, ohne die echte Datenbank anzufassen.
+- **Smoke-Test:** Beide Datenbanken und die Rollen sind gesichert, die Messwerte kommen in Prometheus an. Der Test-Ordner wird danach über den Container gelöscht, weil die Dateien dort root gehören.
+
+**Noch nicht hier:** Die Kopie auf einen anderen Rechner kommt in Phase 8. Ein Backup auf derselben Platte schützt vor Bedienfehlern und kaputten Updates, nicht vor dem Verlust des Servers.
+
 ## E-055 · Alarme: Regeln mit Unit-Tests, Alertmanager über die SMTP-Werte der Website (7.6)
 **Entscheidungen:**
 - **Elf Regeln** in `deploy/monitoring/prometheus/rules/alerts.yml`, jede mit deutscher Zusammenfassung und dem ersten Befehl zur Fehlersuche:

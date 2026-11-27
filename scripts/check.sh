@@ -25,6 +25,11 @@ dotnet format PubPot.slnx --verify-no-changes -v q
 section "Tests"
 dotnet test --solution PubPot.slnx --no-build
 
+section "Shell-Skripte (Syntax)"
+for script in scripts/*.sh deploy/*/*.sh deploy/*/*/*.sh deploy/*/*/*/*.sh; do
+  if [ -f "$script" ]; then sh -n "$script"; fi
+done
+
 # Prometheus-Konfiguration mit promtool aus demselben Image, das Compose startet (E-053).
 # "pwd -W" liefert unter Git Bash (Windows) einen Pfad, den Docker versteht.
 section "Monitoring-Konfiguration (promtool)"

@@ -16,6 +16,7 @@ TestResults/
 # Lokal
 *.log
 backups/
+backups-smoke/
 
 # Privat – nicht veröffentlichen (F-011)
 docs/AUFTRAG.md

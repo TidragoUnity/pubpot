@@ -143,6 +143,31 @@ services:
       web:
         condition: service_healthy
 
+  # Backups beider Datenbanken (E-056): beim ersten Start sofort, dann jede Nacht um 03:00, 7 Tage täglich und
+  # 4 Wochen wöchentlich. Ablage in BACKUP_DIR (Standard deploy/backups, nicht im Git). Sofort sichern:
+  #   docker compose exec backup sh /scripts/backup.sh now        Wiederherstellen: scripts/restore.sh
+  backup:
+    logging: *logging
+    image: postgres:16.16
+    <<: *hardening
+    restart: unless-stopped
+    entrypoint: ["sh", "/scripts/backup.sh", "loop"]
+    environment:
+      # Superuser: Nur er darf Rollen samt Passwort-Hashes sichern (pg_dumpall --roles-only).
+      PGHOST: db
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD in deploy/.env setzen}
+      BACKUP_TIME: ${BACKUP_TIME:-03:00}
+      TZ: ${BACKUP_TZ:-Europe/Berlin}
+    volumes:
+      - ./backup:/scripts:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+      # Messwerte für den node-exporter (Profil "monitoring"), daraus entstehen die Backup-Alarme.
+      - backup_metrics:/metrics
+    depends_on:
+      db:
+        condition: service_healthy
+
   # Einmaliger Container: spielt die SQL-Skripte des Workers ein (deploy/db/twitch, E-036).
   # Läuft im Postgres-Image, weil das psql schon mitbringt.
   migrate-twitch:
@@ -312,10 +337,13 @@ services:
     restart: unless-stopped
     command:
       - --path.rootfs=/host
+      # Messwerte aus Dateien, hier vom Backup-Dienst (E-056).
+      - --collector.textfile.directory=/textfile
     pid: host
     # Ohne "rslave": Docker Desktop lehnt es ab. Es betrifft nur später eingehängte Laufwerke, "/" ist so sichtbar.
     volumes:
       - /:/host:ro
+      - backup_metrics:/textfile:ro
 
   # Messwerte pro Container: CPU und Arbeitsspeicher je Compose-Dienst.
   # Braucht Lesezugriff auf Docker und den Kernel. Kein Port nach außen, nur Prometheus fragt ihn ab (E-053).
@@ -349,6 +377,7 @@ volumes:
   prometheus_data:
   grafana_data:
   alertmanager_data:
+  backup_metrics:
 
 networks:
   # Festes Subnetz, damit die App weiß, wem sie die Forwarded-Header glauben darf (Proxy__KnownNetworks bei web).

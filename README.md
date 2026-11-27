@@ -138,6 +138,15 @@ Grafana: http://localhost:3000 (Dashboard „PubPot – Start“), Prometheus: h
 http://localhost:9093. Alle sind nur auf diesem Rechner erreichbar. Alarm-Mails landen lokal in Mailpit
 (http://localhost:8025). Die Konfiguration liegt in `deploy/monitoring/`.
 
+**Backups** (Dienst `backup`, läuft immer mit): beim ersten Start sofort, danach jede Nacht um 03:00. Ablage in
+`deploy/backups/` (nicht im Git), 7 Tage täglich und 4 Wochen wöchentlich.
+
+```bash
+docker compose exec backup sh /scripts/backup.sh now   # sofort sichern
+./scripts/restore.sh                                     # vorhandene Backups anzeigen
+./scripts/restore.sh daily/pubpot-<Zeit>.dump            # Datenbank pubpot daraus wiederherstellen (fragt vorher)
+```
+
 ### Caddy-Zertifikat vertrauen (optional)
 
 Damit die Warnung verschwindet, Caddys lokales Stammzertifikat für deinen Windows-Benutzer eintragen
