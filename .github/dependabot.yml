@@ -1,0 +1,96 @@
+# Dependabot: schlägt Updates als Pull Requests vor (E-045). Jeder PR läuft durch die CI.
+# Wöchentlich montags, Updates gebündelt, damit nicht jedes Paket einen eigenen PR bekommt.
+version: 2
+
+updates:
+  # NuGet-Pakete (zentrale Versionen in Directory.Packages.props).
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: deps
+    groups:
+      dotnet:
+        patterns: ["Microsoft.*", "System.*", "Npgsql*", "EFCore.*"]
+      tests:
+        patterns: ["xunit*", "Testcontainers*"]
+    ignore:
+      # Ziel ist .NET 10 (LTS). Pakete in Version 11.x gehören zu .NET 11 (E-007).
+      - dependency-name: "Microsoft.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "System.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Npgsql*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "EFCore.*"
+        update-types: ["version-update:semver-major"]
+      # dotnet-ef (dotnet-tools.json) muss zur EF-Core-Version passen.
+      - dependency-name: "dotnet-ef"
+        update-types: ["version-update:semver-major"]
+
+  # SDK-Version in global.json (Patches mit Sicherheitsupdates). Neue Hauptversionen nur bewusst.
+  - package-ecosystem: dotnet-sdk
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: deps
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # Basis-Images in den Dockerfiles.
+  - package-ecosystem: docker
+    directories:
+      - /src/PubPot.Web
+      - /src/TwitchWorker
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: deps
+    groups:
+      dotnet-images:
+        patterns: ["dotnet/*"]
+    ignore:
+      # Laufzeit bleibt .NET 10, das SDK bleibt bei der Hauptversion aus global.json (E-007).
+      - dependency-name: "dotnet/*"
+        update-types: ["version-update:semver-major"]
+
+  # Images in den Compose-Dateien (Postgres, Caddy, Mailpit, Adminer).
+  - package-ecosystem: docker-compose
+    directory: /deploy
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: deps
+    ignore:
+      # Neue Postgres-Hauptversion braucht eine Daten-Migration (pg_upgrade), nie automatisch.
+      - dependency-name: "postgres"
+        update-types: ["version-update:semver-major"]
+
+  # GitHub Actions: Dependabot aktualisiert auch die festgenagelten Commit-SHAs samt Versions-Kommentar.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    commit-message:
+      prefix: deps
+    groups:
+      actions:
+        patterns: ["*"]

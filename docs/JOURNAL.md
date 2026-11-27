@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 6.5 – Dependabot
+- `.github/dependabot.yml` für NuGet, `global.json`, die Dockerfiles, die Compose-Dateien und GitHub Actions: wöchentlich, gebündelt, keine Hauptversionen für .NET, EF Core, Npgsql, das SDK, die .NET-Images und Postgres (E-045).
+- Per API eingeschaltet: Dependabot-Warnungen (`vulnerability-alerts`) und automatische Sicherheitsupdates (`automated-security-fixes`).
+- Die ersten Dependabot-PRs kommen nach dem Merge. Sie werden in der Abnahme (6.8) geprüft.
+- **Als Nächstes:** 6.6 CodeQL.
+
 ## 2026-11-27 · Schritt 6.4 – Image-Scan mit Trivy
 - Trivy prüft die drei Images im Job „Images und Smoke-Test“. Bericht mit hohen und kritischen Lücken in der Zusammenfassung, rot nur bei kritischen Lücken mit Update (E-044).
 - Trivy wird über `setup-trivy` v0.3.1 in Version v0.76.2 installiert, beides unveränderliche Releases, festgenagelt. Grund ist die Kompromittierung der `trivy-action` im März 2026.

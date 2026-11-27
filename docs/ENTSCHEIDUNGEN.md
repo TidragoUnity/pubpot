@@ -338,6 +338,15 @@ Zwei Funde aus der Abnahme 5.8.
 **Ergebnis beim Einführen:** alle drei Images 0 hohe und kritische Lücken. Trivy erkennt Ubuntu 24.04 auch in den chiseled-Images und prüft die .NET-Pakete über die `deps.json`.
 **Grenze:** Das `efbundle` im Migrations-Image ist eine Single-File-Anwendung. Deren eingebettete Pakete sieht Trivy nicht. Sie sind dieselben wie in der Web-App, und die wird gescannt.
 
+## E-045 · Dependabot: wöchentlich, gebündelt, ohne neue Hauptversionen von .NET und Postgres
+**Entscheidungen:**
+- **Fünf Bereiche:** NuGet, `global.json` (`dotnet-sdk`), die Dockerfiles, die Compose-Dateien und GitHub Actions. Wöchentlich montags um 06:00 (Berlin), Commit-Präfix `deps`.
+- **Gebündelt:** .NET-, EF-Core- und Npgsql-Pakete in einem PR, Testpakete in einem, die .NET-Images in einem, alle Actions in einem. Sie hängen zusammen und sollen zusammen getestet werden. Außerdem bleibt die Zahl der PRs überschaubar.
+- **Keine neuen Hauptversionen** für .NET-Pakete, `dotnet-ef`, das SDK und die .NET-Images (E-007) sowie für Postgres. Ein Sprung von Postgres 16 auf 17 braucht eine Daten-Migration (`pg_upgrade` oder Dump und Restore) und passiert deshalb nur bewusst.
+- **Actions:** Dependabot aktualisiert die festgenagelten Commit-SHAs mitsamt Versions-Kommentar (E-041).
+- **Dependabot-Warnungen und Sicherheitsupdates eingeschaltet** (per API). Bei einer bekannten Lücke in einem verwendeten Paket öffnet Dependabot sofort einen PR, nicht erst am Montag.
+**Ablauf:** Dependabot-PRs laufen durch dieselbe CI. Gemergt wird nur, wenn sie grün ist. Bis die Regeln aus 6.7 aktiv sind, entscheide ich das von Fall zu Fall.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
