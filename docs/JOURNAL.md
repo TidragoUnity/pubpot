@@ -5,6 +5,16 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.10 – Zähler ab dem Start mit 0
+- **Fehler, vom Nutzer im Dashboard gefunden:** Die erste Developer- und die erste Creator-Anmeldung fehlten in „Anmeldungen pro Tag“. Ursache: Eine Zeitreihe entstand erst beim ersten Ereignis, gleich mit 1, und `increase()` sieht diesen Schritt nicht (E-059).
+- **Fix:** Website und Worker melden beim Start jede eigene Zeitreihe mit 0 (`PubPotMetrics.Initialize`, `WorkerMetrics.Initialize`, ausgelöst bei `ApplicationStarted`). Die Typen des Aufräum-Zählers stehen jetzt als Konstanten in `CleanupType`.
+- **Dashboard:**
+  - „Anmeldungen pro Tag“ zeigt Tagesbalken der letzten 7 Tage, der heutige Tag zählt mit.
+  - Alle Zählungen sind auf ganze Zahlen gerundet.
+- **Tests:** 2 neue und 1 erweiterte Prüfung, die ohne den Fix fehlschlagen. Der Smoke-Test prüft die Nullen in `/metrics` und die Daten der Anmelde- und Mail-Panels.
+- **Im lokalen Stack nachgeprüft:** Web neu gebaut, eine Developer-Anmeldung über Caddy bestätigt. Sie erscheint in Prometheus als Schritt 0 → 1. Die Test-Anmeldung `zaehler-710@example.test` liegt in der lokalen Datenbank.
+- **Stand:** 431 Tests, Smoke-Test mit 25 Prüfungen.
+
 ## 2026-11-27 · Schritt 7.9 – Abnahme, Phase 7 abgeschlossen
 - **Lokaler Stack mit allen Profilen.** Twitch war für den Worker gesperrt, die `.env` des Nutzers blieb unverändert (E-058).
 - **Jeden Alarm ausgelöst:**

@@ -19,6 +19,15 @@ def query(base, expr):
         return json.load(error)
 
 
+def grafana_variables(expr):
+    """Grafana setzt $__interval selbst ein (im Panel mindestens der Wert von „interval“). Für die Prüfung reicht 1d.
+
+    „offset -$__interval“ (Tagesbalken, E-059) zählt ab dem Zeitpunkt des Punkts nach vorn. Abgefragt wird hier aber
+    nur „jetzt“, und nach vorn gibt es noch keine Daten. Deshalb fällt der Offset für die Prüfung weg.
+    """
+    return expr.replace(" offset -$__interval", "").replace("$__interval", "1d")
+
+
 def main():
     sys.stdout.reconfigure(encoding="utf-8")
     dashboard_file, base, *must_have_data = sys.argv[1:]
@@ -28,7 +37,7 @@ def main():
     failed = False
     for panel in dashboard["panels"]:
         for target in panel.get("targets", []):
-            result = query(base, target["expr"])
+            result = query(base, grafana_variables(target["expr"]))
             if result.get("status") != "success":
                 print(f"  FEHLER Panel „{panel['title']}“: {result.get('error')}")
                 failed = True

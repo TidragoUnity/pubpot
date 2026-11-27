@@ -431,7 +431,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(pubpot_signups_confirmed_total[24h])) or vector(0)",
+          "expr": "round(sum(increase(pubpot_signups_confirmed_total[24h]))) or vector(0)",
           "legendFormat": "__auto",
           "instant": true,
           "range": false
@@ -773,7 +773,7 @@
     {
       "type": "timeseries",
       "title": "Anmeldungen pro Tag",
-      "description": "Gleitende Summe der letzten 24 Stunden: gespeichert (neu oder geändert) und bestätigt, nach Art.",
+      "description": "Ein Balken pro Tag, letzte 7 Tage: bestätigte Anmeldungen nach Art (gestapelt) und alle gespeicherten (neu oder geändert, Punkt). Der heutige Balken wächst im Lauf des Tages. Prometheus teilt die Tage nach UTC: ein Tag beginnt um 01:00 deutscher Zeit, im Sommer um 02:00.",
       "targets": [
         {
           "refId": "A",
@@ -781,7 +781,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (kind) (increase(pubpot_signups_confirmed_total[1d]))",
+          "expr": "round(sum by (kind) (increase(pubpot_signups_confirmed_total[$__interval] offset -$__interval)))",
           "legendFormat": "bestätigt {{kind}}"
         },
         {
@@ -790,31 +790,61 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (kind) (increase(pubpot_signups_total[1d]))",
-          "legendFormat": "gespeichert {{kind}}"
+          "expr": "round(sum(increase(pubpot_signups_total[$__interval] offset -$__interval)))",
+          "legendFormat": "gespeichert (alle)"
         }
       ],
       "fieldConfig": {
         "defaults": {
           "unit": "short",
           "custom": {
-            "drawStyle": "line",
-            "lineWidth": 2,
-            "fillOpacity": 10,
+            "drawStyle": "bars",
+            "lineWidth": 1,
+            "fillOpacity": 80,
             "showPoints": "never",
             "spanNulls": false,
             "stacking": {
-              "mode": "none",
+              "mode": "normal",
               "group": "A"
-            }
+            },
+            "barAlignment": 1
           },
           "color": {
             "mode": "palette-classic"
           },
           "noValue": "Noch keine Daten",
-          "min": 0
+          "min": 0,
+          "decimals": 0
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "gespeichert (alle)"
+            },
+            "properties": [
+              {
+                "id": "custom.drawStyle",
+                "value": "points"
+              },
+              {
+                "id": "custom.pointSize",
+                "value": 10
+              },
+              {
+                "id": "custom.showPoints",
+                "value": "always"
+              },
+              {
+                "id": "custom.stacking",
+                "value": {
+                  "mode": "none",
+                  "group": "B"
+                }
+              }
+            ]
+          }
+        ]
       },
       "options": {
         "legend": {
@@ -837,7 +867,9 @@
       "datasource": {
         "type": "prometheus",
         "uid": "prometheus"
-      }
+      },
+      "interval": "1d",
+      "timeFrom": "7d"
     },
     {
       "type": "timeseries",
@@ -850,7 +882,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(pubpot_mails_sent_total[1h]))",
+          "expr": "round(sum(increase(pubpot_mails_sent_total[1h])))",
           "legendFormat": "verschickt"
         },
         {
@@ -859,7 +891,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum(increase(pubpot_mails_failed_total[1h]))",
+          "expr": "round(sum(increase(pubpot_mails_failed_total[1h])))",
           "legendFormat": "fehlgeschlagen"
         },
         {
@@ -868,7 +900,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (reason) (increase(pubpot_signups_spam_total[1h]))",
+          "expr": "round(sum by (reason) (increase(pubpot_signups_spam_total[1h])))",
           "legendFormat": "Spam: {{reason}}"
         }
       ],
@@ -941,7 +973,7 @@
             "type": "prometheus",
             "uid": "prometheus"
           },
-          "expr": "sum by (result) (increase(pubpot_worker_rounds_total[1h]))",
+          "expr": "round(sum by (result) (increase(pubpot_worker_rounds_total[1h])))",
           "legendFormat": "{{result}}"
         }
       ],

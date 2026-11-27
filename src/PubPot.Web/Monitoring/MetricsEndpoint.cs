@@ -36,6 +36,7 @@ public static class MetricsEndpoint
     public static void AddPubPotMetrics(this IServiceCollection services)
     {
         services.AddSingleton<PubPotMetrics>();
+        services.AddHostedService<MetricsInitializer>();
         services.AddOpenTelemetry()
             .ConfigureResource(r => r.AddService("pubpot-web"))
             .WithMetrics(m => m

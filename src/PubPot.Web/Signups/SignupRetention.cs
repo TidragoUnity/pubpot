@@ -67,7 +67,7 @@ public sealed class SignupRetention(
         }
 
         await db.SaveChangesAsync(ct);
-        metrics.Deleted("inactive_signups", deleted);
+        metrics.Deleted(CleanupType.InactiveSignups, deleted);
 
         if (deleted + inactive.Count > 0)
         {

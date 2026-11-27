@@ -60,6 +60,17 @@ metrics_inside() {
   compose exec -T caddy wget -qO- http://web:9464/metrics | grep -q '^http_server_request_duration_seconds_count'
 }
 
+# Eigene Zähler stehen ab dem Start mit 0 in /metrics, auch ohne ein einziges Ereignis (E-059). Sonst übersieht
+# increase() in Prometheus das erste Ereignis jeder Art.
+counters_from_start() {
+  m=$(compose exec -T caddy wget -qO- http://web:9464/metrics) || return 1
+  for series in 'pubpot_signups_total{[^}]*kind="developer"' 'pubpot_signups_confirmed_total{[^}]*kind="creator"' \
+    'pubpot_signups_spam_total{[^}]*reason="too_fast"' 'pubpot_mails_failed_total{' \
+    'pubpot_cleanup_deleted_total{[^}]*type="inactive_signups"'; do
+    printf '%s\n' "$m" | grep -q "^$series" || { echo "    fehlt: $series"; return 1; }
+  done
+}
+
 # Worker ohne Netz starten (kein Twitch, keine Datenbank) und /metrics aus seinem Netz-Namespace abfragen (E-052).
 # wget kommt aus dem Caddy-Image, das Worker-Image hat bewusst keine Werkzeuge.
 worker_metrics() {
@@ -71,7 +82,7 @@ worker_metrics() {
   result=1
   for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
     if docker run --rm --network "container:$id" --entrypoint wget "$wget_image" -qO- --header "Host: worker:9464" \
-      http://127.0.0.1:9464/metrics 2>/dev/null | grep -q '^pubpot_worker_last_complete_round_time_seconds'; then
+      http://127.0.0.1:9464/metrics 2>/dev/null | grep -q '^pubpot_worker_rounds_total{[^}]*result="complete"[^}]*} 0$'; then
       result=0
       break
     fi
@@ -132,7 +143,7 @@ grafana_ready() {
 dashboard_queries() {
   "$python" ../scripts/check-dashboard-queries.py monitoring/grafana/dashboards/pubpot.json http://127.0.0.1:9090 \
     "Von außen" "App intern" "Anfragen/s" "Anfragen nach Statuscode" "CPU pro Container" "Arbeitsspeicher pro Container" \
-    "Festplatte belegt" "Server: CPU und Arbeitsspeicher"
+    "Festplatte belegt" "Server: CPU und Arbeitsspeicher" "Anmeldungen pro Tag" "Mails und Spam"
 }
 
 # --- Restore-Test (E-057) -----------------------------------------------------------------------------------
@@ -215,7 +226,8 @@ check "Web-Log: jede Zeile JSON mit UTC-Zeit" web_log_is_json
 check "/metrics von außen nicht erreichbar" sh -c '! curl -sk https://localhost/metrics | grep -q "# TYPE"'
 check "/metrics auch nicht mit Host-Header :9464" sh -c '! curl -sk -H "Host: localhost:9464" https://localhost/metrics | grep -q "# TYPE"'
 check "/metrics im Docker-Netz (web:9464) mit Anfragen-Metrik" metrics_inside
-check "Worker: /metrics im Container (ohne Netz, ohne Twitch)" worker_metrics
+check "Eigene Zähler ab dem Start mit 0 in /metrics" counters_from_start
+check "Worker: /metrics im Container (ohne Netz, ohne Twitch), Runden ab Start mit 0" worker_metrics
 check "Prometheus erreicht web, node-exporter, cAdvisor, Blackbox, Alertmanager und sich selbst" prometheus_targets_up
 check "Alarmregeln geladen, Alertmanager verbunden, kein Alarm aktiv" alerting_ready
 check "Backup beim Start: pubpot, twitch und Rollen gesichert" backup_files
