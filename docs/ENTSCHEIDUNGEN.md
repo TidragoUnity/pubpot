@@ -233,6 +233,16 @@ Umsetzung von E-023 (F-013, F-015).
 **Docker-Detail:** Bei Dual-Stack meldet Kestrel IPv4-Absender oft als `::ffff:172.30.0.2`. Die Middleware erkennt solche Adressen, ein Test deckt es ab.
 **Host-Header:** Links in Mails kommen aus `Site:BaseUrl` (E-021). Deshalb braucht die App den ursprünglichen Host nicht, und ein gefälschter Host kann nichts anrichten.
 
+## E-034 · Web-Image „chiseled“ mit eingebautem Healthcheck
+**Entscheidungen:**
+- **Zwei Stufen:** Gebaut wird mit `sdk:11.0` (E-007), ins fertige Image kommt nur das Ergebnis von `dotnet publish`. Das SDK, der Quellcode und die NuGet-Pakete bleiben in der Build-Stufe.
+- **Laufzeit `aspnet:10.0-noble-chiseled-extra`:** Ubuntu ohne Shell, ohne Paketmanager und ohne root-Benutzer (läuft als `app`, UID 1654). „extra“ enthält ICU und Zeitzonen-Daten, die wir für Deutsch/Englisch und `Europe/Berlin` brauchen. Ohne „extra“ liefe .NET im Invariant-Modus, dann wären Datumsformate und Sortierung falsch.
+- **Healthcheck als eigener Befehl** `dotnet PubPot.Web.dll healthcheck`: fragt `/health` im Container ab, Exit-Code 0 oder 1. Im Image gibt es kein `curl`, und eins nachzuinstallieren hieße, die Schlankheit wieder aufzugeben.
+- **Restore als eigene Schicht:** Erst die `.csproj` und die zentralen Props kopieren und `restore` ausführen, dann den Code. Ändert sich nur Code, kommt das Restore aus dem Docker-Cache.
+- **`GssEncryptionMode=Disable`** im Connection-String (wie beim Worker). Sonst sucht Npgsql `libgssapi_krb5` und schreibt eine verwirrende Fehlermeldung ins Log.
+**Warum chiseled:** Was nicht im Image ist, kann ein Angreifer nicht benutzen. Ohne Shell kann eine Lücke in der App nicht einfach `sh` starten. Außerdem meldet ein Image-Scanner weniger Pakete mit bekannten Lücken. Der Preis: `docker exec … sh` geht nicht. Zum Nachsehen nimmt man `docker logs` oder startet einen Debug-Container daneben.
+**Größe:** 261 MB entpackt.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.2 – Dockerfile für die Web-App
+- `src/PubPot.Web/Dockerfile`: Build mit SDK 11, Laufzeit `aspnet:10.0-noble-chiseled-extra` (ohne Shell, ohne Paketmanager, Nicht-Root). Healthcheck mit dem neuen Befehl `healthcheck` (E-034).
+- Probelauf gegen die Entwicklungsdatenbank: `/health`, `/health/ready` und `/de` liefern 200, die deutsche Seite rendert (ICU funktioniert). Der Container läuft als UID 1654 und ist nach dem ersten Healthcheck `healthy`. `docker exec … sh` schlägt fehl, eine Shell gibt es wirklich nicht. Image entpackt 261 MB.
+- **Gefunden:** Npgsql suchte `libgssapi_krb5.so.2`. Behoben wie beim Worker mit `GssEncryptionMode=Disable`.
+- 9 neue Tests (`HealthCheckCommandTests`): Port aus `ASPNETCORE_HTTP_PORTS`, gesund → 0, Fehlerstatus oder nicht erreichbar → 1.
+- **Als Nächstes:** 5.3 Migrations-Bundle.
+
 ## 2026-11-27 · Schritt 5.1 – Forwarded Headers
 - Neue Einstellung `Proxy__KnownNetworks` (z. B. `172.30.0.0/24`). Nur Anfragen aus diesen Netzen dürfen der App die Client-IP (`X-Forwarded-For`) und HTTPS (`X-Forwarded-Proto`) mitteilen (E-033). Ohne Eintrag ist die Middleware aus, sonst würde ASP.NET jedem Absender glauben.
 - Die Middleware läuft als Erstes, vor Security-Headern, HSTS, Cookies und Rate-Limiting.
