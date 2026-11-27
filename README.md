@@ -91,6 +91,9 @@ docker compose --profile worker up -d --build  # mit Twitch-Worker (Zugangsdaten
 docker compose down                            # alles stoppen, Daten bleiben
 ```
 
+Smoke-Test wie in der CI (startet den Stack ohne Override mit fertigen Images in einem eigenen Projekt, prüft ihn
+und räumt wieder auf): `./scripts/smoke-test.sh`. Vorher die Images bauen (`docker compose build`).
+
 ### Caddy-Zertifikat vertrauen (optional)
 
 Damit die Warnung verschwindet, Caddys lokales Stammzertifikat für deinen Windows-Benutzer eintragen
