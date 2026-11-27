@@ -28,15 +28,11 @@ services:
       target: web
     # Lokale Werte, solange in der .env nichts anderes steht: Mails gehen an Mailpit.
     environment:
-      Site__BaseUrl: ${Site__BaseUrl:-http://localhost:8090}
       Smtp__Host: ${Smtp__Host:-mailpit}
       Smtp__Port: ${Smtp__Port:-1025}
       Smtp__Security: ${Smtp__Security:-None}
       Smtp__FromAddress: ${Smtp__FromAddress:-pubpot@localhost.test}
       Notifications__Email: ${Notifications__Email:-team@localhost.test}
-    # Vorübergehend direkt erreichbar, bis Caddy davorsteht (Schritt 5.6). 8080 ist von der Studie belegt.
-    ports:
-      - "127.0.0.1:8090:8080"
     depends_on:
       - mailpit
 

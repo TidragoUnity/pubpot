@@ -12,8 +12,11 @@
 # Compose liest die .env nur zum Einsetzen der ${…}-Werte unten. Jeder Container bekommt ausschließlich die
 # Variablen, die bei ihm unter "environment:" stehen. Die Web-App sieht also nie das Twitch-Secret.
 #
-# Startreihenfolge: db gesund → migrate erfolgreich beendet → web.
+# Startreihenfolge: db gesund → migrate erfolgreich beendet → web gesund → caddy.
 #                   db gesund → migrate-twitch erfolgreich beendet → worker (nur mit Profil "worker").
+#
+# Netze (E-038): "edge" verbindet nur Caddy und web. Alle anderen Dienste hängen im Netz "default".
+# Caddy kommt dadurch nie an die Datenbank, und von außen erreichbar ist nur Caddy (Ports 80 und 443).
 
 name: pubpot
 
@@ -72,7 +75,10 @@ services:
     # mit klarer Meldung ab (SMTP, Site__BaseUrl). Lokale Werte stehen in compose.override.yaml.
     environment:
       ConnectionStrings__Default: Host=db;Database=pubpot;Username=pubpot;Password=${PUBPOT_DB_PASSWORD:?PUBPOT_DB_PASSWORD in deploy/.env setzen}
-      Site__BaseUrl: ${Site__BaseUrl:-}
+      # Links in Mails. Standard: die Domain, unter der Caddy die Seite ausliefert.
+      Site__BaseUrl: ${Site__BaseUrl:-https://${SITE_DOMAIN:-localhost}}
+      # Nur Caddy (Netz "edge", Subnetz siehe unten bei networks) darf Client-IP und HTTPS melden (E-033).
+      Proxy__KnownNetworks: 172.30.0.0/24
       Smtp__Host: ${Smtp__Host:-}
       Smtp__Port: ${Smtp__Port:-587}
       Smtp__Security: ${Smtp__Security:-StartTls}
@@ -89,6 +95,37 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+    networks:
+      - default
+      - edge
+
+  # Reverse Proxy mit automatischem HTTPS (E-038). Der einzige Dienst mit Ports nach außen.
+  caddy:
+    image: caddy:2.11.9
+    <<: *hardening
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-localhost}
+    # BIND_ADDRESS: lokal 127.0.0.1 (nur dein Rechner), auf dem Server 0.0.0.0. 443/udp ist HTTP/3.
+    ports:
+      - "${BIND_ADDRESS:-127.0.0.1}:80:80"
+      - "${BIND_ADDRESS:-127.0.0.1}:443:443"
+      - "${BIND_ADDRESS:-127.0.0.1}:443:443/udp"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # Zertifikate und Caddys lokale Zertifizierungsstelle. Geht das Volume verloren, holt Caddy neue.
+      - caddy_data:/data
+      - caddy_config:/config
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2020/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - edge
+    depends_on:
+      web:
+        condition: service_healthy
 
   # Einmaliger Container: spielt die SQL-Skripte des Workers ein (deploy/db/twitch, E-036).
   # Läuft im Postgres-Image, weil das psql schon mitbringt.
@@ -135,3 +172,12 @@ services:
 
 volumes:
   pgdata:
+  caddy_data:
+  caddy_config:
+
+networks:
+  # Festes Subnetz, damit die App weiß, wem sie die Forwarded-Header glauben darf (Proxy__KnownNetworks bei web).
+  edge:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

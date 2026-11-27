@@ -1,0 +1,37 @@
+# Caddy: Reverse Proxy vor der Web-App mit automatischem HTTPS (E-038).
+#
+# Die Domain kommt aus SITE_DOMAIN (deploy/.env):
+#   - lokal "localhost": Caddy stellt das Zertifikat mit seiner eigenen Zertifizierungsstelle aus.
+#     Der Browser warnt, bis du ihr vertraust (README, „Caddy-Zertifikat vertrauen“, F-017).
+#   - auf dem Server die echte Domain: Zertifikat automatisch von Let's Encrypt, inklusive Verlängerung.
+# Caddy leitet HTTP automatisch auf HTTPS um.
+{
+	# Keine Verwaltungs-API. Änderungen an dieser Datei wirken nach "docker compose restart caddy".
+	admin off
+	# Im Container gibt es keinen System-Zertifikatsspeicher, in den Caddy seine lokale CA eintragen könnte.
+	skip_install_trust
+}
+
+{$SITE_DOMAIN} {
+	# Caddy setzt X-Forwarded-For und X-Forwarded-Proto selbst und überschreibt, was ein Besucher mitschickt.
+	# Die App vertraut diesen Headern nur aus dem Netz "edge" (Proxy__KnownNetworks, E-033).
+	reverse_proxy web:8080
+
+	# Verrät nicht, welche Software läuft (wie in der App, E-018). "defer": erst ganz am Ende entfernen,
+	# nachdem reverse_proxy seinen Via-Header gesetzt hat.
+	header {
+		-Server
+		-Via
+		defer
+	}
+
+	# Bewusst:
+	# - kein "log": Ein Access-Log enthielte die IP-Adressen aller Besucher (personenbezogene Daten).
+	# - kein "encode": Statische Dateien liefert die App schon komprimiert. HTML mit Antiforgery-Token
+	#   komprimieren wir nicht (BREACH-Angriff auf komprimierte Antworten über HTTPS).
+}
+
+# Nur für den Docker-Healthcheck von Caddy, im Container. Dieser Port wird nicht veröffentlicht.
+http://:2020 {
+	respond /health 200
+}

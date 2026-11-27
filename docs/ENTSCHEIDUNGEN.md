@@ -276,6 +276,18 @@ Umsetzung von E-011 für den Worker.
 - **Images** heißen schon wie in der Registry (`ghcr.io/tidragounity/pubpot-web` usw.) mit `IMAGE_TAG` (lokal `local`).
 **Grenze: eine Web-Instanz pro Datenbank.** Der Mail-Ausgang sperrt keine Zeilen, und die Login-Sperre zählt im Arbeitsspeicher (E-026). Zwei Instanzen würden Mails doppelt verschicken. Für diese Seite reicht eine Instanz. Lokal heißt das: entweder `dotnet run` oder der Web-Container, nicht beides. Für mehrere Instanzen bräuchte der Ausgang `FOR UPDATE SKIP LOCKED`.
 
+## E-038 · Caddy als einziger Eingang, getrennte Netze
+**Entscheidungen:**
+- **Caddy 2.11.9** vor der App. Die Domain kommt aus `SITE_DOMAIN`. Lokal (`localhost`) stellt Caddy das Zertifikat mit seiner eigenen Zertifizierungsstelle aus (F-017), auf dem Server holt er es automatisch bei Let's Encrypt. HTTP leitet er mit 308 auf HTTPS um, HTTP/3 läuft über 443/udp.
+- **Zwei Netze:** `edge` (Caddy und web, festes Subnetz `172.30.0.0/24`) und `default` (alle anderen). Caddy kommt nicht an die Datenbank. Nur Caddy hat Ports nach außen, die App selbst nicht mehr.
+- **Vertrauen nur für `edge`:** `Proxy__KnownNetworks=172.30.0.0/24` bei web (E-033). Caddy überschreibt mitgeschickte `X-Forwarded-*`-Header, und die App nimmt nur den letzten Eintrag. Ein gefälschter Header kommt also nicht durch.
+- **Ports über `BIND_ADDRESS`**, Standard `127.0.0.1`. Lokal ist die Seite nur auf deinem Rechner erreichbar, auf dem Server kommt `0.0.0.0` in die `.env`. Eine Variable reicht, weil Compose `ports:` aus mehreren Dateien zusammenfügt statt ersetzt.
+- **Kein Access-Log** (IP-Adressen sind personenbezogen), **`Server` und `Via` entfernt**, **`admin off`** (keine Verwaltungs-API im Container).
+- **Kein `encode`:** Die statischen Dateien sind schon komprimiert (`MapStaticAssets`). HTML mit Antiforgery-Token komprimieren wir über HTTPS bewusst nicht (BREACH-Angriff). Lighthouse hatte auch ohne Kompression 100.
+- **Gehärtet wie die eigenen Container:** schreibgeschützt, `cap_drop: ALL`, `no-new-privileges`. Caddy läuft im offiziellen Image zwar als root, darf aber ohne Sonderrechte nichts außer seinen eigenen Dateien schreiben. Die Ports 80 und 443 gehen trotzdem, weil Docker in Containern das Binden niedriger Ports erlaubt.
+- **Healthcheck** über einen internen Port 2020 (`/health`), nicht veröffentlicht.
+**Gut zu wissen:** Für `localhost` setzt ASP.NET absichtlich **kein HSTS**. Sonst würde der Browser `localhost` ein Jahr lang nur noch per HTTPS aufrufen, und `dotnet run` unter `http://localhost:5080` ginge nicht mehr. Dass HSTS hinter Caddy mit echter Domain kommt, prüfen die Tests aus 5.1.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

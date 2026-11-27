@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.6 – Caddy
+- `deploy/caddy/Caddyfile` und Dienst `caddy` (2.11.9) in `compose.yaml`: Domain aus `SITE_DOMAIN` (Standard `localhost`), Ports über `BIND_ADDRESS` (Standard `127.0.0.1`), Volumes für Zertifikate, Healthcheck über einen internen Port (E-038).
+- Netz `edge` mit festem Subnetz für Caddy und web. Die App vertraut nur diesem Netz (`Proxy__KnownNetworks`). `Site__BaseUrl` ist jetzt standardmäßig `https://${SITE_DOMAIN}`. Der direkte Port 8090 ist wieder entfernt.
+- **Geprüft:** HTTP → 308 → HTTPS. Die CSP enthält `upgrade-insecure-requests`, die App erkennt also HTTPS hinter Caddy. Das Antiforgery-Cookie kommt mit `secure`. Kein `Server`- und kein `Via`-Header, `/health/ready` über Caddy 200. Caddy läuft ohne Linux-Capabilities.
+- **Gefunden:** (1) Caddy hängt `Via: 1.1 Caddy` an. Weg ist er erst mit `header { -Via; defer }`, denn ohne `defer` wird der Header entfernt, bevor `reverse_proxy` ihn setzt. (2) Caddy warnt bei unformatiertem Caddyfile. Formatiert mit `caddy fmt`.
+- Der Headless-Browser zeigt erwartungsgemäß `ERR_CERT_AUTHORITY_INVALID`. Für die Abnahme in 5.8 startet er mit „Zertifikatsfehler ignorieren“.
+- **Als Nächstes:** 5.7 `.env.example` und Doku.
+
 ## 2026-11-27 · Schritt 5.5 – Compose für die Anwendung
 - `deploy/compose.yaml` hat jetzt die Dienste `migrate`, `web`, `migrate-twitch` und `worker` (die beiden letzten nur mit Profil `worker`). Die Startreihenfolge läuft über `depends_on` mit `service_healthy` bzw. `service_completed_successfully` (E-037).
 - `compose.override.yaml`: Build aus dem Repo, lokale Werte für Mailpit, Web vorübergehend unter `127.0.0.1:8090` (bis 5.6 Caddy davorsteht), Ordner `sql/` und `export/` für die Auswertung der Studie im DB-Container.

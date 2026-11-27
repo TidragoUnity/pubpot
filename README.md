@@ -37,8 +37,8 @@ cp .env.example .env        # einmalig, dann Passwörter eintragen
 docker compose up -d db mailpit adminer
 ```
 
-Ein einfaches `docker compose up -d --build` startet zusätzlich die Web-App als Container (unter
-http://localhost:8090, ab Schritt 5.6 hinter Caddy). **Nicht beides gleichzeitig** gegen dieselbe Datenbank
+Ein einfaches `docker compose up -d --build` startet zusätzlich die Web-App als Container, hinter Caddy unter
+https://localhost (die Zertifikatswarnung des Browsers einmal wegklicken, F-017). **Nicht beides gleichzeitig** gegen dieselbe Datenbank
 laufen lassen: Zwei Instanzen würden sich die Hintergrund-Jobs teilen und Mails doppelt verschicken (E-037).
 
 | Dienst | Adresse | Zweck |
