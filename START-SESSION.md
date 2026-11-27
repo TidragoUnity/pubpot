@@ -29,13 +29,11 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 ## Stand (2026-11-27)
 - **Phasen 0–6 fertig:** Website DE/EN mit Anmeldung, Double-Opt-in, Spam-Schutz, Admin-Bereich, Aufbewahrungsfrist. Docker-Stack hinter Caddy (`https://localhost`).
 - **Phase 6 (CI):** Jeder PR durchläuft „Build und Tests“ (`check.sh`), „Images und Smoke-Test“ (`smoke-test.sh`, Trivy) und CodeQL. Merges auf `main` legen die Images öffentlich in GHCR ab (`ghcr.io/tidragounity/pubpot-{web,migrate,worker}:<sha>`). Dependabot läuft wöchentlich. `main` ist geschützt: nur PRs, nur Squash, nur mit grüner CI (E-040 bis E-048).
-- 402 Tests grün, 5 Migrationen.
-- **Offen:** Dependabot-PR #7 (MailKit 5.0) ist rot. Die Send-API hat sich geändert, die Anpassung kommt als eigener PR mit SMTP-Test gegen Mailpit.
+- 404 Tests grün, 5 Migrationen. MailKit 5.0 mit SMTP-Test gegen Mailpit (ersetzt Dependabot-PR #7).
 - **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
-1. **MailKit 5:** eigener PR (`deps-mailkit-5`) mit Versionssprung, `using MailKit;` in `Email/IEmailTransport.cs` und einem Test, der über Testcontainers echt an Mailpit sendet. PR #7 schließt Dependabot danach selbst.
-2. **Phase 7 – Monitoring, Alarme, Backups (lokal)** ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt. Vorher in `docs/ROADMAP.md` fein planen und vorlegen. Mitzunehmen ist der Punkt aus Phase 5: Auch unvollständige Worker-Runden schreiben den Heartbeat (E-036).
+1. **Phase 7 – Monitoring, Alarme, Backups (lokal)** ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt. Vorher in `docs/ROADMAP.md` fein planen und vorlegen. Mitzunehmen ist der Punkt aus Phase 5: Auch unvollständige Worker-Runden schreiben den Heartbeat (E-036).
 
 **Arbeitsweise seit Phase 6 (F-019, E-040):** Jeder Schritt in einem eigenen Branch (`x.y-kurzname`), PR, warten bis grün (`gh pr checks <nr> --watch`), dann `gh pr merge <nr> --squash --subject "x.y: …"`. Direkt auf `main` geht nicht mehr. Push und Merge sind in `C:\Timo\Docker\.claude\settings.local.json` freigegeben.
 

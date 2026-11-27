@@ -5,10 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · MailKit 5.0 (ersetzt Dependabot-PR #7)
+- MailKit 4.18.2 → 5.0.0. MailKit braucht jetzt kein BouncyCastle mehr, sondern nur noch `MimeKit.Core`. Damit sind weniger Pakete im Image und weniger Angriffsfläche.
+- Anpassung: In MailKit 5 sind `Send`/`SendAsync(message)` Erweiterungsmethoden. Es fehlte nur `using MailKit;` in `Email/IEmailTransport.cs`.
+- **Neuer Test `SmtpTransportTests`:** schickt per Testcontainers echt über SMTP an Mailpit und prüft über dessen API Betreff mit Umlauten, Absender, Empfänger und Text. Dazu der Fall „Server nicht erreichbar“, der eine Ausnahme werfen muss, damit der Mail-Ausgang es erneut versucht. Bisher ersetzten alle Tests den Versand durch eine Attrappe, also blieb genau der Teil ungeprüft, der von MailKit abhängt. Der Test lief vorher auch gegen 4.18.2 grün, prüft also dasselbe Verhalten vor und nach dem Update.
+- **Gefunden beim lokalen Prüfen:** Nach mehrfachem Wechsel der Paketversion lieferte der Razor-Generator 736 Fehler in unveränderten `.cshtml`-Dateien. Ursache war ein hängender Build-Server bzw. ein veralteter `obj`-Stand, nicht der Code. Abhilfe: `dotnet build-server shutdown` und `bin`/`obj` löschen. In der CI kann das nicht passieren, weil jeder Lauf frisch startet.
+- Stand: 404 Tests grün.
+
 ## 2026-11-27 · Schritt 6.8 – Abnahme, Phase 6 abgeschlossen
 - **Direkter Push auf `main`** mit einem Test-Commit: abgelehnt durch die Regeln.
 - **Test-PR #9 mit absichtlichem Formatfehler** (falsch eingerückte Zeile): „Build und Tests“ rot, Merge-Status `BLOCKED`, `gh pr merge` abgewiesen. Danach korrigiert (dieser Commit), grün, gemergt.
-- **GHCR:** Seit 6.3 legt jeder Merge die Images mit SHA- und `main`-Tag ab, öffentlich, mit SBOM und Provenance. Nach diesem Merge prüfe ich, dass die Images aus GHCR mit `IMAGE_TAG=<sha> ./scripts/smoke-test.sh` ohne Build starten.
+- **GHCR:** Seit 6.3 legt jeder Merge die Images mit SHA- und `main`-Tag ab, öffentlich, mit SBOM und Provenance. **Geprüft nach dem Merge:** `IMAGE_TAG=edefb70… ./scripts/smoke-test.sh` hat die Images dieses Commits aus GHCR gezogen (ohne lokalen Build) und alle 5 Prüfungen bestanden.
 - **Erster Dependabot-PR #7 (MailKit 5.0.0):** Die CI ist rot, weil MailKit 5 die Send-API geändert hat. Die CI hat ihren Zweck also gleich beim ersten Update erfüllt. Behoben wird es in einem eigenen PR, mit einem neuen Test für den echten SMTP-Versand (E-048).
 - Stand: 402 Tests, 5 Migrationen, 9 PRs in Phase 6.
 - **Als Nächstes:** PR für MailKit 5. Danach Phase 7 (Monitoring, Alarme, Backups lokal), vorher planen und deine Bestätigung abwarten.
