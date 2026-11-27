@@ -2,6 +2,7 @@
 
 Hier steht, **was** gebaut wird und **wie weit** es ist. Das ist die einzige Quelle für den Status.
 Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offene Fragen in [RUECKFRAGEN.md](RUECKFRAGEN.md).
+Ideen für die Plattform nach V1 (noch nicht geplant) sammelt [IDEEN.md](IDEEN.md).
 
 ## Status-Legende
 

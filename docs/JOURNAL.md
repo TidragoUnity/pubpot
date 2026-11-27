@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Ideensammlung für die Zeit nach V1
+- Neue Datei `docs/IDEEN.md`, verlinkt aus ROADMAP und START-SESSION. Darin stehen die Ideen des Nutzers, mit ersten Gedanken und offenen Punkten, damit sie später als Entwurf ausgearbeitet werden können:
+  - I-01: Creator sehen, wer ein Spiel noch bewirbt.
+  - I-02: Entwickler bündeln ihre Pools.
+  - I-03: Steam-Keys direkt an Creator.
+  - I-04: Spielekatalog mit Kreisdiagramm und Pot.
+- Keine der Ideen ist bisher geplant, weil V1 nur die Landingpage umfasst. Deshalb ist auch I-04 aufgenommen.
+
 ## 2026-11-27 · MailKit 5.0 (ersetzt Dependabot-PR #7)
 - MailKit 4.18.2 → 5.0.0. MailKit braucht jetzt kein BouncyCastle mehr, sondern nur noch `MimeKit.Core`. Damit sind weniger Pakete im Image und weniger Angriffsfläche.
 - Anpassung: In MailKit 5 sind `Send`/`SendAsync(message)` Erweiterungsmethoden. Es fehlte nur `using MailKit;` in `Email/IEmailTransport.cs`.
