@@ -135,6 +135,70 @@ dashboard_queries() {
     "Festplatte belegt" "Server: CPU und Arbeitsspeicher"
 }
 
+# --- Restore-Test (E-057) -----------------------------------------------------------------------------------
+db_psql() { compose exec -T db psql -U postgres -v ON_ERROR_STOP=1 -At "$@"; }
+
+# Anmeldung wie ein Browser über Caddy: Formular laden (Token, Cookie, Zeitstempel), Mindestzeit abwarten, absenden.
+signup_via_website() {
+  jar=$(mktemp)
+  page=$(curl -sk -c "$jar" https://localhost/de/signup/creator)
+  token=$(printf '%s' "$page" | sed -n 's/.*name="__RequestVerificationToken"[^>]*value="\([^"]*\)".*/\1/p' | head -n 1)
+  started=$(printf '%s' "$page" | sed -n 's/.*name="FormStarted" value="\([^"]*\)".*/\1/p' | head -n 1)
+  sleep 4 # Spam:MinFillSeconds ist 3 Sekunden
+  answer=$(curl -sk -b "$jar" -o /dev/null -w '%{http_code} %{redirect_url}' \
+    --data-urlencode "__RequestVerificationToken=$token" --data-urlencode "FormStarted=$started" \
+    --data-urlencode "Input.Name=Smoke Test" --data-urlencode "Input.Email=smoke-restore@example.test" \
+    --data-urlencode "Input.Platforms=Twitch" --data-urlencode "Input.Channel=smoke_kanal" \
+    --data-urlencode "Input.AudienceSize=Under10" --data-urlencode "Input.Genres=Roguelikes" \
+    --data-urlencode "Input.Adult=true" --data-urlencode "Input.Consent=true" \
+    https://localhost/de/signup/creator)
+  rm -f "$jar"
+  case "$answer" in
+    "302 "*/de/signup/thanks*) [ "$(db_psql -d pubpot -c 'select count(*) from signups')" -ge 1 ] ;;
+    *) echo "Antwort: $answer" >&2; return 1 ;;
+  esac
+}
+
+# Pro Tabelle: Name, Anzahl Zeilen und Prüfsumme über den ganzen Inhalt.
+fingerprint() {
+  for table in $(db_psql -d "$1" -c "select quote_ident(schemaname) || '.' || quote_ident(tablename) from pg_tables
+      where schemaname not in ('pg_catalog', 'information_schema') order by 1"); do
+    echo "$table $(db_psql -d "$1" -c "select count(*) || ' ' || md5(coalesce(string_agg(t::text, '|' order by t::text), ''))
+      from $table t")"
+  done
+}
+
+# Neuestes Backup einer Datenbank in eine neue Datenbank <db>_restore_check einspielen und Tabelle für Tabelle vergleichen.
+restore_matches() {
+  file=$(compose exec -T backup sh -c "cd /backups && ls -1t daily/$1-*.dump | head -n 1")
+  COMPOSE_ARGS="-f compose.yaml -p $project --env-file $env_file" ../scripts/restore.sh "$file" "$1_restore_check" --yes \
+    >/dev/null || return 1
+  original=$(fingerprint "$1")
+  restored=$(fingerprint "$1_restore_check")
+  if [ -n "$original" ] && [ "$original" = "$restored" ]; then
+    printf '%s\n' "$original" | awk '{ rows += $2 } END { printf "       (%d Tabellen, %d Zeilen verglichen)\n", NR, rows }'
+    return 0
+  fi
+  printf 'Original:\n%s\nWiederhergestellt:\n%s\n' "$original" "$restored" >&2
+  return 1
+}
+
+website_ready() {
+  for _ in $(seq 1 60); do
+    curl -fsk -o /dev/null https://localhost/health/ready && return 0
+    sleep 1
+  done
+  return 1
+}
+
+# Echte Wiederherstellung von pubpot mit scripts/restore.sh: stoppt web, spielt ein, startet web wieder.
+restore_in_place() {
+  file=$(compose exec -T backup sh -c "cd /backups && ls -1t daily/pubpot-*.dump | head -n 1")
+  COMPOSE_ARGS="-f compose.yaml -p $project --env-file $env_file" ../scripts/restore.sh "$file" pubpot --yes >/dev/null &&
+    website_ready &&
+    [ "$(db_psql -d pubpot -c "select count(*) from signups where email = 'smoke-restore@example.test'")" = 1 ]
+}
+
 echo "==> Starte Stack (IMAGE_TAG=${IMAGE_TAG:-local})"
 if ! compose --profile monitoring up -d --wait --wait-timeout 180 --no-build; then failed=1; exit 1; fi
 compose --profile worker run --rm --no-deps migrate-twitch || failed=1
@@ -159,6 +223,24 @@ check "Backup-Messwerte in Prometheus: beide erfolgreich" backup_metrics
 check "Blackbox: Website per HTTPS über Caddy, http leitet um" website_probes
 check "Grafana: Datenquelle OK, Start-Dashboard vorhanden" grafana_ready
 check "Dashboard: alle Abfragen gültig, wichtige mit Daten" dashboard_queries
+
+# Restore-Test (E-057) mit echten Daten. Beim Sichern und Vergleichen ist web gestoppt, damit sich nichts ändert
+# (der Mail-Ausgang arbeitet sonst laufend weiter, weil smtp.invalid nie erreichbar ist).
+echo "==> Restore-Test"
+twitch_test_data() {
+  db_psql -q -d twitch -c "insert into snapshots (taken_at, stream_count, viewer_sum, pages, duration_ms, complete, filter)
+    values (now(), 1, 42, 1, 100, true, 'smoke')" >/dev/null
+}
+backup_now() { compose exec -T backup sh backup.sh now >/dev/null; }
+check "Anmeldung über die Website (HTTPS, Formular-Token, Mindestzeit)" signup_via_website
+check "Testdaten im Worker-Schema" twitch_test_data
+compose stop web >/dev/null 2>&1
+check "Backup von Hand (backup.sh now)" backup_now
+check "Restore pubpot in neue Datenbank: alle Tabellen gleich" restore_matches pubpot
+check "Restore twitch in neue Datenbank: alle Tabellen gleich" restore_matches twitch
+compose start web >/dev/null 2>&1
+check "Website nach Neustart wieder bereit" website_ready
+check "restore.sh: pubpot zurückgespielt, web neu gestartet, Anmeldung da" restore_in_place
 
 if [ "$failed" -ne 0 ]; then exit 1; fi
 echo "==> Smoke-Test bestanden."

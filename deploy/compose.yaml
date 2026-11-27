@@ -145,13 +145,15 @@ services:
 
   # Backups beider Datenbanken (E-056): beim ersten Start sofort, dann jede Nacht um 03:00, 7 Tage täglich und
   # 4 Wochen wöchentlich. Ablage in BACKUP_DIR (Standard deploy/backups, nicht im Git). Sofort sichern:
-  #   docker compose exec backup sh /scripts/backup.sh now        Wiederherstellen: scripts/restore.sh
+  #   docker compose exec backup sh backup.sh now        Wiederherstellen: scripts/restore.sh
   backup:
     logging: *logging
     image: postgres:16.16
     <<: *hardening
     restart: unless-stopped
     entrypoint: ["sh", "/scripts/backup.sh", "loop"]
+    # Damit "docker compose exec backup sh backup.sh now" ohne absoluten Pfad geht (Git Bash würde ihn umschreiben).
+    working_dir: /scripts
     environment:
       # Superuser: Nur er darf Rollen samt Passwort-Hashes sichern (pg_dumpall --roles-only).
       PGHOST: db

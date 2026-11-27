@@ -20,6 +20,7 @@ Ich ergänze die Liste, sobald im Projekt etwas Neues dazukommt.
 
 ## Bis Phase 8 (Server) – vorher F-008 klären
 - [ ] Hetzner VPS anlegen (F-008), SSH-Schlüssel hinterlegen
+- [ ] Datenschutzerklärung, Abschnitt Backups, anwaltlich prüfen lassen: Wie werden Löschanfragen seit dem letzten Backup nach einer Wiederherstellung erneut umgesetzt? (TODO in der Datenschutzerklärung, E-057)
 - [ ] VPS nach der Härtungsanleitung absichern (kommt in Phase 8)
 - [ ] Domain `pubpot.games` registrieren
 - [ ] DNS: A/AAAA-Einträge für `pubpot.games`, `www` und `staging` auf den VPS

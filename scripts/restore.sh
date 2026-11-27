@@ -50,7 +50,7 @@ if [ -n "$running" ]; then
 fi
 
 status=0
-compose exec -T backup sh /scripts/backup.sh restore "$file" "$db" || status=$?
+compose exec -T backup sh backup.sh restore "$file" "$db" || status=$?
 
 if [ -n "$running" ]; then
   echo "Starte$running wieder ..."
