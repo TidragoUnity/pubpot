@@ -378,6 +378,24 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-052 · Metriken des Workers per HttpListener, Startzeit als Ausgangswert, Push-URL nur nach vollständigen Runden (7.3)
+**Entscheidungen:**
+- **`/metrics` per `OpenTelemetry.Exporter.Prometheus.HttpListener`** (Vorschau wie in E-049) auf Port 9464. Der Worker bleibt ein schlanker Hintergrunddienst ohne Webserver und ohne ASP.NET im Image. Erreichbar ist der Port nur im internen Docker-Netz.
+- **Messwerte:**
+  - `pubpot_worker_rounds_total{result}` mit `complete`, `incomplete` oder `failed`
+  - `pubpot_worker_last_round_streams`
+  - `pubpot_worker_last_complete_round_time_seconds`
+  - `pubpot_worker_finished`
+  - dazu Laufzeit und HttpClient
+- **Startzeit als Ausgangswert** für „letzte vollständige Runde“. Der Alarm in 7.6 kann dann einfach rechnen: `time() - … > 15 Minuten`. Er schlägt auch an, wenn seit dem Start keine einzige Runde vollständig war.
+- **`pubpot_worker_finished = 1`**, wenn `Worker__StopAfterHours` erreicht ist. Der Worker fragt dann absichtlich nichts mehr ab, und der Alarm soll das nicht als Fehler melden.
+- **Push-URL (`Worker__PushUrl`):**
+  - Sie wird nur nach vollständigen Runden aufgerufen (E-036), mit eigenem HttpClient und 10 s Timeout.
+  - Fehler werden geloggt, stoppen den Worker aber nicht.
+  - Die URL ist ein Geheimnis und steht nie im Log (Test).
+
+**Gefunden:** Der Exporter akzeptiert `*` nicht mehr als Hostnamen, weil er intern eine URI baut, und der Worker startete im Container nicht. Lösung: erst mit `localhost` anlegen, dann im `ConfigureHttpListener`-Haken auf `http://*:9464/` umstellen. Der Smoke-Test startet seitdem das echte Worker-Image ohne Netz (kein Twitch, keine Datenbank) und fragt `/metrics` ab.
+
 ## E-051 · Metriken der Website: eingebaute .NET-Messwerte, eigene Zähler, eigener Port mit Prüfung auf den echten Port (7.2)
 **Entscheidungen:**
 - **OpenTelemetry nur als Sammler und Exporter** (`OpenTelemetry.Extensions.Hosting`, `…Exporter.Prometheus.AspNetCore`). Die Messwerte selbst sind in .NET 10 eingebaut: Anfragen und Antwortzeiten, Kestrel, Rate-Limiting, Ausnahmen, Laufzeit (Speicher, GC, Threads, CPU) und ausgehende HTTP-Aufrufe. Dafür braucht es keine weiteren Instrumentierungs-Pakete.

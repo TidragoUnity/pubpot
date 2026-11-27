@@ -11,17 +11,23 @@ public sealed class SnapshotWorker : BackgroundService
     private readonly TwitchClient _twitch;
     private readonly SampleStore _store;
     private readonly WorkerOptions _options;
+    private readonly WorkerMetrics _metrics;
+    private readonly PushNotifier _push;
     private readonly ILogger<SnapshotWorker> _log;
 
     public SnapshotWorker(
         TwitchClient twitch,
         SampleStore store,
         IOptions<WorkerOptions> options,
+        WorkerMetrics metrics,
+        PushNotifier push,
         ILogger<SnapshotWorker> log)
     {
         _twitch = twitch;
         _store = store;
         _options = options.Value;
+        _metrics = metrics;
+        _push = push;
         _log = log;
     }
 
@@ -49,6 +55,7 @@ public sealed class SnapshotWorker : BackgroundService
                     _log.LogInformation("Geplante Laufzeit von {Hours} Stunden erreicht. Keine weiteren Abfragen; Container kann gestoppt werden.",
                         _options.StopAfterHours);
                     finishedLogged = true;
+                    _metrics.Finished();
                 }
                 await WriteHeartbeatAsync(ct);
                 continue;
@@ -95,6 +102,7 @@ public sealed class SnapshotWorker : BackgroundService
         {
             await _store.SaveAsync(info, streams.Values, ct);
             await WriteHeartbeatAsync(ct);
+            _metrics.RoundSaved(complete, streams.Count);
 
             _log.LogInformation("Runde gespeichert: {Streams} Streams, {Viewers} Zuschauer, {Pages} Seiten, {Seconds:F1}s{Flag}.",
                 streams.Count, streams.Values.Sum(s => (long)s.ViewerCount), pages, watch.Elapsed.TotalSeconds,
@@ -104,6 +112,14 @@ public sealed class SnapshotWorker : BackgroundService
         {
             // Kein Heartbeat schreiben: Der Docker-Healthcheck merkt dann, dass etwas nicht stimmt.
             _log.LogError(ex, "Speichern fehlgeschlagen.");
+            _metrics.RoundFailed();
+            return;
+        }
+
+        // Nur vollständige Runden melden „alles gut“ nach außen (E-036).
+        if (complete)
+        {
+            await _push.PushAsync(ct);
         }
     }
 

@@ -35,6 +35,9 @@ public sealed class WorkerOptions
     /// <summary>Datei, deren Zeitstempel nach jeder Abfrage erneuert wird (für den Docker-Healthcheck).</summary>
     public string HeartbeatFile { get; set; } = Path.Combine(Path.GetTempPath(), "heartbeat");
 
+    /// <summary>Optional: wird nach jeder vollständigen Runde aufgerufen (externer Heartbeat-Monitor). Leer = aus.</summary>
+    public string PushUrl { get; set; } = "";
+
     internal static string[] Split(string value) =>
         value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 }

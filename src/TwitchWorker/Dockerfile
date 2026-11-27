@@ -22,6 +22,8 @@ FROM mcr.microsoft.com/dotnet/runtime:10.0-noble-chiseled
 WORKDIR /app
 COPY --from=build /app .
 USER $APP_UID
+# /metrics für Prometheus, nur im internen Docker-Netz (E-052). Der Worker hat keine Ports nach außen.
+EXPOSE 9464
 
 # Gesund, solange der Worker in den letzten 15 Minuten eine Runde gespeichert hat (Heartbeat-Datei in /tmp).
 HEALTHCHECK --interval=1m --timeout=5s --start-period=2m \
