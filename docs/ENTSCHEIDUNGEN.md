@@ -356,6 +356,17 @@ Zwei Funde aus der Abnahme 5.8.
 - **Rechte:** `security-events: write` nur im Analyse-Job.
 **Warum zusätzlich zu den Tests:** Tests prüfen, ob das gewünschte Verhalten da ist. CodeQL sucht nach Mustern, die zu Lücken führen (SQL-Injection, offene Weiterleitungen, unsichere Deserialisierung, Log-Injection), auch an Stellen, an die beim Testen niemand gedacht hat.
 
+## E-047 · Regeln für `main`: nur per Pull Request, nur mit grüner CI
+**Entscheidungen (Ruleset „main schützen“, Quelle `.github/rulesets/main.json`):**
+- **Nur per Pull Request**, nur „Squash and merge“, lineare Historie. Kein Force-Push, kein Löschen von `main`.
+- **Pflicht-Prüfungen:** „Build und Tests“, „Images und Smoke-Test“ und CodeQL für C#, Actions und JavaScript. Sie müssen von GitHub Actions kommen (`integration_id` 15368), damit niemand sie über die Status-API fälschen kann. Der Branch muss auf dem neuesten Stand von `main` sein (`strict`): Geprüft wird also genau das, was nach dem Merge auf `main` liegt.
+- **Code Scanning als Sperre:** Neue CodeQL-Funde mit Schweregrad „hoch“ oder „kritisch“ (bzw. Fehler) verhindern den Merge.
+- **Keine Freigabe durch eine zweite Person** (`required_approving_review_count: 0`). Du arbeitest allein und kannst deine eigenen PRs nicht freigeben. Die CI übernimmt diese Rolle.
+- **Keine Ausnahmen** (`bypass_actors` leer), auch nicht für Admins. Wer die Regeln umgehen will, muss sie sichtbar abschalten.
+- **Repo-Einstellungen:** nur Squash-Merge (Titel = PR-Titel), Branches nach dem Merge automatisch löschen.
+- **Die Regeln liegen als JSON im Repo** und werden per `gh api -X POST repos/TidragoUnity/pubpot/rulesets --input .github/rulesets/main.json` angelegt (bzw. per `PUT …/rulesets/<id>` geändert). So ist nachvollziehbar, was gilt und seit wann.
+**Folge:** Auch Doku-Änderungen und Dependabot-Updates gehen über PRs. Für Updates von Dependabot muss der Branch oft erst auf den neuesten Stand gebracht werden. Dependabot macht das selbst (Rebase), sobald `main` sich ändert.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

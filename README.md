@@ -1,5 +1,8 @@
 # PubPot
 
+[![CI](https://github.com/TidragoUnity/pubpot/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TidragoUnity/pubpot/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/TidragoUnity/pubpot/actions/workflows/codeql.yml/badge.svg?branch=main)](https://github.com/TidragoUnity/pubpot/actions/workflows/codeql.yml)
+
 Landingpage mit Anmeldung für Entwickler und Creator, dazu Twitch-Worker, Docker, CI/CD und Monitoring.
 
 > Im Aufbau. Plan und Status: [docs/ROADMAP.md](docs/ROADMAP.md)
@@ -10,7 +13,10 @@ Landingpage mit Anmeldung für Entwickler und Creator, dazu Twitch-Worker, Docke
 |---|---|
 | `src/PubPot.Web` | Landingpage (ASP.NET Core Razor Pages, Deutsch und Englisch) |
 | `src/TwitchWorker` | Sammelt regelmäßig Stream-Daten von Twitch in PostgreSQL (.NET 10) |
-| `tests/PubPot.Web.Tests` | Tests (xUnit v3) |
+| `tests/PubPot.Web.Tests` | Tests der Website (xUnit v3, Testcontainers) |
+| `tests/TwitchWorker.Tests` | Tests des Workers (Healthcheck, Schema-Skripte im echten Postgres) |
+| `deploy/` | Compose-Dateien, Caddyfile, Datenbank-Skripte |
+| `.github/` | CI-Workflows, Dependabot, Regeln für `main` |
 | `docs/` | Roadmap, Entscheidungen, Rückfragen, Journal, Checkliste |
 
 ## Bauen und testen
@@ -25,6 +31,33 @@ dotnet format PubPot.slnx --verify-no-changes
 
 Alles auf einmal, so wie die CI prüft (bricht beim ersten Fehler ab): `./scripts/check.sh`.
 Die Datenbank-Tests brauchen ein laufendes Docker, weil Testcontainers ein eigenes Postgres startet.
+
+## CI und Arbeitsablauf
+
+Jede Änderung kommt über einen **Pull Request** auf `main`. Direkt pushen geht nicht (Regeln in
+[`.github/rulesets/main.json`](.github/rulesets/main.json)). Ein PR lässt sich erst mergen, wenn alle Prüfungen grün
+sind, und zwar nur per „Squash and merge“: ein Commit pro Änderung.
+
+| Workflow | Wann | Was |
+|---|---|---|
+| [CI](.github/workflows/ci.yml): Build und Tests | jeder PR, `main`, montags | `./scripts/check.sh` wie lokal: Build mit Warnungen als Fehler, Format, alle Tests |
+| CI: Images und Smoke-Test | ebenso | baut die drei Images, startet den Stack wie auf dem Server (`./scripts/smoke-test.sh`), Trivy-Scan |
+| CI: Push nach GHCR | nur nach Merge auf `main` | Images mit Tag `<commit-sha>` und `main` nach `ghcr.io/tidragounity/pubpot-{web,migrate,worker}`, mit SBOM und Provenance |
+| [CodeQL](.github/workflows/codeql.yml) | jeder PR, `main`, mittwochs | Sicherheitsanalyse für C#, Workflows und JavaScript |
+| [Dependabot](.github/dependabot.yml) | montags | Update-PRs für NuGet, SDK, Docker-Images und Actions |
+
+Ablauf für eine Änderung:
+
+```bash
+git switch -c 6.8-kurzname          # Branch pro Roadmap-Schritt
+# … ändern, ./scripts/check.sh …
+git push -u origin 6.8-kurzname
+gh pr create --fill                 # PR öffnen, die CI startet
+gh pr checks --watch                # warten, bis alles grün ist
+gh pr merge --squash --delete-branch
+```
+
+Die fertigen Images sind öffentlich: `docker pull ghcr.io/tidragounity/pubpot-web:main`.
 
 ## Lokale Hilfsdienste (Docker)
 

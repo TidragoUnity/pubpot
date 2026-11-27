@@ -30,7 +30,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Phasen 0–5 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks, Admin-Bereich (`/admin`) mit Pipeline, Export, Löschen, Hinweis-Mails und Aufbewahrungsfrist.
 - **Phase 5 (Docker):** `cd deploy && docker compose up -d --build` startet alles hinter Caddy unter `https://localhost` (Zertifikatswarnung wegklicken, F-017). Images „chiseled“ ohne Shell, Nicht-Root, eingebaute Healthchecks. Migrationen als eigener Container (EF-Bundle bzw. SQL-Skripte für den Worker). Worker nur mit `--profile worker` (F-016). Forwarded Headers nur vom Netz „edge“ (E-033). Entscheidungen E-032 bis E-039.
 - 402 Tests grün (`PubPot.Web.Tests`, `TwitchWorker.Tests`), 5 Migrationen. Lighthouse überall 100, auch über Caddy.
-- **Phase 6 in Arbeit** (6.1–6.8, F-018 und F-019 beantwortet, E-040). Fertig: 6.1 CI-Workflow (E-041), 6.2 Images und Smoke-Test (E-042), 6.3 Push nach GHCR (E-043), 6.4 Trivy (E-044), 6.5 Dependabot (E-045), 6.6 CodeQL (E-046). Images liegen öffentlich in GHCR. **Keine offenen Rückfragen.**
+- **Phase 6 in Arbeit** (6.1–6.8, F-018 und F-019 beantwortet, E-040). Fertig: 6.1 bis 6.7 (E-041 bis E-047). `main` ist geschützt: nur PRs mit grüner CI. Images liegen öffentlich in GHCR. **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
 ### Phase 6 – CI (geplant und freigegeben, Schritt für Schritt umsetzen)
