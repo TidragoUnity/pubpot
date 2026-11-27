@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PubPot.Web.Data;
 using PubPot.Web.Email;
 using Testcontainers.PostgreSql;
@@ -23,6 +24,9 @@ public sealed class DatabaseWebFactory : WebApplicationFactory<Program>, IAsyncL
 
     public FakeEmailTransport Mail { get; } = new();
 
+    /// <summary>Log-Einträge der App, nur zwischen <c>Logs.Start()</c> und <c>Logs.Stop()</c>.</summary>
+    public LogCapture Logs { get; } = new();
+
     public async ValueTask InitializeAsync()
     {
         await _postgres.StartAsync();
@@ -38,6 +42,7 @@ public sealed class DatabaseWebFactory : WebApplicationFactory<Program>, IAsyncL
         builder.UseSetting("ConnectionStrings:Default", ConnectionString);
         TestSettings.Apply(builder);
         builder.ConfigureTestServices(services => services.AddSingleton<IEmailTransport>(Mail));
+        builder.ConfigureLogging(logging => logging.AddProvider(Logs));
     }
 
     /// <summary>Leert alle Tabellen und den Fake-Mailversand.</summary>
