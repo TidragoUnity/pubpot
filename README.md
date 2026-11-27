@@ -59,7 +59,7 @@ alles hinter `https://localhost`.
 cd deploy
 cp .env.example .env              # einmalig: die drei DB-Passwörter eintragen, der Rest ist lokal optional
 docker compose up -d --build      # baut die Images und startet alles
-docker compose ps                 # alle Dienste "healthy", migrate "Exited (0)"
+docker compose ps -a              # alle Dienste "healthy", migrate "Exited (0)" (-a zeigt auch beendete)
 ```
 
 Dann https://localhost öffnen. Der Browser warnt vor dem Zertifikat, weil Caddy es lokal selbst ausstellt.
