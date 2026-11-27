@@ -37,14 +37,15 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
   - Abnahme: jeder Alarm ausgelöst, Mails in Mailpit (E-058). Die README hat den Abschnitt „Monitoring, Alarme und Backups“.
   - 7.10: Eigene Zähler starten mit 0, damit `increase()` das erste Ereignis sieht. „Anmeldungen pro Tag“ als Tagesbalken (E-059).
 - 431 Tests, 15 Regel-Tests, Smoke-Test mit 25 Prüfungen, 5 Migrationen.
-- **Keine offenen Rückfragen.** Ideen für nach V1 stehen in `docs/IDEEN.md` (I-01 bis I-04).
+- **Phase 8 geplant** (Twitch-Login, Spiele von Steam, Creator-Übersicht, E-061). **VPS und CD sind jetzt Phase 9**, fein geplant, aber blockiert, bis der Nutzer den Umzug startet (E-060).
+- **Offene Rückfragen:** nur zurückgestellte für Phase 9 (F-022 bis F-025, F-027). Ideen für nach V1 stehen in `docs/IDEEN.md` (I-01 bis I-04).
 
 ## Nächste Aufgabe
-1. **Phase 8 – VPS und CD (Staging, dann Production)** ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt. Vorher F-008 klären (VPS, Backup-Ziel außerhalb des Servers, Domain, SMTP), dann in `docs/ROADMAP.md` fein planen und vorlegen. Mitzunehmen aus Phase 7:
-   - externer Dienst für Server-Ausfall und Worker über `Worker__PushUrl` (E-052, E-058)
-   - Backups zusätzlich außerhalb des Servers (E-056)
-   - Monitoring per SSH-Tunnel
-   - `GRAFANA_ADMIN_PASSWORD` und `ALERT_EMAIL` auf dem Server
+1. **Schritt 8.1 – Twitch-Login, die Technik** (Plan in `docs/ROADMAP.md`, Phase 8). Erst beginnen, wenn der Nutzer es sagt.
+   - Die Twitch-App „PubPot Dev“ ist angelegt. Client-ID und Secret trägt der Nutzer als `TwitchLogin__ClientId` und `TwitchLogin__ClientSecret` in `deploy/.env` ein. **Nur die Namen der Schlüssel lesen, nie die Werte.**
+   - Rücksprungadressen nur `https`: `https://localhost/signin-twitch` (Caddy) und `https://localhost:5081/signin-twitch` (`dotnet run`, HTTPS-Port 5081 mit `dotnet dev-certs https` kommt in 8.1).
+   - Die Login-App darf lokal auch den Worker füttern. Die Zugangsdaten der Studie nie benutzen (F-001).
+2. Danach 8.2 bis 8.7. Phase 9 (VPS) erst, wenn der Nutzer den Umzug startet, spätestens Anfang Januar 2027.
 
 **Arbeitsweise seit Phase 6 (F-019, E-040):** Jeder Schritt in einem eigenen Branch (`x.y-kurzname`), PR, warten bis grün (`gh pr checks <nr> --watch`), dann `gh pr merge <nr> --squash --subject "x.y: …"`. Direkt auf `main` geht nicht mehr. Push und Merge sind in `C:\Timo\Docker\.claude\settings.local.json` freigegeben.
 

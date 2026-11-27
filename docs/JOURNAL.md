@@ -5,6 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Phase 8 geplant, VPS wird Phase 9
+- **VPS und CD fein geplant** (jetzt Phase 9, Schritte 9.1 bis 9.10), dazu die Rückfragen F-022 bis F-028.
+  - Beantwortet: Totmannschalter bei healthchecks.io (F-026) und Vorschau-Modus mit Passwort bis zum Go-live (F-028), festgehalten in E-060.
+  - Zurückgestellt bis zum Umzug in die Cloud: VPS, Domain, SMTP, Backup-Ziel, Twitch-App für den Server.
+- **Neue Phase 8** auf Wunsch des Nutzers (E-061, bewusst über V1 hinaus):
+  - Twitch-Login nur für Creator, mit „Mein Bereich“.
+  - Spiele von Steam als Katalog-Entwurf, nur im Admin-Bereich (F-030).
+  - Creator-Übersicht: Zuschauer pro Spiel aus den Worker-Daten, Einnahmen als Beispielrechnung in der Admin-Vorschau (F-029).
+- **Twitch-App „PubPot Dev“** hat der Nutzer angelegt. Twitch erlaubt nur `https`-Rücksprungadressen: `https://localhost/signin-twitch` (Caddy) und `https://localhost:5081/signin-twitch` (`dotnet run`, kommt in 8.1).
+- **Als Nächstes:** Schritt 8.1.
+
 ## 2026-11-27 · Schritt 7.10 – Zähler ab dem Start mit 0
 - **Fehler, vom Nutzer im Dashboard gefunden:** Die erste Developer- und die erste Creator-Anmeldung fehlten in „Anmeldungen pro Tag“. Ursache: Eine Zeitreihe entstand erst beim ersten Ereignis, gleich mit 1, und `increase()` sieht diesen Schritt nicht (E-059).
 - **Fix:** Website und Worker melden beim Start jede eigene Zeitreihe mit 0 (`PubPotMetrics.Initialize`, `WorkerMetrics.Initialize`, ausgelöst bei `ApplicationStarted`). Die Typen des Aufräum-Zählers stehen jetzt als Konstanten in `CleanupType`.
