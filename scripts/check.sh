@@ -25,5 +25,13 @@ dotnet format PubPot.slnx --verify-no-changes -v q
 section "Tests"
 dotnet test --solution PubPot.slnx --no-build
 
+# Prometheus-Konfiguration mit promtool aus demselben Image, das Compose startet (E-053).
+# "pwd -W" liefert unter Git Bash (Windows) einen Pfad, den Docker versteht.
+section "Monitoring-Konfiguration (promtool)"
+prometheus_image=$(sed -n 's|^ *image: \(prom/prometheus:.*\)$|\1|p' deploy/compose.yaml)
+monitoring_dir="$(pwd -W 2>/dev/null || pwd)/deploy/monitoring"
+MSYS_NO_PATHCONV=1 docker run --rm -v "$monitoring_dir/prometheus:/etc/prometheus:ro" --entrypoint promtool \
+  "$prometheus_image" check config /etc/prometheus/prometheus.yml
+
 [ -n "${in_group:-}" ] && echo "::endgroup::"
 echo "==> Alles grün."

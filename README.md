@@ -128,6 +128,15 @@ docker compose down                            # alles stoppen, Daten bleiben
 Smoke-Test wie in der CI (startet den Stack ohne Override mit fertigen Images in einem eigenen Projekt, prüft ihn
 und räumt wieder auf): `./scripts/smoke-test.sh`. Vorher die Images bauen (`docker compose build`).
 
+**Monitoring** (Profil `monitoring`): erst `GRAFANA_ADMIN_PASSWORD` in `deploy/.env` setzen, dann
+
+```bash
+docker compose --profile monitoring up -d   # Prometheus, Grafana, node-exporter, cAdvisor
+```
+
+Grafana: http://localhost:3000 (Dashboard „PubPot – Start“), Prometheus: http://localhost:9090. Beide sind nur auf
+diesem Rechner erreichbar. Die Konfiguration liegt in `deploy/monitoring/`.
+
 ### Caddy-Zertifikat vertrauen (optional)
 
 Damit die Warnung verschwindet, Caddys lokales Stammzertifikat für deinen Windows-Benutzer eintragen

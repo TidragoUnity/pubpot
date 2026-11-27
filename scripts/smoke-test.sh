@@ -19,9 +19,9 @@ compose() { docker compose -f compose.yaml -p "$project" --env-file "$env_file" 
 cleanup() {
   if [ "$failed" -ne 0 ]; then
     echo "==> Fehlgeschlagen. Logs aller Container:"
-    compose --profile worker logs --no-color || true
+    compose --profile worker --profile monitoring logs --no-color || true
   fi
-  compose --profile worker down -v --remove-orphans >/dev/null 2>&1 || true
+  compose --profile worker --profile monitoring down -v --remove-orphans >/dev/null 2>&1 || true
   rm -f "$env_file"
 }
 trap cleanup EXIT
@@ -32,6 +32,7 @@ cat > "$env_file" <<ENV
 POSTGRES_PASSWORD=$(random)
 PUBPOT_DB_PASSWORD=$(random)
 TWITCH_DB_PASSWORD=$(random)
+GRAFANA_ADMIN_PASSWORD=$(random)
 IMAGE_TAG=${IMAGE_TAG:-local}
 EDGE_SUBNET=172.31.250.0/24
 Smtp__Host=smtp.invalid
@@ -75,8 +76,34 @@ worker_metrics() {
   return $result
 }
 
+# Monitoring (E-053): Prometheus erreicht alle Ziele. Der erste Abruf kommt nach bis zu 15 s, daher warten.
+# Das erste Python, das wirklich läuft (unter Windows ist "python3" oft nur ein Platzhalter für den Store).
+python=""
+for candidate in python3 python; do
+  if "$candidate" -c "" 2>/dev/null; then python=$candidate; break; fi
+done
+prom() { curl -sG --data-urlencode "query=$1" http://127.0.0.1:9090/api/v1/query; }
+prometheus_targets_up() {
+  for _ in $(seq 1 30); do
+    prom 'count(up{job=~"prometheus|web|node|cadvisor"} == 1)' | grep -q '"4"\]' && return 0
+    sleep 2
+  done
+  prom 'up' >&2
+  return 1
+}
+grafana() { curl -sf -u "admin:$(sed -n 's/^GRAFANA_ADMIN_PASSWORD=//p' "$env_file")" "http://127.0.0.1:3000$1"; }
+grafana_ready() {
+  grafana /api/datasources/uid/prometheus/health | grep -q '"status":"OK"' &&
+    grafana /api/dashboards/uid/pubpot-start | grep -q '"title":"PubPot – Start"'
+}
+dashboard_queries() {
+  "$python" ../scripts/check-dashboard-queries.py monitoring/grafana/dashboards/pubpot.json http://127.0.0.1:9090 \
+    "Website" "Anfragen pro Sekunde" "Anfragen nach Statuscode" "CPU pro Container" "Arbeitsspeicher pro Container" \
+    "Festplatte belegt" "Server: CPU und Arbeitsspeicher"
+}
+
 echo "==> Starte Stack (IMAGE_TAG=${IMAGE_TAG:-local})"
-if ! compose up -d --wait --wait-timeout 180 --no-build; then failed=1; exit 1; fi
+if ! compose --profile monitoring up -d --wait --wait-timeout 180 --no-build; then failed=1; exit 1; fi
 compose --profile worker run --rm --no-deps migrate-twitch || failed=1
 
 echo "==> Prüfe"
@@ -92,6 +119,9 @@ check "/metrics von außen nicht erreichbar" sh -c '! curl -sk https://localhost
 check "/metrics auch nicht mit Host-Header :9464" sh -c '! curl -sk -H "Host: localhost:9464" https://localhost/metrics | grep -q "# TYPE"'
 check "/metrics im Docker-Netz (web:9464) mit Anfragen-Metrik" metrics_inside
 check "Worker: /metrics im Container (ohne Netz, ohne Twitch)" worker_metrics
+check "Prometheus erreicht web, node-exporter, cAdvisor und sich selbst" prometheus_targets_up
+check "Grafana: Datenquelle OK, Start-Dashboard vorhanden" grafana_ready
+check "Dashboard: alle Abfragen gültig, wichtige mit Daten" dashboard_queries
 
 if [ "$failed" -ne 0 ]; then exit 1; fi
 echo "==> Smoke-Test bestanden."

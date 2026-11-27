@@ -1,0 +1,38 @@
+# Prometheus – holt alle 15 Sekunden die Messwerte ab ("Pull", E-049) und speichert sie 30 Tage.
+# Geprüft in der CI mit "promtool check config" (scripts/check.sh). Doku: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
+#
+# Alle Ziele liegen im internen Docker-Netz "default". Von außen ist keines erreichbar.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  # Prometheus selbst (Speicher, Anzahl Zeitreihen, eigene Fehler).
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # Website: /metrics auf dem internen Port 9464 (E-051).
+  - job_name: web
+    static_configs:
+      - targets: ["web:9464"]
+
+  # Twitch-Worker (E-052). Über DNS statt fest eingetragen: Läuft der Worker nicht (Profil "worker" aus),
+  # gibt es einfach kein Ziel, statt eines Ziels, das dauerhaft "down" ist.
+  - job_name: worker
+    dns_sd_configs:
+      - names: ["worker"]
+        type: A
+        port: 9464
+        refresh_interval: 30s
+
+  # Server: CPU, Arbeitsspeicher, Festplatte (node-exporter).
+  - job_name: node
+    static_configs:
+      - targets: ["node-exporter:9100"]
+
+  # Container: CPU und Arbeitsspeicher pro Dienst (cAdvisor).
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]

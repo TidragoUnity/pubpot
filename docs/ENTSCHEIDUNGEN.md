@@ -378,6 +378,36 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-053 · Monitoring-Stack im Profil `monitoring`: Konfiguration als Dateien, Oberflächen nur lokal (7.4)
+**Entscheidungen:**
+- **Vier Dienste im Profil `monitoring`:**
+  - Prometheus v3 mit 30 Tagen und höchstens 2 GB Speicher
+  - Grafana 13
+  - node-exporter für Server-Werte
+  - cAdvisor für CPU und RAM pro Container
+
+  Alle Images haben eine feste Version, Dependabot hält sie aktuell.
+- **Ports nur auf `127.0.0.1`** (9090, 3000), auch auf dem Server. Dort geht der Zugang per SSH-Tunnel (F-009).
+- **Alles als Datei im Repo** (`deploy/monitoring/`):
+  - Prometheus-Ziele
+  - Grafana-Datenquelle
+  - Start-Dashboard: 16 Panels für Website, Anmeldungen, Mails, Worker, Container und Server
+
+  Änderungen in der Grafana-Oberfläche werden nicht gespeichert: Dashboard als JSON exportieren und die Datei ersetzen.
+- **Worker per DNS-Erkennung:** Läuft er nicht (Profil `worker` aus), gibt es kein Ziel statt eines dauerhaft „roten“.
+- **Grafana:**
+  - Ohne `GRAFANA_ADMIN_PASSWORD` startet es nicht, statt still mit admin/admin zu laufen. `:?` in Compose geht hier nicht: Das prüft Compose auch für ausgeschaltete Profile.
+  - Keine Verbindungen nach außen: keine Statistik, kein Update-Check, kein News-Feed, keine Plugin-Downloads.
+- **Härtung:** Prometheus und Grafana schreibgeschützt (`x-hardening`) mit eigenem Volume. cAdvisor braucht `privileged` und Lesezugriff auf Docker. Er hat keinen Port nach außen und übernimmt nur das Label mit dem Dienstnamen.
+- **Festplatte:** Gemessen wird `/` oder `/var/lib`, der kritischere Wert zählt. Auf dem Server liegen die Docker-Daten meist auf `/`, unter Docker Desktop auf `/var/lib`.
+- **Prüfungen:**
+  - `promtool check config` in `check.sh`.
+  - Der Smoke-Test startet den Stack mit Monitoring und prüft dreierlei: Prometheus erreicht alle Ziele, Grafana hat Datenquelle und Dashboard, und jede Dashboard-Abfrage ist gültiges PromQL, die wichtigen liefern Daten (`scripts/check-dashboard-queries.py`).
+
+**Gefunden beim Smoke-Test:**
+- Der Healthcheck der Datenbank lief über den lokalen Socket. Beim allerersten Start meldete er „gesund“, während Postgres nur kurz für die Init-Skripte lief, und `migrate` bekam „connection refused“. Jetzt prüft er über TCP.
+- Docker Desktop lehnt `rslave` beim Einhängen von `/` ab. Ohne die Option geht es überall.
+
 ## E-052 · Metriken des Workers per HttpListener, Startzeit als Ausgangswert, Push-URL nur nach vollständigen Runden (7.3)
 **Entscheidungen:**
 - **`/metrics` per `OpenTelemetry.Exporter.Prometheus.HttpListener`** (Vorschau wie in E-049) auf Port 9464. Der Worker bleibt ein schlanker Hintergrunddienst ohne Webserver und ohne ASP.NET im Image. Erreichbar ist der Port nur im internen Docker-Netz.
