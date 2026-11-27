@@ -311,6 +311,14 @@ Zwei Funde aus der Abnahme 5.8.
 - **Runner `ubuntu-24.04`** statt `ubuntu-latest`: Ein Wechsel der Ubuntu-Version kommt dann bewusst per Änderung, nicht unbemerkt.
 **Abweichung vom Plan:** Keine Testergebnisse als Artefakt. Der Test-Runner (Microsoft Testing Platform mit xUnit v3) schreibt TRX nur mit einem Zusatzpaket, und das Log des Laufs zeigt fehlgeschlagene Tests mit Meldung und Stacktrace ohnehin.
 
+## E-042 · Smoke-Test des Docker-Stacks als Skript, in der CI und lokal
+**Entscheidungen:**
+- **`scripts/smoke-test.sh`** startet den Stack nur aus `deploy/compose.yaml`, also ohne `compose.override.yaml`, ohne Build und mit fertigen Images (`IMAGE_TAG`), so wie auf dem Server. Dann prüft er: migrate endet mit 0, `migrate-twitch` läuft durch, `/health/ready` und `/de` über Caddy, HTTP → 308, kein `Server`-Header. Bei einem Fehler gibt er die Logs aller Container aus. Am Ende räumt er immer auf (`down -v`).
+- **Eigenes Compose-Projekt** (`pubpot-smoke`), Wegwerf-Passwörter aus `/dev/urandom`, eigenes Subnetz (`EDGE_SUBNET=172.31.250.0/24`). Lokal stört er deine Daten nicht. Er braucht nur kurz die Ports 80 und 443.
+- **In der CI:** Job „Images und Smoke-Test“ parallel zu „Build und Tests“. Buildx baut die drei Images mit dem Commit-SHA als Tag und lädt sie in das Docker des Runners. Der Build-Cache liegt im Cache von GitHub Actions (`type=gha`, je Image ein eigener Bereich). Die Image-Größen stehen in der Zusammenfassung des Laufs.
+- **SMTP im Smoke-Test** zeigt auf `smtp.invalid`. Die App braucht einen Wert, um zu starten, verschickt im Test aber keine Mail.
+**Warum:** Die Tests aus 6.1 prüfen den Code, aber nicht die Dockerfiles, die Compose-Datei, das Caddyfile und das Zusammenspiel. Genau dort sind in Phase 5 die meisten Fehler aufgetreten (Laufzeit im SDK-Image, `Via`-Header, Subnetz).
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

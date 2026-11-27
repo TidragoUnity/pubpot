@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 6.2 – Images bauen und Compose-Smoke-Test
+- Neues Skript `scripts/smoke-test.sh`: Stack aus `deploy/compose.yaml` mit fertigen Images in einem eigenen Projekt starten, 5 Prüfungen, Logs bei Fehlern, immer aufräumen (E-042).
+- CI-Job „Images und Smoke-Test“: Buildx baut web, migrate und worker mit dem Commit-SHA als Tag, mit Build-Cache. Danach läuft der Smoke-Test, die Image-Größen stehen in der Zusammenfassung.
+- Lokal getestet: bestanden. Mit einem nicht vorhandenen Image-Tag endet er mit Exit 1 und lässt keine Container und Volumes zurück.
+- **Als Nächstes:** 6.3 Push nach GHCR.
+
 ## 2026-11-27 · Schritt 6.1 – CI-Workflow Build und Tests
 - `.github/workflows/ci.yml`: Job „Build und Tests“ bei jedem Pull Request und Push auf `main`. SDK 11 und .NET 10, NuGet-Cache, dann `./scripts/check.sh` (E-041).
 - `scripts/check.sh` gliedert seine Ausgabe in GitHub Actions in einklappbare Gruppen, lokal bleibt sie wie bisher.
