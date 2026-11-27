@@ -49,6 +49,11 @@ web_log_is_json() {
   [ -n "$log" ] && ! printf '%s\n' "$log" | grep -v '^{"Timestamp":"[0-9-]*T[0-9:.]*Z",.*}$' | grep -q .
 }
 
+# Caddy hängt im selben Netz wie web und bringt wget mit. Die App-Images haben bewusst kein Werkzeug dafür.
+metrics_inside() {
+  compose exec -T caddy wget -qO- http://web:9464/metrics | grep -q '^http_server_request_duration_seconds_count'
+}
+
 echo "==> Starte Stack (IMAGE_TAG=${IMAGE_TAG:-local})"
 if ! compose up -d --wait --wait-timeout 180 --no-build; then failed=1; exit 1; fi
 compose --profile worker run --rm --no-deps migrate-twitch || failed=1
@@ -61,6 +66,10 @@ check "/de liefert die Startseite" sh -c 'curl -fsk https://localhost/de | grep 
 check "HTTP leitet auf HTTPS um (308)" sh -c '[ "$(curl -s -o /dev/null -w "%{http_code}" http://localhost/de)" = 308 ]'
 check "kein Server-Header" sh -c '! curl -sk -D - -o /dev/null https://localhost/de | grep -qi "^server:"'
 check "Web-Log: jede Zeile JSON mit UTC-Zeit" web_log_is_json
+# Metriken (E-051): von außen nicht erreichbar, auch nicht mit gefälschtem Host-Header, im Docker-Netz schon.
+check "/metrics von außen nicht erreichbar" sh -c '! curl -sk https://localhost/metrics | grep -q "# TYPE"'
+check "/metrics auch nicht mit Host-Header :9464" sh -c '! curl -sk -H "Host: localhost:9464" https://localhost/metrics | grep -q "# TYPE"'
+check "/metrics im Docker-Netz (web:9464) mit Anfragen-Metrik" metrics_inside
 
 if [ "$failed" -ne 0 ]; then exit 1; fi
 echo "==> Smoke-Test bestanden."

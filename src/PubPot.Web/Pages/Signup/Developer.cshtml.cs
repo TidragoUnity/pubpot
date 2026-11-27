@@ -5,6 +5,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using PubPot.Web.Forms;
 using PubPot.Web.Localization;
+using PubPot.Web.Monitoring;
 using PubPot.Web.Signups;
 using PubPot.Web.Spam;
 
@@ -18,7 +19,8 @@ public sealed class DeveloperModel(
     IOptions<SpamOptions> spam,
     CurrentLanguage language,
     IStringLocalizer<SharedResource> text,
-    ILogger<DeveloperModel> logger) : SignupFormPageModel(timing, spam, language, text, logger)
+    PubPotMetrics metrics,
+    ILogger<DeveloperModel> logger) : SignupFormPageModel(timing, spam, language, text, metrics, logger)
 {
     [BindProperty]
     public DeveloperInput Input { get; set; } = new();

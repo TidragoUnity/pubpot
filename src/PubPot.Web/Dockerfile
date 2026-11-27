@@ -46,7 +46,10 @@ COPY --from=build /app .
 
 # Das Image läuft ohnehin als Benutzer "app" (UID 1654). Hier noch einmal ausdrücklich.
 USER $APP_UID
-EXPOSE 8080
+# 8080: Website (Caddy leitet nur hierhin weiter). 9464: /metrics für Prometheus, nur im internen Docker-Netz (E-051).
+# Der Healthcheck nimmt den ersten Port.
+ENV ASPNETCORE_HTTP_PORTS=8080;9464
+EXPOSE 8080 9464
 
 # Kein curl im Image: Die App prüft sich selbst (HealthCheckCommand). Docker startet den Container
 # nicht neu, aber Compose und "docker ps" sehen "unhealthy", und Caddy wartet auf "healthy".

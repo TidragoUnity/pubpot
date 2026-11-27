@@ -13,6 +13,7 @@ using PubPot.Web.Data;
 using PubPot.Web.Email;
 using PubPot.Web.Forms;
 using PubPot.Web.Localization;
+using PubPot.Web.Monitoring;
 using PubPot.Web.Notifications;
 using PubPot.Web.Security;
 using PubPot.Web.Signups;
@@ -200,7 +201,13 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<AppDbContext>("database", tags: ["ready"])
     .AddCheck<MigrationsHealthCheck>("migrations", tags: ["ready"]);
 
+// Metriken für Prometheus auf eigenem Port (E-051). Im Container lauscht Kestrel auf 8080 (Website) und 9464 (Metriken).
+builder.Services.AddPubPotMetrics();
+
 var app = builder.Build();
+
+// Ganz vorne: Abfragen auf dem Metrik-Port durchlaufen nichts von der Website (Sprachen, Rate-Limiting, Admin).
+app.UseMetricsPort(MetricsEndpoint.Port(app.Configuration));
 
 if (!app.Services.GetRequiredService<IOptions<AdminOptions>>().Value.IsEnabled)
 {

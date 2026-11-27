@@ -5,6 +5,19 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.2 – Metriken der Website
+- **OpenTelemetry mit Prometheus-Exporter.** Erfasst werden:
+  - die eingebauten Messwerte von .NET: Anfragen, Antwortzeiten, Rate-Limiting, Ausnahmen, Speicher, GC, Threads und ausgehende HTTP-Aufrufe
+  - eigene Zähler: Anmeldungen und Bestätigungen nach Art, Spam nach Grund, verschickte und fehlgeschlagene Mails, gelöschte Einträge nach Typ (E-051)
+- **`/metrics` auf Port 9464,** geprüft am echten Port der Verbindung, nicht am Host-Header. Lokal mit `dotnet run`: http://localhost:9464/metrics.
+- **Tests:**
+  - Port-Trennung, gefälschter Host-Header, Format.
+  - Zähler über `MetricCollector`, ohne personenbezogene Daten.
+  - Smoke-Test: `/metrics` von außen 404, auch mit `Host: localhost:9464`, im Docker-Netz erreichbar.
+- **Gefunden:** Mehrere Test-Apps im selben Prozess stören sich beim OpenTelemetry-Export (gleichnamige Zähler werden zusammengefasst). Deshalb messen die Tests die Zähler direkt.
+- Stand: 416 Tests grün.
+- **Als Nächstes:** 7.3 Metriken des Workers und Push-URL.
+
 ## 2026-11-27 · Schritt 7.1 – JSON-Logs ohne personenbezogene Daten
 - **Format:** Web und Worker loggen im Container als JSON, eine Zeile pro Eintrag, Zeit in UTC, ohne Scopes. Bei `dotnet run` bleibt die lesbare Ausgabe, jetzt mit Uhrzeit (E-050).
 - **Log-Rotation** für alle Dienste in `compose.yaml`: höchstens 5 × 10 MB pro Container.

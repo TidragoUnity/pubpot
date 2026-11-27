@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PubPot.Web.Email;
+using PubPot.Web.Monitoring;
 
 namespace PubPot.Web.Data;
 
@@ -38,6 +39,7 @@ public sealed class DataCleanup(
     TimeProvider time,
     IOptions<CleanupOptions> options,
     IOptions<OutboxOptions> outbox,
+    PubPotMetrics metrics,
     ILogger<DataCleanup> log)
 {
     public async Task<CleanupResult> RunAsync(CancellationToken ct)
@@ -66,6 +68,10 @@ public sealed class DataCleanup(
             .ExecuteDeleteAsync(ct);
 
         var result = new CleanupResult(signups, links, sent, failed);
+        metrics.Deleted("unconfirmed_signups", signups);
+        metrics.Deleted("expired_links", links);
+        metrics.Deleted("sent_mails", sent);
+        metrics.Deleted("failed_mails", failed);
         if (signups + links + sent + failed > 0)
         {
             log.LogInformation("Aufgeräumt: {Signups} unbestätigte Anmeldungen, {Links} abgelaufene Links, " +
