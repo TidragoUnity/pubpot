@@ -108,3 +108,83 @@ jobs:
             docker images --format 'table {{.Repository}}:{{.Tag}}\t{{.Size}}' | grep -E 'REPOSITORY|tidragounity'
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # Nur auf main und nur, wenn Tests und Smoke-Test grün sind: Images nach GHCR schieben (E-043).
+  publish:
+    name: Push nach GHCR (${{ matrix.image }})
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [build-test, images]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    # Schreibrecht für Packages nur in diesem Job, nicht im ganzen Workflow.
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - image: web
+            file: src/PubPot.Web/Dockerfile
+            target: web
+            description: PubPot Website (ASP.NET Core)
+          - image: migrate
+            file: src/PubPot.Web/Dockerfile
+            target: migrate
+            description: PubPot Datenbank-Migrationen (EF-Bundle)
+          - image: worker
+            file: src/TwitchWorker/Dockerfile
+            target: ""
+            description: PubPot Twitch-Worker
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # Anmeldung mit dem automatischen GITHUB_TOKEN dieses Laufs. Kein eigenes Secret nötig.
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Tags: Commit-SHA (unveränderlich, damit deployt Phase 8) und "main" (immer der neueste Stand).
+      # Dazu OCI-Labels wie Quelle und Commit. Das Label "source" verknüpft das Package mit diesem Repo.
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/tidragounity/pubpot-${{ matrix.image }}
+          tags: |
+            type=raw,value=${{ github.sha }}
+            type=raw,value=main
+          labels: |
+            org.opencontainers.image.title=pubpot-${{ matrix.image }}
+            org.opencontainers.image.description=${{ matrix.description }}
+
+      # Gleicher Build wie im Job "images": Alle Schichten kommen aus dem Cache, es entsteht derselbe Inhalt.
+      # SBOM (Liste aller Pakete im Image) und Provenance (wie und woraus es gebaut wurde) hängen am Image.
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          sbom: true
+          provenance: mode=max
+          cache-from: type=gha,scope=${{ matrix.image }}
+
+      # Werte aus ${{ }} nie direkt ins Skript schreiben (Script Injection), sondern als Umgebungsvariable übergeben.
+      - name: Zusammenfassung
+        env:
+          IMAGE: pubpot-${{ matrix.image }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          {
+            echo "### $IMAGE"
+            echo '```'
+            echo "$TAGS"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

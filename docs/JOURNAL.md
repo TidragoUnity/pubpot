@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 6.3 – Push nach GHCR
+- Neuer Job `publish` (Matrix für web, migrate, worker): nur auf `main`, nur nach grünem Build, Tests und Smoke-Test. Tags `<commit-sha>` und `main`, mit SBOM, Provenance und OCI-Labels, Anmeldung über `GITHUB_TOKEN` (E-043).
+- Im PR wird der Job übersprungen. Der erste echte Push passiert beim Merge dieses PRs, danach wird er geprüft.
+- **Als Nächstes:** 6.4 Image-Scan mit Trivy.
+
 ## 2026-11-27 · Schritt 6.2 – Images bauen und Compose-Smoke-Test
 - Neues Skript `scripts/smoke-test.sh`: Stack aus `deploy/compose.yaml` mit fertigen Images in einem eigenen Projekt starten, 5 Prüfungen, Logs bei Fehlern, immer aufräumen (E-042).
 - CI-Job „Images und Smoke-Test“: Buildx baut web, migrate und worker mit dem Commit-SHA als Tag, mit Build-Cache. Danach läuft der Smoke-Test, die Image-Größen stehen in der Zusammenfassung.

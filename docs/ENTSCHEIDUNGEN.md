@@ -319,6 +319,17 @@ Zwei Funde aus der Abnahme 5.8.
 - **SMTP im Smoke-Test** zeigt auf `smtp.invalid`. Die App braucht einen Wert, um zu starten, verschickt im Test aber keine Mail.
 **Warum:** Die Tests aus 6.1 prüfen den Code, aber nicht die Dockerfiles, die Compose-Datei, das Caddyfile und das Zusammenspiel. Genau dort sind in Phase 5 die meisten Fehler aufgetreten (Laufzeit im SDK-Image, `Via`-Header, Subnetz).
 
+## E-043 · Images nach GHCR: nur von `main`, nur nach grüner CI, mit SHA-Tag
+**Entscheidungen:**
+- **Job `publish`** läuft nur bei einem Push auf `main` (also nach einem Merge) und nur, wenn „Build und Tests“ und „Images und Smoke-Test“ grün sind (`needs`). In Pull Requests wird er übersprungen. Ein PR kann also nie ein Image veröffentlichen.
+- **Tags:** der volle Commit-SHA (unveränderlich, damit deployt Phase 8 genau den geprüften Stand) und `main` (zeigt immer auf den neuesten Stand, praktisch zum Ausprobieren, nie für den Deploy).
+- **Anmeldung mit dem automatischen `GITHUB_TOKEN`**, kein eigenes Secret. `packages: write` gibt es nur in diesem einen Job.
+- **Gleicher Build wie im Smoke-Test:** Der Job baut aus demselben Cache. Alle Schichten sind dort schon vorhanden, es entsteht also derselbe Inhalt, ohne die Images zwischen Jobs als Datei herumzureichen.
+- **SBOM und Provenance** hängen als Attestierungen am Image. Die SBOM listet alle enthaltenen Pakete. Die Provenance sagt, aus welchem Commit und mit welchem Workflow das Image gebaut wurde. Beides wertet später auch Trivy aus.
+- **OCI-Labels** über `docker/metadata-action`. `org.opencontainers.image.source` verknüpft das Package mit dem Repo.
+- **Werte aus `${{ }}` nur über `env:` in Skripte** (Schutz vor Script Injection), auch wenn sie hier harmlos sind. So bleibt es eine feste Regel.
+**Nach dem ersten Push:** GitHub legt die Packages privat an. Du stellst sie einmal auf öffentlich (F-018, Checkliste).
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
