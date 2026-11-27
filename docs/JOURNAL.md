@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Phase 7 geplant
+- Phase 7 in 9 Schritte aufgeteilt (7.1 JSON-Logs bis 7.9 Abnahme).
+- F-020: Prometheus-Endpunkt mit dem Vorschau-Paket von OpenTelemetry. F-021: Blackbox-Exporter statt Uptime Kuma (E-049).
+- Go vom Nutzer am 2026-11-27, Plan per PR auf `main`.
+
 ## 2026-11-27 · Ideensammlung für die Zeit nach V1
 - Neue Datei `docs/IDEEN.md`, verlinkt aus ROADMAP und START-SESSION. Darin stehen die Ideen des Nutzers, mit ersten Gedanken und offenen Punkten, damit sie später als Entwurf ausgearbeitet werden können:
   - I-01: Creator sehen, wer ein Spiel noch bewirbt.

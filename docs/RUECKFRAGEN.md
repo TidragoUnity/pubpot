@@ -137,3 +137,17 @@ So funktioniert es:
 **Möglichkeiten:** (a) Pro Roadmap-Schritt ein Branch und ein PR. Ist die CI grün, merge ich per „Squash and merge“. Auf `main` bleibt ein Commit `x.y: …` pro Schritt wie bisher. Du kannst jeden PR vorher auf GitHub ansehen. (b) Wie (a), aber **du** mergst jeden PR selbst. (c) Weiter direkt auf `main`, mit einer Ausnahme für dich in den Regeln.
 **Vorschlag:** (a). So lernst du den üblichen Ablauf kennen, die CI hat das letzte Wort, und du musst nicht bei jedem Schritt klicken. Hinweis: Jeder Push braucht im Moment deine Freigabe. Wenn du willst, erlaube ich in den Einstellungen `git push` auf Branches außer `main`.
 **Antwort (27.11.):** Genau, jedes Feature entsteht in einem eigenen Branch und wird dann auf `main` gemergt. → Vorschlag (a), ab 6.1.
+
+### F-020 · Prometheus-Endpunkt: Paket noch in der Vorschau · beantwortet
+**Wichtig ab:** Schritt 7.2.
+**Kontext:** Der Auftrag verlangt „Metriken über OpenTelemetry mit Prometheus-Endpunkt“. OpenTelemetry selbst ist stabil (1.21.0). Das Paket für den Prometheus-Endpunkt (`OpenTelemetry.Exporter.Prometheus.AspNetCore`) gibt es aber nur als Vorschau (`1.21.0-beta.1`), schon seit Jahren. Es kommt vom OpenTelemetry-Projekt selbst und ist weit verbreitet. „Beta“ heißt vor allem, dass sich die Schnittstelle bei einem Update noch ändern darf.
+**Möglichkeiten:** (a) **Das Vorschau-Paket**, genau wie im Auftrag: Prometheus holt die Werte regelmäßig ab („Pull“). Fällt die App aus, merkt Prometheus das sofort (`up = 0`). (b) **OTLP statt Prometheus-Endpunkt:** Die App schickt die Werte mit dem stabilen OTLP-Exporter an Prometheus, das sie seit Version 3 direkt annimmt („Push“). Alles stabil, aber ohne `/metrics`-Endpunkt, und einen Ausfall erkennt man nur indirekt („keine Daten mehr“).
+**Vorschlag:** (a). Sie entspricht dem Auftrag und dem üblichen Aufbau, den du später überall wiederfindest. Das Risiko ist klein: Ändert sich bei einem Update etwas, fällt es in der CI auf (Phase 6).
+**Antwort (27.11.):** Ja, passt, das Vorschau-Paket nehmen. → (a)
+
+### F-021 · Erreichbarkeit: Uptime Kuma oder Blackbox-Exporter? · beantwortet
+**Wichtig ab:** Schritt 7.5.
+**Kontext:** Der Auftrag nennt „Uptime Kuma (oder vergleichbar)“ für die Erreichbarkeit der Website und als Push-Monitor für den Worker. Uptime Kuma hat eine schöne Oberfläche, wird aber **nur dort eingerichtet**, per Klick. Es gibt keine offizielle Konfiguration als Datei. Außerdem hat es eigene Benachrichtigungen, also gäbe es zwei Stellen, an denen Alarme entstehen.
+**Möglichkeiten:** (a) **Uptime Kuma:** Container im Profil `monitoring`, du richtest die zwei Monitore und die Mail-Benachrichtigung einmal nach meiner Anleitung ein (etwa 5 Minuten). Die Einstellungen liegen in seinem Volume. (b) **Blackbox-Exporter von Prometheus:** prüft die Website über Caddy (Status, HTTPS, Zertifikat). Den Worker überwacht Prometheus über seine Metriken aus 7.3. Alles steht als Datei im Repo, ist getestet und läuft über **einen** Alarmweg (Alertmanager). Die Push-URL des Workers gibt es trotzdem, für einen externen Dienst in Phase 8.
+**Vorschlag:** (b). Alles als Code, nichts muss von Hand nachgebaut werden, wenn ein Volume verloren geht, und alle Alarme kommen aus einer Quelle. Wenn dir eine Status-Oberfläche wie bei Kuma wichtig ist, nehmen wir (a).
+**Antwort (27.11.):** Klingt gut, der Blackbox-Exporter gefällt mir. → (b)

@@ -33,7 +33,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Keine offenen Rückfragen.** Ideen für nach V1 stehen in `docs/IDEEN.md` (I-01 bis I-04).
 
 ## Nächste Aufgabe
-1. **Phase 7 – Monitoring, Alarme, Backups (lokal)** ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt. Vorher in `docs/ROADMAP.md` fein planen und vorlegen. Mitzunehmen ist der Punkt aus Phase 5: Auch unvollständige Worker-Runden schreiben den Heartbeat (E-036).
+1. **Phase 7 – Monitoring, Alarme, Backups (lokal)**: Go vom Nutzer am 2026-11-27. Plan in `docs/ROADMAP.md` (7.1–7.9, E-049). Als Nächstes **7.1 JSON-Logs ohne personenbezogene Daten**.
 
 **Arbeitsweise seit Phase 6 (F-019, E-040):** Jeder Schritt in einem eigenen Branch (`x.y-kurzname`), PR, warten bis grün (`gh pr checks <nr> --watch`), dann `gh pr merge <nr> --squash --subject "x.y: …"`. Direkt auf `main` geht nicht mehr. Push und Merge sind in `C:\Timo\Docker\.claude\settings.local.json` freigegeben.
 
