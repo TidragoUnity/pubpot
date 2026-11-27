@@ -85,6 +85,26 @@ public class SecurityTests(PubPotWebFactory factory) : IClassFixture<PubPotWebFa
         Assert.EndsWith("; upgrade-insecure-requests", Assert.Single(response.Headers.GetValues("Content-Security-Policy")), StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Die Statusseite wird bei einem POST ebenfalls per POST aufgerufen (Re-Execute). Ohne Ausnahme für das
+    /// Antiforgery-Token wurde aus einem 429 ein leeres 400 (gefunden in der Abnahme 5.8).
+    /// </summary>
+    [Fact]
+    public async Task Rate_limited_post_without_token_gets_429_page()
+    {
+        using var app = factory.WithWebHostBuilder(b => b.UseSetting("Spam:MaxPostsPerWindow", "1"));
+        using var client = CreateClient(app);
+
+        using var first = await client.PostAsync("/de/signup/creator", new FormUrlEncodedContent([]), Ct);
+        using var second = await client.PostAsync("/de/signup/creator", new FormUrlEncodedContent([]), Ct);
+        var html = await second.Content.ReadAsStringAsync(Ct);
+
+        Assert.Equal(HttpStatusCode.BadRequest, first.StatusCode);
+        Assert.Contains("<h1>", await first.Content.ReadAsStringAsync(Ct), StringComparison.Ordinal);
+        Assert.Equal(HttpStatusCode.TooManyRequests, second.StatusCode);
+        Assert.Contains("Bitte warte einen Moment.", html, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task No_hsts_over_plain_http()
     {

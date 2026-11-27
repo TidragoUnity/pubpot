@@ -115,6 +115,7 @@ Die Vorlage mit Kommentaren ist [`deploy/.env.example`](deploy/.env.example).
 | `POSTGRES_PASSWORD`, `PUBPOT_DB_PASSWORD`, `TWITCH_DB_PASSWORD` | ja | DB-Passwörter (Superuser, Web, Worker), nur Buchstaben und Ziffern |
 | `SITE_DOMAIN` | Server | Domain für Caddy, Standard `localhost` |
 | `BIND_ADDRESS` | Server | `0.0.0.0` auf dem Server, Standard `127.0.0.1` |
+| `EDGE_SUBNET` | – | Subnetz zwischen Caddy und web, Standard `172.30.0.0/24`. Ein zweites Projekt auf demselben Rechner braucht ein eigenes |
 | `Site__BaseUrl` | – | Adresse für Links in Mails, Standard `https://${SITE_DOMAIN}` |
 | `Smtp__Host`, `Smtp__Port`, `Smtp__Security`, `Smtp__Username`, `Smtp__Password`, `Smtp__FromAddress`, `Smtp__FromName` | Server | Mailversand. Lokal Standard: Mailpit |
 | `Admin__Username`, `Admin__PasswordHash` | – | Admin-Bereich, ohne Hash aus |
@@ -124,7 +125,7 @@ Die Vorlage mit Kommentaren ist [`deploy/.env.example`](deploy/.env.example).
 | `Worker__Languages`, `Worker__IntervalMinutes`, `Worker__StopAfterHours`, `Worker__GameIds`, `Worker__UserLogins` | – | was der Worker sammelt |
 | `IMAGE_TAG` | Server | Image-Version, lokal `local` |
 
-Feste Werte stehen direkt in `compose.yaml` (`Proxy__KnownNetworks`). Weitere Einstellungen wie Spam-Schutz,
+`Proxy__KnownNetworks` folgt automatisch aus `EDGE_SUBNET`. Weitere Einstellungen wie Spam-Schutz,
 Aufräum-Job und Mail-Ausgang haben Standardwerte in `appsettings.json`. Compose reicht sie bewusst nicht durch.
 
 ## Website lokal starten

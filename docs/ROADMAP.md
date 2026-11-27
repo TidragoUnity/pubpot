@@ -85,7 +85,7 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 
 > Ergebnis Lighthouse (Abnahme, lokal): Login, Liste, Detail, Löschen und `/de|en/signup/keep` jeweils mobil und Desktop **100/100/100** (Performance, Barrierefreiheit, Best Practices). SEO 54 nur wegen des gewollten `noindex` (`is-crawlable`) und der dann überflüssigen Meta-Beschreibung, genauso wie bei der Bestätigungsseite.
 
-## Phase 5 – Docker und Compose lokal 🔄
+## Phase 5 – Docker und Compose lokal ✅
 Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später auf dem VPS läuft. Die Anmeldung samt Double-Opt-in lässt sich unter `https://localhost` mit Mailpit testen.
 
 | # | Schritt | Status |
@@ -97,7 +97,7 @@ Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später 
 | 5.5 | **Compose für die Anwendung:** Dienste `migrate`, `web`, `migrate-twitch`, `worker` in `compose.yaml`. Startreihenfolge über `depends_on` (db gesund → Migration erfolgreich beendet → web). Jeder Dienst bekommt nur die Variablen, die er braucht. Härtung: schreibgeschütztes Dateisystem, `/tmp` als tmpfs, `no-new-privileges`, alle Linux-Capabilities entzogen. `build:` steht nur in `compose.override.yaml`, auf dem Server werden fertige Images gezogen | ✅ |
 | 5.6 | **Caddy:** `deploy/caddy/Caddyfile` mit Domain aus `SITE_DOMAIN`. Lokal `localhost` mit Caddys eigener Zertifizierungsstelle, auf dem VPS automatisch Let's Encrypt. Zwei Netze: `edge` (Caddy, web) und `backend` (web, db, worker …), Caddy kommt nie an die Datenbank. Ports über `BIND_ADDRESS` (Standard `127.0.0.1`). Kein Access-Log, weil IP-Adressen personenbezogen sind. `Server`-Header entfernt | ✅ |
 | 5.7 | **`.env.example` und Doku:** alle Variablen mit Kommentar (auch `Admin__PasswordHash`, `Notifications__Email`, `Notifications__DiscordWebhookUrl`, `Site__BaseUrl`), Befehl `docker compose run --rm --no-deps web hash-password`. README-Abschnitt „Alles in Docker starten“ und optional „Caddy-Zertifikat vertrauen“. Checkliste ergänzen | ✅ |
-| 5.8 | **Abnahme:** Start von null in einem eigenen Compose-Projekt (deine Entwicklungsdaten bleiben unberührt): alle Container gesund, Migration mit Exit-Code 0, Double-Opt-in im Browser über `https://localhost` mit Mailpit, Admin-Login über HTTPS (Secure-Cookie), HSTS-Header da, Container laufen nicht als root. Lighthouse über Caddy, Größe der Images notieren | ⬜ |
+| 5.8 | **Abnahme:** Start von null in einem eigenen Compose-Projekt (deine Entwicklungsdaten bleiben unberührt): alle Container gesund, Migration mit Exit-Code 0, Double-Opt-in im Browser über `https://localhost` mit Mailpit, Admin-Login über HTTPS (Secure-Cookie), HSTS-Header da, Container laufen nicht als root. Lighthouse über Caddy, Größe der Images notieren | ✅ |
 
 **Was für alle Schritte gilt**
 - Die bisherigen Wege bleiben: `dotnet run` gegen die Datenbank aus `deploy/` und `./scripts/check.sh` funktionieren weiter.
@@ -106,13 +106,18 @@ Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später 
 - Getrennte Konfiguration für staging und production kommt in Phase 8. `compose.yaml` ist dafür schon so gebaut, dass nur die `.env` wechselt.
 - `C:\Timo\Docker	witch-worker` und seine Container bleiben unberührt (F-001), siehe F-016.
 
+> Ergebnis der Abnahme: von leerem Volume bis „alles gesund“ in 46 s. Lighthouse über Caddy (`https://localhost/de` und `/de/signup/creator`, mobil und Desktop) **100/100/100/100**. Images entpackt: web 261 MB, migrate 295 MB, worker 146 MB, Caddy 92 MB. HSTS kommt für `localhost` absichtlich nicht (E-038), mit echter Domain prüfen das die Tests aus 5.1.
+
 ## Phase 6 – CI ⬜
 Grob: PR-Workflow (restore, build, format, Tests mit Postgres, Images bauen) · Push nach GHCR mit SHA-Tag bei Merge auf `main` · Dependabot (NuGet, Docker, Actions; keine 11.x-Pakete, E-007) · Secret Scanning.
+Aus Phase 5 mitnehmen: drei Images aus zwei Dockerfiles (`src/PubPot.Web/Dockerfile` mit den Zielen `web` und `migrate`, `src/TwitchWorker/Dockerfile`), Build-Kontext ist die Repo-Wurzel, Namen `ghcr.io/tidragounity/pubpot-{web,migrate,worker}`. Die Tests brauchen SDK 11 **und** die .NET-10-Laufzeit, dazu Docker für Testcontainers (zwei Testprojekte). Dependabot auch für `caddy`, `postgres` und `mailpit` in den Compose-Dateien.
 
 > **Phasen 7 und 8 sind gegenüber dem Auftrag getauscht** (E-013): Erst läuft alles lokal, dann kommt der VPS.
 
 ## Phase 7 – Monitoring, Alarme, Backups (lokal) ⬜
+Aus Phase 5 mitnehmen: Auch eine unvollständige Worker-Runde schreibt den Heartbeat (E-036). Der Alarm „Worker ohne Runde“ sollte vollständige Runden zählen.
 Grob: JSON-Logs ohne personenbezogene Daten · OpenTelemetry + `/metrics` · Prometheus, Grafana mit Start-Dashboard, node-exporter, cAdvisor · Uptime Kuma + Push-URL im Worker · Alarme per E-Mail, lokal an Mailpit (E-014) · nächtliche Backups mit Rotation in einen lokalen Ordner, Restore-Skript, dokumentierter Restore-Test. Alle Oberflächen nur an `127.0.0.1`.
 
 ## Phase 8 – VPS und CD: Staging, dann Production ⬜
+Aus Phase 5 mitnehmen: Staging neben Production auf demselben VPS braucht ein eigenes `EDGE_SUBNET` und einen eigenen Compose-Projektnamen. Pro Datenbank läuft nur eine Web-Instanz (E-037). Auf dem Server `BIND_ADDRESS=0.0.0.0`, Firewall auch für 443/UDP.
 Grob: vorher F-008 klären (VPS, Backup-Ziel, Domain, SMTP) · Anleitung VPS-Härtung · Compose-Konfiguration für staging/production · Deploy-Skript (pull, migrate, up, Smoke-Test, automatischer Rollback) · Staging bei Merge auf `main` · Production über Tag `v*` mit manueller Freigabe · Monitoring auf dem VPS, Zugang per SSH-Tunnel (F-009) · Backups auf externen Speicher · README fertig.

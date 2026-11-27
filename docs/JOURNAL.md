@@ -5,6 +5,16 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.8 – Abnahme, Phase 5 abgeschlossen
+- **Start von null** in einem eigenen Compose-Projekt (`-p pubpot-abnahme`, frische Zufallspasswörter nur im Scratchpad). Dein Stack war dafür gestoppt, die Volumes blieben erhalten. Das Init-Skript legte beide Datenbanken an, `migrate` spielte 5 Migrationen ein (Exit 0). Bis alles `healthy` war: **46 s**.
+- **Geprüft:** web und migrate laufen als UID 1654, die Datenbank als 999, Caddy als root ohne Capabilities. Alle eigenen Container sind schreibgeschützt mit `no-new-privileges`. Caddy kann `db` nicht einmal auflösen (getrennte Netze). Das Worker-Schema lief in die frische `twitch`-Datenbank.
+- **Im Browser über `https://localhost`** (Zertifikatsfehler ignoriert, F-017): Weiterleitung `/` → `/de`, Creator-Anmeldung, Bestätigungslink in Mailpit mit `https://localhost`, Bestätigung, Hinweis-Mail mit HTTPS-Link zur Detailseite. Der Link führt ohne Login zum Login und danach zurück zur Detailseite. Admin-Cookie `Secure`, `HttpOnly`, `SameSite=Strict`, Sitzungscookie. Logout. Keine Konsolenfehler. Datum und Uhrzeit in deutscher Zeit (ICU und Zeitzonen im Image funktionieren).
+- **Lighthouse über Caddy:** `/de` und `/de/signup/creator`, mobil und Desktop, jeweils 100/100/100/100.
+- **Gefunden und behoben:** (1) Bei POSTs ohne Token wurde aus dem 429 der Statusseite ein leeres 400, weil die Statusseite selbst ein Token verlangte. Jetzt ignorieren die Statusseiten das Token (E-039, mit Test). Danach über Caddy: 5 × 400 mit Seite, dann 429, obwohl jeder POST ein anderes gefälschtes `X-Forwarded-For` hatte. Damit ist der Schutz aus 5.1 auch im echten Aufbau bestätigt. (2) Das feste Subnetz von „edge“ hätte ein zweites Projekt auf demselben Rechner verhindert. Jetzt einstellbar über `EDGE_SUBNET` (E-039).
+- Danach: Abnahme-Projekt samt Volumes entfernt, dein Stack wieder wie vorher (db, Mailpit, Adminer), 3 Anmeldungen und 5 Migrationen unverändert.
+- Stand: 402 Tests grün (zwei Testprojekte), 5 Migrationen.
+- **Als Nächstes:** Phase 6 (CI). Vorher fein planen und deine Bestätigung abwarten.
+
 ## 2026-11-27 · Schritt 5.7 – `.env.example` und Doku
 - `deploy/.env.example` vollständig: DB-Passwörter, `SITE_DOMAIN`, `BIND_ADDRESS`, `Site__BaseUrl`, SMTP, Admin (mit Befehl `docker compose run --rm --no-deps web hash-password`), Hinweise, Worker mit `COMPOSE_PROFILES`, `IMAGE_TAG`. Jeder Abschnitt sagt, was lokal optional und was auf dem Server Pflicht ist. Dazu der Hinweis auf `$` und `;` in Passwörtern.
 - README: neuer Abschnitt „Alles in Docker starten“ (Ablauf, Dienste, Admin-Hash im Container, Befehle), „Caddy-Zertifikat vertrauen (optional)“ mit `certutil -user` (ohne Admin-Rechte, wieder entfernbar) und eine Tabelle aller Variablen in `deploy/.env`.

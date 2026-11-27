@@ -1,4 +1,7 @@
 @page "/error"
+@* Wird bei einem POST auch per POST aufgerufen (Re-Execute). Die Seite ändert nichts, das Antiforgery-Token
+   zu prüfen machte aus einem 429 oder 500 nur ein leeres 400 (gefunden in der Abnahme 5.8). *@
+@attribute [Microsoft.AspNetCore.Mvc.IgnoreAntiforgeryToken]
 @{
     ViewData["Title"] = S["Error.Title"];
 }

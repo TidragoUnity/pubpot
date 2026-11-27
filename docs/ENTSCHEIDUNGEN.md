@@ -288,6 +288,11 @@ Umsetzung von E-011 für den Worker.
 - **Healthcheck** über einen internen Port 2020 (`/health`), nicht veröffentlicht.
 **Gut zu wissen:** Für `localhost` setzt ASP.NET absichtlich **kein HSTS**. Sonst würde der Browser `localhost` ein Jahr lang nur noch per HTTPS aufrufen, und `dotnet run` unter `http://localhost:5080` ginge nicht mehr. Dass HSTS hinter Caddy mit echter Domain kommt, prüfen die Tests aus 5.1.
 
+## E-039 · Statusseiten ohne Antiforgery-Prüfung, Subnetz von „edge“ einstellbar
+Zwei Funde aus der Abnahme 5.8.
+- **Statusseiten (`/status/{code}`, `/error`) ignorieren das Antiforgery-Token.** Bei einem POST ruft ASP.NET die Statusseite ebenfalls per POST auf (Re-Execute). Ohne gültiges Token wurde daraus ein leeres 400: Aus „429 Bitte warte einen Moment“ oder „500“ wurde für Bots ohne Token und für Menschen mit abgelaufenem Formular eine leere Seite mit falschem Code. Die Statusseiten ändern nichts, also braucht es dort keine Prüfung. Ein Test deckt es ab.
+- **`EDGE_SUBNET`** (Standard `172.30.0.0/24`) legt das Subnetz von „edge“ fest, und `Proxy__KnownNetworks` folgt automatisch. Docker vergibt jedes Subnetz pro Rechner nur einmal. Ein zweites Compose-Projekt (die Abnahme, später Staging neben Production) bräuchte sonst ein anderes.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.

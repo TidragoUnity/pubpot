@@ -78,7 +78,7 @@ services:
       # Links in Mails. Standard: die Domain, unter der Caddy die Seite ausliefert.
       Site__BaseUrl: ${Site__BaseUrl:-https://${SITE_DOMAIN:-localhost}}
       # Nur Caddy (Netz "edge", Subnetz siehe unten bei networks) darf Client-IP und HTTPS melden (E-033).
-      Proxy__KnownNetworks: 172.30.0.0/24
+      Proxy__KnownNetworks: ${EDGE_SUBNET:-172.30.0.0/24}
       Smtp__Host: ${Smtp__Host:-}
       Smtp__Port: ${Smtp__Port:-587}
       Smtp__Security: ${Smtp__Security:-StartTls}
@@ -177,7 +177,9 @@ volumes:
 
 networks:
   # Festes Subnetz, damit die App weiß, wem sie die Forwarded-Header glauben darf (Proxy__KnownNetworks bei web).
+  # Pro Rechner darf jedes Subnetz nur einmal vorkommen: Ein zweites Projekt (z. B. staging neben production)
+  # braucht ein eigenes, etwa EDGE_SUBNET=172.31.0.0/24.
   edge:
     ipam:
       config:
-        - subnet: 172.30.0.0/24
+        - subnet: ${EDGE_SUBNET:-172.30.0.0/24}

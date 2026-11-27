@@ -27,18 +27,17 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Texte** stehen immer in `.resx`, Deutsch und Englisch (`*.en.resx`). Der Paritätstest meldet fehlende Übersetzungen.
 
 ## Stand (2026-11-27)
-- **Phasen 0–4 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks. Dazu der **Admin-Bereich** (`/admin`, nur Deutsch): Login mit Sperre, Liste mit Filter und Suche, Detailseite mit Pipeline, CSV-Export, Löschen (DSGVO), Hinweis-Mail bei neuer Anmeldung (Discord optional) und die **Aufbewahrungsfrist** mit Warnmail und Link „Ich möchte dabei bleiben“.
-- 401 Tests grün, 5 Migrationen. Lighthouse auf allen Seiten 100 (Performance, Barrierefreiheit, Best Practices).
-- **Phase 5 in Arbeit** (Schritte 5.1–5.8 in der Roadmap, F-016 und F-017 beantwortet, E-032). Fertig: 5.1 bis 5.7 (E-033 bis E-038), offen nur noch 5.8 Abnahme. **Keine offenen Rückfragen.**
+- **Phasen 0–5 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks, Admin-Bereich (`/admin`) mit Pipeline, Export, Löschen, Hinweis-Mails und Aufbewahrungsfrist.
+- **Phase 5 (Docker):** `cd deploy && docker compose up -d --build` startet alles hinter Caddy unter `https://localhost` (Zertifikatswarnung wegklicken, F-017). Images „chiseled“ ohne Shell, Nicht-Root, eingebaute Healthchecks. Migrationen als eigener Container (EF-Bundle bzw. SQL-Skripte für den Worker). Worker nur mit `--profile worker` (F-016). Forwarded Headers nur vom Netz „edge“ (E-033). Entscheidungen E-032 bis E-039.
+- 402 Tests grün (`PubPot.Web.Tests`, `TwitchWorker.Tests`), 5 Migrationen. Lighthouse überall 100, auch über Caddy.
+- **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
-### Phase 5 – Docker und Compose lokal (freigegeben, Schritt für Schritt umsetzen)
-Nächster offener Schritt laut `docs/ROADMAP.md`. Jeder Schritt ist ein eigener Commit.
-- **Worker nur mit Profil `worker`** (F-016). Bis zum Ende der Studie (ca. 03.12.) keine echte Runde gegen Twitch.
-- **Lokal `https://localhost`** mit Caddys eigenem Zertifikat (F-017).
-- Aus Phase 4: In die `.env.example` kommen `Admin__PasswordHash`, `Notifications__Email` und `Notifications__DiscordWebhookUrl`. `hash-password` muss im Container laufen (`docker compose run --rm --no-deps web hash-password`). `Site__BaseUrl` ist Pflicht, denn der Aufbewahrungs-Job baut Links ohne Anfrage (E-031).
+### Phase 6 – CI ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt
+1. Phase 6 in `docs/ROADMAP.md` in Schritte 6.1, 6.2 … aufteilen, dem Nutzer vorlegen und auf das OK warten.
+2. Grobe Inhalte und was aus Phase 5 mitzunehmen ist, stehen in der Roadmap: drei Images aus zwei Dockerfiles, Tests brauchen SDK 11 plus .NET-10-Laufzeit und Docker, Dependabot ohne 11.x-Pakete (E-007), auch für die Images in Compose.
 
-**Hilfreich zu wissen:** Die Data-Protection-Schlüssel liegen schon in der Datenbank, Admin-Cookies überleben also einen Neustart. Mails sind nur Text und laufen über die Outbox, Links kommen aus `Site:BaseUrl` (E-021). Das Rate-Limiting gibt es schon in `Spam/RateLimits.cs`.
+**Hilfreich zu wissen:** Lokal entweder `dotnet run` (dann nur `docker compose up -d db mailpit adminer`) oder der Web-Container, nicht beides gegen dieselbe Datenbank (E-037). Beim Testlauf erscheint zweimal „An error occurred while reading the key ring“. Das ist harmlos und kommt aus den Migrations-Tests aus Phase 4.
 
 ## Wo steht was
 | Datei | Wann lesen |
