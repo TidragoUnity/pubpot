@@ -347,6 +347,15 @@ Zwei Funde aus der Abnahme 5.8.
 - **Dependabot-Warnungen und Sicherheitsupdates eingeschaltet** (per API). Bei einer bekannten Lücke in einem verwendeten Paket öffnet Dependabot sofort einen PR, nicht erst am Montag.
 **Ablauf:** Dependabot-PRs laufen durch dieselbe CI. Gemergt wird nur, wenn sie grün ist. Bis die Regeln aus 6.7 aktiv sind, entscheide ich das von Fall zu Fall.
 
+## E-046 · CodeQL für C#, Workflows und JavaScript
+**Entscheidungen:**
+- **Eigener Workflow `codeql.yml`** („Advanced setup“) statt GitHubs „Default setup“: Er steht versioniert im Repo, nutzt dieselben festgenagelten Actions und dieselbe .NET-Einrichtung wie die CI.
+- **Drei Sprachen:** C# mit echtem Build (`build-mode: manual`, genauer als die Analyse ohne Build), GitHub Actions (findet z. B. Script Injection über `${{ }}` oder zu weite Rechte in den Workflows) und JavaScript (die Skripte in `wwwroot/js`).
+- **Regelsatz `security-extended`:** mehr Sicherheitsregeln als der Standard, dafür gelegentlich ein Fehlalarm. Einen solchen schließt man in GitHub mit Begründung („won't fix“ oder „false positive“), dann bleibt er dokumentiert.
+- **Läufe:** bei Pull Requests, auf `main` und mittwochs (neue Regeln von GitHub).
+- **Rechte:** `security-events: write` nur im Analyse-Job.
+**Warum zusätzlich zu den Tests:** Tests prüfen, ob das gewünschte Verhalten da ist. CodeQL sucht nach Mustern, die zu Lücken führen (SQL-Injection, offene Weiterleitungen, unsichere Deserialisierung, Log-Injection), auch an Stellen, an die beim Testen niemand gedacht hat.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
