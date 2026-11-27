@@ -300,6 +300,17 @@ Zwei Funde aus der Abnahme 5.8.
 - **6.1 gleich als PR:** Die neue CI prüft damit schon ihren eigenen Pull Request. Ab 6.7 erzwingen Regeln diesen Ablauf.
 **Warum:** Erst durch Pull Requests hat die CI das letzte Wort. Ungeprüfter Code kommt nicht auf `main`, und jeder Schritt lässt sich auf GitHub mit Diff und CI-Ergebnis nachvollziehen.
 
+## E-041 · CI-Workflow: dieselben Prüfungen wie lokal, festgenagelte Actions
+**Entscheidungen:**
+- **Die CI ruft `./scripts/check.sh` auf**, statt die Schritte im Workflow zu wiederholen. Damit gibt es nur eine Stelle, an der steht, was „grün“ heißt. In GitHub Actions gliedert das Skript seine Abschnitte als einklappbare Gruppen (`::group::`).
+- **Fremde Actions auf Commit-SHA** (`actions/checkout@3d3c42e…  # v7.0.1`). Ein Tag wie `v7` kann der Autor oder ein Angreifer mit Zugriff jederzeit auf anderen Code umbiegen, ein SHA nicht. Der Kommentar zeigt die Version, und Dependabot (6.5) aktualisiert beides.
+- **Minimale Rechte:** `permissions: contents: read` für den ganzen Workflow. `persist-credentials: false` beim Checkout, damit das Token nicht in `.git/config` liegen bleibt.
+- **.NET:** SDK 11 aus `global.json` und zusätzlich `10.0.x`, weil die Tests auf der .NET-10-Laufzeit laufen (E-007).
+- **NuGet-Cache** über `actions/cache` mit einem Schlüssel aus `Directory.Packages.props` und den `.csproj`-Dateien. Den eingebauten Cache von `setup-dotnet` nutzen wir nicht, weil er Lock-Dateien verlangt.
+- **Abbruch alter Läufe** nur bei Pull Requests. Auf `main` läuft jeder Lauf zu Ende, weil er später Images baut (6.3).
+- **Runner `ubuntu-24.04`** statt `ubuntu-latest`: Ein Wechsel der Ubuntu-Version kommt dann bewusst per Änderung, nicht unbemerkt.
+**Abweichung vom Plan:** Keine Testergebnisse als Artefakt. Der Test-Runner (Microsoft Testing Platform mit xUnit v3) schreibt TRX nur mit einem Zusatzpaket, und das Log des Laufs zeigt fehlgeschlagene Tests mit Meldung und Stacktrace ohnehin.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
