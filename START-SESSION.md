@@ -30,7 +30,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Phasen 0–6 fertig:** Website DE/EN mit Anmeldung, Double-Opt-in, Spam-Schutz, Admin-Bereich, Aufbewahrungsfrist. Docker-Stack hinter Caddy (`https://localhost`).
 - **Phase 6 (CI):** Jeder PR durchläuft „Build und Tests“ (`check.sh`), „Images und Smoke-Test“ (`smoke-test.sh`, Trivy) und CodeQL. Merges auf `main` legen die Images öffentlich in GHCR ab (`ghcr.io/tidragounity/pubpot-{web,migrate,worker}:<sha>`). Dependabot läuft wöchentlich. `main` ist geschützt: nur PRs, nur Squash, nur mit grüner CI (E-040 bis E-048).
 - 404 Tests grün, 5 Migrationen. MailKit 5.0 mit SMTP-Test gegen Mailpit (ersetzt Dependabot-PR #7).
-- **Keine offenen Rückfragen.**
+- **Keine offenen Rückfragen.** Ideen für nach V1 stehen in `docs/IDEEN.md` (I-01 bis I-04).
 
 ## Nächste Aufgabe
 1. **Phase 7 – Monitoring, Alarme, Backups (lokal)** ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt. Vorher in `docs/ROADMAP.md` fein planen und vorlegen. Mitzunehmen ist der Punkt aus Phase 5: Auch unvollständige Worker-Runden schreiben den Heartbeat (E-036).
@@ -48,6 +48,7 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 | `docs/RUECKFRAGEN.md` | wenn der Nutzer eine Frage beantwortet oder eine neue nötig ist |
 | `docs/ENTSCHEIDUNGEN.md` | nur die E-Nummer, auf die verwiesen wird (`grep "## E-0xx"`) |
 | `docs/AUFTRAG.md` | nur den passenden Abschnitt (z. B. „Admin-Bereich“, „Docker“) |
+| `docs/IDEEN.md` | Ideen für die Plattform nach V1 (I-0xx), nur wenn der Nutzer eine Idee ausarbeiten will |
 | `docs/CHECKLISTE-SELBST.md` | Aufgaben für den Nutzer (Konten, Geld, Recht), bei Bedarf ergänzen |
 | `README.md` | lokales Starten, Befehle, Ports |
 
