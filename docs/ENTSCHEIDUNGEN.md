@@ -378,6 +378,18 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-054 · Blackbox-Exporter prüft über Caddy mit der echten Domain, eigenes Netz `probe`, Domain per Startskript (7.5)
+**Entscheidungen:**
+- **Drei Prüfungen alle 30 s:** `/health/ready` (App und Datenbank), `/de` (Startseite) und `http://` → 308 auf `https://`. Die Antwort muss von der App kommen (Text „Healthy“ bzw. „PubPot“). Eine leere Antwort von Caddy reicht nicht.
+- **Ziel ist der Container `caddy`,** mit der Domain als Host-Header und TLS-Name (SNI, Parameter `hostname`). Geprüft wird damit, was Besucher bekommen: Caddy-Konfiguration, Zertifikat, Weiterleitung und App. Nicht geprüft werden DNS und Firewall. Das übernimmt in Phase 8 ein externer Dienst, der auch einen Ausfall des ganzen Servers bemerkt.
+- **Zertifikat:**
+  - Mit echter Domain prüft der Exporter vollständig, samt Ablaufdatum (`probe_ssl_earliest_cert_expiry`).
+  - Lokal (`localhost`) stammt das Zertifikat von Caddys eigener Zertifizierungsstelle. HTTPS muss funktionieren, die Kette wird nicht geprüft.
+  - Die Ziele tragen das Label `tls="local|public"`. Der Ablauf-Alarm (7.6) gilt nur für `public`, weil Caddy lokal Zertifikate mit wenigen Stunden Laufzeit ausstellt.
+- **Eigenes Netz `probe`** nur für Blackbox und Caddy. `edge` bleibt Caddy und web vorbehalten (E-038). Über `probe` erreicht Caddy nichts anderes.
+- **Domain per `start.sh`:** Prometheus liest keine Umgebungsvariablen in seiner Konfiguration. Das Skript setzt `SITE_DOMAIN` ein, prüft die Domain auf erlaubte Zeichen und schreibt nach `/tmp`. `check.sh` prüft die Konfiguration über dasselbe Skript, einmal mit `localhost` und einmal mit einer echten Domain.
+- **Dashboard:** neue Kacheln „Website von außen“ (alle drei Prüfungen), „App (intern)“ und „Zertifikat gültig noch“.
+
 ## E-053 · Monitoring-Stack im Profil `monitoring`: Konfiguration als Dateien, Oberflächen nur lokal (7.4)
 **Entscheidungen:**
 - **Vier Dienste im Profil `monitoring`:**

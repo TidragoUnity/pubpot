@@ -1,0 +1,40 @@
+# Blackbox-Exporter: prüft die Website so, wie ein Besucher sie sieht, über Caddy mit HTTPS (Schritt 7.5, E-054).
+# Prometheus wählt pro Ziel das Modul (prometheus.yml, Job "website"). Doku: https://github.com/prometheus/blackbox_exporter
+modules:
+  # Auf dem Server: echtes Zertifikat (Let's Encrypt), vollständig geprüft samt Ablaufdatum.
+  https_public:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200]
+      fail_if_not_ssl: true
+      preferred_ip_protocol: ip4
+      # Die Antwort muss von der App kommen: "Healthy" von /health/ready, "PubPot" auf der Startseite.
+      fail_if_body_not_matches_regexp: ["Healthy|PubPot"]
+
+  # Lokal (SITE_DOMAIN=localhost): Caddy stellt das Zertifikat mit seiner eigenen Zertifizierungsstelle aus,
+  # der niemand vertraut. HTTPS muss funktionieren, die Kette wird aber nicht geprüft.
+  https_local:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [200]
+      fail_if_not_ssl: true
+      preferred_ip_protocol: ip4
+      # Die Antwort muss von der App kommen: "Healthy" von /health/ready, "PubPot" auf der Startseite.
+      fail_if_body_not_matches_regexp: ["Healthy|PubPot"]
+      tls_config:
+        insecure_skip_verify: true
+
+  # http:// muss dauerhaft (308) auf https:// umleiten.
+  http_redirect:
+    prober: http
+    timeout: 10s
+    http:
+      valid_status_codes: [308]
+      no_follow_redirects: true
+      fail_if_ssl: true
+      preferred_ip_protocol: ip4
+      fail_if_header_not_matches:
+        - header: Location
+          regexp: "^https://"
