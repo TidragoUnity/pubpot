@@ -137,6 +137,8 @@ services:
       retries: 3
     networks:
       - edge
+      # Nur für den Blackbox-Exporter (Profil "monitoring"). Darüber erreicht Caddy sonst nichts.
+      - probe
     depends_on:
       web:
         condition: service_healthy
@@ -198,11 +200,14 @@ services:
     profiles: [monitoring]
     <<: *hardening
     restart: unless-stopped
+    # start.sh setzt die Domain in prometheus.yml ein (für die Blackbox-Prüfungen, E-054) und startet Prometheus.
+    entrypoint: ["sh", "/etc/prometheus/start.sh"]
     command:
-      - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
       - --storage.tsdb.retention.time=30d
       - --storage.tsdb.retention.size=2GB
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-localhost}
     volumes:
       - ./monitoring/prometheus:/etc/prometheus:ro
       - prometheus_data:/prometheus
@@ -250,6 +255,22 @@ services:
       interval: 10s
       timeout: 3s
       retries: 12
+
+  # Prüft die Website von außen gesehen: über Caddy, mit HTTPS und der echten Domain (E-054).
+  # Hängt dafür im eigenen Netz "probe", das es nur mit Caddy teilt. Das Netz "edge" bleibt Caddy und web vorbehalten.
+  blackbox:
+    logging: *logging
+    image: prom/blackbox-exporter:v0.29.1
+    profiles: [monitoring]
+    <<: *hardening
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/blackbox/blackbox.yml
+    volumes:
+      - ./monitoring/blackbox:/etc/blackbox:ro
+    networks:
+      - default
+      - probe
 
   # Messwerte des Servers: CPU, Arbeitsspeicher, Festplatte. Liest das Dateisystem des Servers nur lesend.
   node-exporter:
@@ -305,3 +326,5 @@ networks:
     ipam:
       config:
         - subnet: ${EDGE_SUBNET:-172.30.0.0/24}
+  # Blackbox-Exporter → Caddy (E-054).
+  probe:

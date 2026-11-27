@@ -30,8 +30,11 @@ dotnet test --solution PubPot.slnx --no-build
 section "Monitoring-Konfiguration (promtool)"
 prometheus_image=$(sed -n 's|^ *image: \(prom/prometheus:.*\)$|\1|p' deploy/compose.yaml)
 monitoring_dir="$(pwd -W 2>/dev/null || pwd)/deploy/monitoring"
-MSYS_NO_PATHCONV=1 docker run --rm -v "$monitoring_dir/prometheus:/etc/prometheus:ro" --entrypoint promtool \
-  "$prometheus_image" check config /etc/prometheus/prometheus.yml
+# Einmal wie lokal (localhost) und einmal wie auf dem Server (echte Domain), über start.sh wie im Container.
+for domain in localhost pubpot.example; do
+  MSYS_NO_PATHCONV=1 docker run --rm -e SITE_DOMAIN="$domain" -v "$monitoring_dir/prometheus:/etc/prometheus:ro" \
+    --entrypoint sh "$prometheus_image" /etc/prometheus/start.sh check
+done
 
 [ -n "${in_group:-}" ] && echo "::endgroup::"
 echo "==> Alles grün."

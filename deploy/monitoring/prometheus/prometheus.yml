@@ -1,7 +1,8 @@
 # Prometheus – holt alle 15 Sekunden die Messwerte ab ("Pull", E-049) und speichert sie 30 Tage.
 # Geprüft in der CI mit "promtool check config" (scripts/check.sh). Doku: https://prometheus.io/docs/prometheus/latest/configuration/configuration/
 #
-# Alle Ziele liegen im internen Docker-Netz "default". Von außen ist keines erreichbar.
+# Alle Ziele liegen in internen Docker-Netzen. Von außen ist keines erreichbar.
+# Platzhalter: __SITE_DOMAIN__ (Domain aus SITE_DOMAIN) und __TLS__ (local oder public) setzt start.sh beim Start ein.
 
 global:
   scrape_interval: 15s
@@ -36,3 +37,51 @@ scrape_configs:
   - job_name: cadvisor
     static_configs:
       - targets: ["cadvisor:8080"]
+
+  # Website von außen gesehen (Blackbox-Exporter, E-054): über Caddy mit HTTPS und der echten Domain.
+  # Die Anfrage geht an den Container "caddy". Host-Header und TLS-Name (SNI) sind die Domain, wie bei Besuchern.
+  # /health/ready prüft App und Datenbank, /de die Startseite.
+  - job_name: website
+    scrape_interval: 30s
+    metrics_path: /probe
+    params:
+      module: [https___TLS__]
+      hostname: [__SITE_DOMAIN__]
+    static_configs:
+      - targets: ["https://caddy/health/ready", "https://caddy/de"]
+        labels:
+          tls: __TLS__
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      # Im Dashboard und in Alarmen steht die Adresse, die Besucher aufrufen.
+      - source_labels: [__address__]
+        regex: "https://caddy(.*)"
+        replacement: "https://__SITE_DOMAIN__$1"
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  # http:// muss dauerhaft auf https:// umleiten (308).
+  - job_name: website_redirect
+    scrape_interval: 30s
+    metrics_path: /probe
+    params:
+      module: [http_redirect]
+      hostname: [__SITE_DOMAIN__]
+    static_configs:
+      - targets: ["http://caddy/de"]
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__address__]
+        regex: "http://caddy(.*)"
+        replacement: "http://__SITE_DOMAIN__$1"
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+
+  # Der Blackbox-Exporter selbst.
+  - job_name: blackbox
+    static_configs:
+      - targets: ["blackbox:9115"]

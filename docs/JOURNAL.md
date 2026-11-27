@@ -5,6 +5,13 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.5 – Erreichbarkeit mit dem Blackbox-Exporter
+- **Blackbox-Exporter** im Profil `monitoring`. Er prüft alle 30 s über Caddy mit HTTPS und der echten Domain: `/health/ready`, Startseite und die Umleitung von http auf https. Die Antwort muss von der App stammen (E-054).
+- **Eigenes Netz `probe`** (nur Blackbox und Caddy). Die Domain kommt per `start.sh` in die Prometheus-Konfiguration. `check.sh` prüft sie für `localhost` und für eine echte Domain.
+- **Dashboard:** Kacheln „Website von außen“, „App (intern)“ und „Zertifikat gültig noch“.
+- **Smoke-Test:** Alle drei Prüfungen bestehen, Blackbox ist als Ziel erreichbar (15 Prüfungen insgesamt).
+- **Als Nächstes:** 7.6 Alarme per E-Mail über Alertmanager.
+
 ## 2026-11-27 · Schritt 7.4 – Prometheus, Grafana, node-exporter, cAdvisor
 - **Profil `monitoring`:** Prometheus (127.0.0.1:9090) und Grafana (127.0.0.1:3000) mit fertiger Datenquelle und dem Dashboard „PubPot – Start“, dazu node-exporter und cAdvisor. Die Konfiguration liegt als Dateien in `deploy/monitoring/` (E-053).
 - **Grafana** startet nur mit `GRAFANA_ADMIN_PASSWORD` und baut keine Verbindungen nach außen auf.
