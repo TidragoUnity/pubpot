@@ -21,7 +21,11 @@ cleanup() {
     echo "==> Fehlgeschlagen. Logs aller Container:"
     compose --profile worker --profile monitoring logs --no-color || true
   fi
+  # Backups gehören im Container root (E-056), deshalb über den Container löschen.
+  compose run --rm --no-deps --entrypoint sh backup -c 'rm -rf /backups/daily /backups/weekly /backups/.status-*' \
+    >/dev/null 2>&1 || true
   compose --profile worker --profile monitoring down -v --remove-orphans >/dev/null 2>&1 || true
+  rmdir backups-smoke 2>/dev/null || true
   rm -f "$env_file"
 }
 trap cleanup EXIT
@@ -37,6 +41,7 @@ IMAGE_TAG=${IMAGE_TAG:-local}
 EDGE_SUBNET=172.31.250.0/24
 Smtp__Host=smtp.invalid
 Smtp__FromAddress=smoke@example.test
+BACKUP_DIR=./backups-smoke
 ENV
 
 check() { # check <Beschreibung> <Befehl …>
@@ -91,6 +96,19 @@ prometheus_targets_up() {
   prom 'up' >&2
   return 1
 }
+# Backups (E-056): beim Start sofort beide Datenbanken und die Rollen gesichert, Messwerte kommen in Prometheus an.
+backup_files() {
+  compose exec -T backup sh -c 'ls /backups/daily/pubpot-*.dump /backups/daily/twitch-*.dump /backups/daily/roles-*.sql' \
+    >/dev/null
+}
+backup_metrics() {
+  for _ in $(seq 1 30); do
+    prom 'count(pubpot_backup_last_run_success == 1)' | grep -q '"2"' && return 0
+    sleep 2
+  done
+  prom 'pubpot_backup_last_run_success' >&2
+  return 1
+}
 # Alarme (E-055): Regeln geladen, Alertmanager verbunden, und im gesunden Stack feuert nichts.
 alerting_ready() {
   curl -s http://127.0.0.1:9090/api/v1/rules | grep -q '"name":"WebsiteNichtErreichbar"' &&
@@ -136,6 +154,8 @@ check "/metrics im Docker-Netz (web:9464) mit Anfragen-Metrik" metrics_inside
 check "Worker: /metrics im Container (ohne Netz, ohne Twitch)" worker_metrics
 check "Prometheus erreicht web, node-exporter, cAdvisor, Blackbox, Alertmanager und sich selbst" prometheus_targets_up
 check "Alarmregeln geladen, Alertmanager verbunden, kein Alarm aktiv" alerting_ready
+check "Backup beim Start: pubpot, twitch und Rollen gesichert" backup_files
+check "Backup-Messwerte in Prometheus: beide erfolgreich" backup_metrics
 check "Blackbox: Website per HTTPS über Caddy, http leitet um" website_probes
 check "Grafana: Datenquelle OK, Start-Dashboard vorhanden" grafana_ready
 check "Dashboard: alle Abfragen gültig, wichtige mit Daten" dashboard_queries

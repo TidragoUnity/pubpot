@@ -5,6 +5,17 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 7.7 – Backups
+- **Dienst `backup`:**
+  - Er sichert `pubpot`, `twitch` und die Rollen beim ersten Start sofort, dann jede Nacht um 03:00.
+  - Format `pg_dump` (Custom) bzw. `pg_dumpall --roles-only`. Jedes Backup wird vor dem Zählen mit `pg_restore --list` geprüft (E-056).
+  - Aufbewahrung: 7 Tage täglich, 4 Wochen wöchentlich. Gelöscht wird nur nach Erfolg.
+- **Messwerte** für die Backup-Alarme kommen über den Textfile-Collector des node-exporters.
+- **`scripts/restore.sh`:** zeigt die Backups, stellt nach Rückfrage wieder her und stoppt bzw. startet dabei web oder worker.
+- **`check.sh`** prüft jetzt die Syntax aller Shell-Skripte.
+- **Smoke-Test:** Backups beim Start und Messwerte in Prometheus (19 Prüfungen).
+- **Als Nächstes:** 7.8 Restore-Test in der CI.
+
 ## 2026-11-27 · Schritt 7.6 – Alarme per E-Mail
 - **Elf Alarmregeln** für Website, Worker, Server, Monitoring und Backups, mit **16 Unit-Tests** (`promtool test rules`) in `check.sh` und damit in der CI (E-055).
 - **Gefunden durch die Tests:** Im Test „wenig Verkehr“ lag die Testmenge genau auf der Grenze von 10 Anfragen. Die Testdaten wurden korrigiert, die Regel war richtig.
