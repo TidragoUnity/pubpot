@@ -123,3 +123,17 @@ So funktioniert es:
 **Möglichkeiten:** (a) Lokal **HTTPS** unter `https://localhost`, Zertifikat vertrauen ist optional und steht als Anleitung in der README. (b) Lokal nur **HTTP** über Caddy. Dann lassen sich HSTS, Secure-Cookies und das Admin-Cookie (`__Host-`) lokal nicht so testen wie auf dem Server.
 **Vorschlag:** (a). Lokal läuft dann dasselbe wie später auf dem VPS, nur mit anderem Zertifikat. Ob du das Zertifikat einträgst, entscheidest du selbst. Ohne Eintrag klickst du einmal „Trotzdem fortfahren“.
 **Antwort (27.11.):** HTTPS, die Zertifikatswarnung klicke ich vorerst weg.
+
+### F-018 · Images in GHCR öffentlich oder privat? · beantwortet
+**Wichtig ab:** Schritt 6.3.
+**Kontext:** Die CI legt die Images in der GitHub Container Registry ab. Neue Images sind dort zunächst privat. Der VPS bräuchte dann ein eigenes Token zum Herunterladen.
+**Möglichkeiten:** (a) **öffentlich:** jeder kann die Images ziehen, kein Token auf dem Server nötig. In den Images steckt nur, was ohnehin im öffentlichen Repo liegt, keine Secrets. (b) **privat:** nur du, der VPS braucht ein Token mit `read:packages`, das alle 90 Tage erneuert werden muss.
+**Vorschlag:** (a). Das Repo ist ohnehin öffentlich, die Images verraten nichts Neues, und auf dem Server liegt ein Geheimnis weniger. Umstellen geht einmalig per Klick auf GitHub (Package settings → Change visibility). Das steht dann in der Checkliste.
+**Antwort (27.11.):** Ja, öffentlich, wenn es kein Aufwand ist (sonst wäre auch das Token in Ordnung). → Einmal ein Klick pro Image nach dem ersten Push, also öffentlich.
+
+### F-019 · Arbeitsweise mit Pull Requests ab Schritt 6.7 · beantwortet
+**Wichtig ab:** Schritt 6.7.
+**Kontext:** Bisher committe ich direkt auf `main`. Mit den Regeln aus 6.7 geht das nur noch über Pull Requests mit grüner CI. Das ist der eigentliche Sinn der CI: Nichts kommt ungeprüft auf `main`.
+**Möglichkeiten:** (a) Pro Roadmap-Schritt ein Branch und ein PR. Ist die CI grün, merge ich per „Squash and merge“. Auf `main` bleibt ein Commit `x.y: …` pro Schritt wie bisher. Du kannst jeden PR vorher auf GitHub ansehen. (b) Wie (a), aber **du** mergst jeden PR selbst. (c) Weiter direkt auf `main`, mit einer Ausnahme für dich in den Regeln.
+**Vorschlag:** (a). So lernst du den üblichen Ablauf kennen, die CI hat das letzte Wort, und du musst nicht bei jedem Schritt klicken. Hinweis: Jeder Push braucht im Moment deine Freigabe. Wenn du willst, erlaube ich in den Einstellungen `git push` auf Branches außer `main`.
+**Antwort (27.11.):** Genau, jedes Feature entsteht in einem eigenen Branch und wird dann auf `main` gemergt. → Vorschlag (a), ab 6.1.

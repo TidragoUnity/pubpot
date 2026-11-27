@@ -109,8 +109,27 @@ Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später 
 > Ergebnis der Abnahme: von leerem Volume bis „alles gesund“ in 46 s. Lighthouse über Caddy (`https://localhost/de` und `/de/signup/creator`, mobil und Desktop) **100/100/100/100**. Images entpackt: web 261 MB, migrate 295 MB, worker 146 MB, Caddy 92 MB. HSTS kommt für `localhost` absichtlich nicht (E-038), mit echter Domain prüfen das die Tests aus 5.1.
 
 ## Phase 6 – CI ⬜
-Grob: PR-Workflow (restore, build, format, Tests mit Postgres, Images bauen) · Push nach GHCR mit SHA-Tag bei Merge auf `main` · Dependabot (NuGet, Docker, Actions; keine 11.x-Pakete, E-007) · Secret Scanning.
-Aus Phase 5 mitnehmen: drei Images aus zwei Dockerfiles (`src/PubPot.Web/Dockerfile` mit den Zielen `web` und `migrate`, `src/TwitchWorker/Dockerfile`), Build-Kontext ist die Repo-Wurzel, Namen `ghcr.io/tidragounity/pubpot-{web,migrate,worker}`. Die Tests brauchen SDK 11 **und** die .NET-10-Laufzeit, dazu Docker für Testcontainers (zwei Testprojekte). Dependabot auch für `caddy`, `postgres` und `mailpit` in den Compose-Dateien.
+Ziel: Jeder Pull Request wird automatisch gebaut, getestet und als Docker-Stack gestartet. Nach dem Merge auf `main` liegen fertige Images mit Commit-SHA in der GitHub Container Registry, bereit für den Deploy in Phase 8.
+
+**Vorab von dir:** Dein GitHub-Token braucht zusätzlich die Rechte **Workflows** (Lesen und Schreiben, sonst lehnt GitHub den Push von `.github/workflows` ab), **Pull requests** (Lesen und Schreiben) und für 6.7 **Administration** (Lesen und Schreiben). Anleitung in der Checkliste.
+
+| # | Schritt | Status |
+|---|---|---|
+| 6.1 | **CI-Workflow Build und Tests** (`.github/workflows/ci.yml`): bei jedem Pull Request und Push auf `main`. SDK 11 aus `global.json` plus .NET-10-Laufzeit, NuGet-Cache, dann `./scripts/check.sh`, also genau dieselben Prüfungen wie lokal (Build mit Warnungen als Fehler, Format, beide Testprojekte mit Testcontainers). Testergebnisse als Artefakt, wenn etwas fehlschlägt. Minimale Rechte (`contents: read`), Actions auf Commit-SHA festgenagelt, alte Läufe desselben PRs werden abgebrochen | ⬜ |
+| 6.2 | **Images bauen und Compose-Smoke-Test:** die drei Images (web, migrate, worker) mit Buildx und Build-Cache bauen, in PRs ohne Push. Danach `docker compose up --wait` mit Wegwerf-Passwörtern: migrate muss mit 0 enden, `https://localhost/health/ready` und `/de` müssen 200 liefern, `migrate-twitch` läuft auch. Bei Fehlern landen die Container-Logs im Lauf | ⬜ |
+| 6.3 | **Push nach GHCR** nur bei Merge auf `main` und nur, wenn 6.1 und 6.2 grün sind: Tags `<commit-sha>` (unveränderlich, für den Deploy) und `main` (zeigt immer auf den neuesten Stand). OCI-Labels (Quelle, Commit), SBOM und Herkunftsnachweis (Provenance) am Image. Schreibrecht für Packages nur in diesem Job | ⬜ |
+| 6.4 | **Image-Scan mit Trivy:** sucht in den drei Images nach bekannten Sicherheitslücken. Ergebnis als Tabelle in der Zusammenfassung des Laufs, rot nur bei **kritischen** Lücken, für die es schon ein Update gibt | ⬜ |
+| 6.5 | **Dependabot** (`.github/dependabot.yml`): NuGet, Dockerfiles, Compose-Dateien und GitHub Actions, wöchentlich, Updates gebündelt. .NET-, EF-Core- und Npgsql-Pakete sowie die Laufzeit-Images bleiben auf 10.x (E-007), Postgres auf 16. Dazu „Dependabot security updates“ einschalten | ⬜ |
+| 6.6 | **CodeQL** (Code-Scanning für C#, für öffentliche Repos kostenlos): findet typische Sicherheitsfehler im Code, bei PRs und wöchentlich. Funde erscheinen im Reiter „Security“ | ⬜ |
+| 6.7 | **Regeln für `main`** (Ruleset): Änderungen nur per Pull Request, die Prüfungen aus 6.1, 6.2 und 6.6 müssen grün sein, kein Force-Push, kein Löschen. Ab hier arbeiten wir mit Pull Requests (siehe F-019). README: CI-Badge und Abschnitt „CI“ | ⬜ |
+| 6.8 | **Abnahme:** Test-PR mit absichtlichem Formatfehler → rot und Merge gesperrt. Korrigiert → grün → Merge → Images mit SHA in GHCR. Lokal die Images aus GHCR ziehen und starten (`IMAGE_TAG=<sha>`, ohne Build). Erste Dependabot-PRs laufen durch die CI | ⬜ |
+
+**Was für alle Schritte gilt**
+- **Kosten:** keine. GitHub Actions, GHCR, Dependabot, Secret Scanning und CodeQL sind für öffentliche Repos kostenlos.
+- **Lokal = CI:** Die CI ruft dieselben Befehle auf wie du (`check.sh`, `docker compose`). Was lokal grün ist, ist es auch in der CI und umgekehrt.
+- **Keine Secrets in der CI:** Phase 6 braucht nur das automatische `GITHUB_TOKEN`. Die Passwörter für den Smoke-Test entstehen im Lauf und verschwinden mit ihm. Echte Secrets (SSH, Server) kommen erst in Phase 8.
+- **Lieferkette:** Fremde Actions sind auf einen Commit-SHA festgenagelt, nicht auf ein Tag wie `v4`, das der Autor jederzeit umbiegen kann. Dependabot hält die SHAs aktuell.
+- Secret Scanning und Push Protection sind im Repo schon an (geprüft).
 
 > **Phasen 7 und 8 sind gegenüber dem Auftrag getauscht** (E-013): Erst läuft alles lokal, dann kommt der VPS.
 

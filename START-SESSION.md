@@ -30,12 +30,13 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **Phasen 0–5 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks, Admin-Bereich (`/admin`) mit Pipeline, Export, Löschen, Hinweis-Mails und Aufbewahrungsfrist.
 - **Phase 5 (Docker):** `cd deploy && docker compose up -d --build` startet alles hinter Caddy unter `https://localhost` (Zertifikatswarnung wegklicken, F-017). Images „chiseled“ ohne Shell, Nicht-Root, eingebaute Healthchecks. Migrationen als eigener Container (EF-Bundle bzw. SQL-Skripte für den Worker). Worker nur mit `--profile worker` (F-016). Forwarded Headers nur vom Netz „edge“ (E-033). Entscheidungen E-032 bis E-039.
 - 402 Tests grün (`PubPot.Web.Tests`, `TwitchWorker.Tests`), 5 Migrationen. Lighthouse überall 100, auch über Caddy.
-- **Keine offenen Rückfragen.**
+- Phase 6 geplant (6.1–6.8), F-018 und F-019 beantwortet (E-040). **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
-### Phase 6 – CI ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt
-1. Phase 6 in `docs/ROADMAP.md` in Schritte 6.1, 6.2 … aufteilen, dem Nutzer vorlegen und auf das OK warten.
-2. Grobe Inhalte und was aus Phase 5 mitzunehmen ist, stehen in der Roadmap: drei Images aus zwei Dockerfiles, Tests brauchen SDK 11 plus .NET-10-Laufzeit und Docker, Dependabot ohne 11.x-Pakete (E-007), auch für die Images in Compose.
+### Phase 6 – CI (geplant und freigegeben, Schritt für Schritt umsetzen)
+Nächster offener Schritt laut `docs/ROADMAP.md`. **Ab 6.1 jeder Schritt in einem eigenen Branch** (`x.y-kurzname`) mit Pull Request. Ist die CI grün, mergt Claude per „Squash and merge“ mit dem Titel `x.y: …` (F-019, E-040).
+- Images in GHCR werden öffentlich (F-018). Nach dem ersten Push stellt der Nutzer jedes Image einmal in der Weboberfläche um.
+- Das Token braucht die Rechte Workflows, Pull requests und Administration (Checkliste). Lehnt GitHub den Push von `.github/workflows` ab, fehlt das Recht „Workflows“.
 
 **Hilfreich zu wissen:** Lokal entweder `dotnet run` (dann nur `docker compose up -d db mailpit adminer`) oder der Web-Container, nicht beides gegen dieselbe Datenbank (E-037). Beim Testlauf erscheint zweimal „An error occurred while reading the key ring“. Das ist harmlos und kommt aus den Migrations-Tests aus Phase 4.
 

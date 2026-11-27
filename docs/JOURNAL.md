@@ -5,6 +5,12 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Phase 6 geplant
+- Phase 6 in 8 Schritte aufgeteilt (6.1 CI-Workflow bis 6.8 Abnahme), mit Trivy und CodeQL als kostenlose Ergänzungen.
+- F-018: Die Images in GHCR werden öffentlich. F-019: Jeder Schritt bekommt einen eigenen Branch und Pull Request, Merge bei grüner CI (E-040).
+- Vorab von dir: Token-Rechte für Workflows, Pull Requests und Administration (Checkliste).
+- **Als Nächstes:** 6.1 CI-Workflow.
+
 ## 2026-11-27 · Schritt 5.8 – Abnahme, Phase 5 abgeschlossen
 - **Start von null** in einem eigenen Compose-Projekt (`-p pubpot-abnahme`, frische Zufallspasswörter nur im Scratchpad). Dein Stack war dafür gestoppt, die Volumes blieben erhalten. Das Init-Skript legte beide Datenbanken an, `migrate` spielte 5 Migrationen ein (Exit 0). Bis alles `healthy` war: **46 s**.
 - **Geprüft:** web und migrate laufen als UID 1654, die Datenbank als 999, Caddy als root ohne Capabilities. Alle eigenen Container sind schreibgeschützt mit `no-new-privileges`. Caddy kann `db` nicht einmal auflösen (getrennte Netze). Das Worker-Schema lief in die frische `twitch`-Datenbank.

@@ -293,6 +293,13 @@ Zwei Funde aus der Abnahme 5.8.
 - **Statusseiten (`/status/{code}`, `/error`) ignorieren das Antiforgery-Token.** Bei einem POST ruft ASP.NET die Statusseite ebenfalls per POST auf (Re-Execute). Ohne gültiges Token wurde daraus ein leeres 400: Aus „429 Bitte warte einen Moment“ oder „500“ wurde für Bots ohne Token und für Menschen mit abgelaufenem Formular eine leere Seite mit falschem Code. Die Statusseiten ändern nichts, also braucht es dort keine Prüfung. Ein Test deckt es ab.
 - **`EDGE_SUBNET`** (Standard `172.30.0.0/24`) legt das Subnetz von „edge“ fest, und `Proxy__KnownNetworks` folgt automatisch. Docker vergibt jedes Subnetz pro Rechner nur einmal. Ein zweites Compose-Projekt (die Abnahme, später Staging neben Production) bräuchte sonst ein anderes.
 
+## E-040 · Rahmen für Phase 6: öffentliche Images, ein PR pro Schritt
+**Entscheidungen (F-018, F-019):**
+- **Images in GHCR öffentlich.** Der Server zieht sie ohne Token. In den Images steckt nur, was ohnehin im öffentlichen Repo liegt. GitHub legt neue Packages privat an. Umstellen geht nur in der Weboberfläche, einmal pro Image (Checkliste).
+- **Ein Branch und ein Pull Request pro Roadmap-Schritt**, ab 6.1. Branch-Name `x.y-kurzname`, z. B. `6.1-ci`. Ist die CI grün, merge ich per „Squash and merge“ mit dem Titel `x.y: …`. Auf `main` bleibt so ein Commit pro Schritt wie bisher. ROADMAP, JOURNAL und START-SESSION ändern sich im selben PR.
+- **6.1 gleich als PR:** Die neue CI prüft damit schon ihren eigenen Pull Request. Ab 6.7 erzwingen Regeln diesen Ablauf.
+**Warum:** Erst durch Pull Requests hat die CI das letzte Wort. Ungeprüfter Code kommt nicht auf `main`, und jeder Schritt lässt sich auf GitHub mit Diff und CI-Ergebnis nachvollziehen.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
