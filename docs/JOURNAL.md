@@ -5,6 +5,11 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Phase 5 geplant
+- Phase 5 in 8 Schritte aufgeteilt (5.1 Forwarded Headers bis 5.8 Abnahme) und von dir freigegeben.
+- F-016: Der Worker startet nur mit dem Compose-Profil `worker`, damit er die laufende Studie nicht stört. F-017: lokal HTTPS mit Caddys eigenem Zertifikat, die Warnung wird weggeklickt (E-032).
+- **Als Nächstes:** 5.1 Forwarded Headers.
+
 ## 2026-11-26 · Schritt 4.10 – Abnahme, Phase 4 abgeschlossen
 - **Lokal mit echtem Postgres und Mailpit**, Migrationen 4 und 5 auf die Entwicklungsdatenbank angewendet. Admin-Passwort nur als Umgebungsvariable für den Testlauf, die User Secrets sind unverändert.
 - **Durchlauf im Browser:** Anmeldung als Creator → Bestätigungsmail in Mailpit → Bestätigung → **Hinweis-Mail ans Team über echtes SMTP** (ohne Name und Adresse). Danach im Admin-Bereich: Weiterleitung zum Login, 5 Fehlversuche → Sperre (auch mit richtigem Passwort), nach Ablauf Login. Cookie ist `HttpOnly`, `Secure`, `SameSite=Strict` und ein Sitzungscookie. Filter landet in der URL (`/admin?kind=Creator`), der Suchtext nicht. CSV-Export mit BOM und passendem Dateinamen. Status, Datum und Notiz bearbeitet. Logout, danach wieder Login nötig. Test-Anmeldung über die Oberfläche gelöscht, ihre Mails sind aus dem Ausgang verschwunden.

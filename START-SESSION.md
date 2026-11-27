@@ -26,16 +26,17 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
 - **CSP:** kein `style="…"` und kein Inline-`<script>`. Styles kommen nach `wwwroot/css/site.css`, Skripte als Datei nach `wwwroot/js`.
 - **Texte** stehen immer in `.resx`, Deutsch und Englisch (`*.en.resx`). Der Paritätstest meldet fehlende Übersetzungen.
 
-## Stand (2026-11-26)
+## Stand (2026-11-27)
 - **Phasen 0–4 fertig:** alle Seiten auf DE/EN, Formulare, Datenbank, Double-Opt-in mit Mail-Outbox, Spam-Schutz, Aufräum-Job, Health-Checks. Dazu der **Admin-Bereich** (`/admin`, nur Deutsch): Login mit Sperre, Liste mit Filter und Suche, Detailseite mit Pipeline, CSV-Export, Löschen (DSGVO), Hinweis-Mail bei neuer Anmeldung (Discord optional) und die **Aufbewahrungsfrist** mit Warnmail und Link „Ich möchte dabei bleiben“.
 - 365 Tests grün, 5 Migrationen. Lighthouse auf allen Seiten 100 (Performance, Barrierefreiheit, Best Practices).
-- Entscheidungen der Phase 4: E-024 bis E-031. **Keine offenen Rückfragen.**
+- **Phase 5 geplant und freigegeben** (Schritte 5.1–5.8 in der Roadmap). F-016 und F-017 beantwortet (E-032). **Keine offenen Rückfragen.**
 
 ## Nächste Aufgabe
-### Phase 5 – Docker und Compose lokal ⚠️ erst beginnen, wenn der Nutzer ausdrücklich bestätigt
-1. Phase 5 in `docs/ROADMAP.md` in Schritte 5.1, 5.2 … aufteilen, dem Nutzer vorlegen und auf das OK warten.
-2. Grobe Inhalte stehen in der Roadmap: Dockerfiles (Nicht-Root, Healthcheck), Migrations-Bundle, Compose mit web, worker, db, caddy und migrate, Forwarded Headers hinter Caddy (E-022).
-3. Aus Phase 4 mitnehmen: In die `.env.example` kommen `Admin__PasswordHash`, `Notifications__Email` und `Notifications__DiscordWebhookUrl`. `hash-password` muss im Container laufen (`docker compose run --rm web hash-password`). `Site__BaseUrl` ist Pflicht, denn der Aufbewahrungs-Job baut Links ohne Anfrage (E-031).
+### Phase 5 – Docker und Compose lokal (freigegeben, Schritt für Schritt umsetzen)
+Nächster offener Schritt laut `docs/ROADMAP.md`. Jeder Schritt ist ein eigener Commit.
+- **Worker nur mit Profil `worker`** (F-016). Bis zum Ende der Studie (ca. 03.12.) keine echte Runde gegen Twitch.
+- **Lokal `https://localhost`** mit Caddys eigenem Zertifikat (F-017).
+- Aus Phase 4: In die `.env.example` kommen `Admin__PasswordHash`, `Notifications__Email` und `Notifications__DiscordWebhookUrl`. `hash-password` muss im Container laufen (`docker compose run --rm --no-deps web hash-password`). `Site__BaseUrl` ist Pflicht, denn der Aufbewahrungs-Job baut Links ohne Anfrage (E-031).
 
 **Hilfreich zu wissen:** Die Data-Protection-Schlüssel liegen schon in der Datenbank, Admin-Cookies überleben also einen Neustart. Mails sind nur Text und laufen über die Outbox, Links kommen aus `Site:BaseUrl` (E-021). Das Rate-Limiting gibt es schon in `Spam/RateLimits.cs`.
 

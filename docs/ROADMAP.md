@@ -86,7 +86,25 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 > Ergebnis Lighthouse (Abnahme, lokal): Login, Liste, Detail, Löschen und `/de|en/signup/keep` jeweils mobil und Desktop **100/100/100** (Performance, Barrierefreiheit, Best Practices). SEO 54 nur wegen des gewollten `noindex` (`is-crawlable`) und der dann überflüssigen Meta-Beschreibung, genauso wie bei der Bestätigungsseite.
 
 ## Phase 5 – Docker und Compose lokal ⬜
-Grob: Multi-Stage-Dockerfiles (Nicht-Root, Healthcheck) · Migrations-Bundle als einmaliger Container · `compose.yaml` (web, worker, db, caddy, migrate) · `compose.override.yaml` (mailpit, adminer an 127.0.0.1) · DB-Init mit zwei Datenbanken und eigenen Benutzern (E-011) · Worker-Schema als SQL-Skript · `.env.example` (auch `Admin__PasswordHash`, `Notifications__Email`, `Notifications__DiscordWebhookUrl`, Befehl `docker compose run --rm web hash-password`) · **Forwarded Headers** hinter Caddy (echte Client-IP fürs Rate-Limiting, HTTPS-Erkennung für HSTS und Secure-Cookies, siehe E-018/E-022) · Abnahme: `docker compose up` + Double-Opt-in mit Mailpit.
+Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später auf dem VPS läuft. Die Anmeldung samt Double-Opt-in lässt sich unter `https://localhost` mit Mailpit testen.
+
+| # | Schritt | Status |
+|---|---|---|
+| 5.1 | **Forwarded Headers:** Hinter Caddy liest die App `X-Forwarded-For` (echte Client-IP fürs Rate-Limiting) und `X-Forwarded-Proto` (HTTPS für HSTS und Secure-Cookies). Vertraut wird nur einem festen Docker-Netz (`Proxy__KnownNetworks`), sonst könnte jeder Besucher seine IP fälschen. Tests für vertrauten und nicht vertrauten Absender (E-018, E-022) | ⬜ |
+| 5.2 | **Dockerfile Web:** Multi-Stage (Build mit SDK 11, Laufzeit `aspnet:10.0` in der „chiseled“-Variante: ohne Shell und Paketmanager, Nicht-Root). Healthcheck als eingebauter Befehl `healthcheck`, weil das Image weder `curl` noch `wget` enthält. Restore als eigene Schicht für schnelle Builds | ⬜ |
+| 5.3 | **Migrations-Bundle:** zweites Ziel `migrate` im selben Dockerfile mit `dotnet ef migrations bundle`. Es läuft als einmaliger Container vor dem Start der App und braucht nur den Connection-String. Probelauf gegen die lokale Datenbank (zweimal hintereinander, der zweite Lauf ändert nichts) | ⬜ |
+| 5.4 | **Worker:** Schema als versionierte SQL-Skripte (`deploy/db/twitch/001_schema.sql`) mit kleinem Runner und Tabelle `schema_migrations`, `CREATE TABLE` fliegt aus dem Code (E-011). Der Worker prüft beim Start nur noch, ob das Schema da ist. Dockerfile auf chiseled umgestellt, Healthcheck (Alter der Heartbeat-Datei) als eingebauter Befehl. Die alte `src/TwitchWorker/docker-compose.yml` entfällt | ⬜ |
+| 5.5 | **Compose für die Anwendung:** Dienste `migrate`, `web`, `migrate-twitch`, `worker` in `compose.yaml`. Startreihenfolge über `depends_on` (db gesund → Migration erfolgreich beendet → web). Jeder Dienst bekommt nur die Variablen, die er braucht. Härtung: schreibgeschütztes Dateisystem, `/tmp` als tmpfs, `no-new-privileges`, alle Linux-Capabilities entzogen. `build:` steht nur in `compose.override.yaml`, auf dem Server werden fertige Images gezogen | ⬜ |
+| 5.6 | **Caddy:** `deploy/caddy/Caddyfile` mit Domain aus `SITE_DOMAIN`. Lokal `localhost` mit Caddys eigener Zertifizierungsstelle, auf dem VPS automatisch Let's Encrypt. Zwei Netze: `edge` (Caddy, web) und `backend` (web, db, worker …), Caddy kommt nie an die Datenbank. Ports über `BIND_ADDRESS` (Standard `127.0.0.1`). Kein Access-Log, weil IP-Adressen personenbezogen sind. `Server`-Header entfernt | ⬜ |
+| 5.7 | **`.env.example` und Doku:** alle Variablen mit Kommentar (auch `Admin__PasswordHash`, `Notifications__Email`, `Notifications__DiscordWebhookUrl`, `Site__BaseUrl`), Befehl `docker compose run --rm --no-deps web hash-password`. README-Abschnitt „Alles in Docker starten“ und optional „Caddy-Zertifikat vertrauen“. Checkliste ergänzen | ⬜ |
+| 5.8 | **Abnahme:** Start von null in einem eigenen Compose-Projekt (deine Entwicklungsdaten bleiben unberührt): alle Container gesund, Migration mit Exit-Code 0, Double-Opt-in im Browser über `https://localhost` mit Mailpit, Admin-Login über HTTPS (Secure-Cookie), HSTS-Header da, Container laufen nicht als root. Lighthouse über Caddy, Größe der Images notieren | ⬜ |
+
+**Was für alle Schritte gilt**
+- Die bisherigen Wege bleiben: `dotnet run` gegen die Datenbank aus `deploy/` und `./scripts/check.sh` funktionieren weiter.
+- Eine `.env` für alle, aber Compose reicht jedem Container nur seine eigenen Werte weiter (`environment:`, kein `env_file:` mit allem). Die Web-App sieht also nie das Twitch-Secret.
+- Images heißen schon so wie später in der GitHub Container Registry (`ghcr.io/tidragounity/pubpot-web`, `…-worker`, `…-migrate`), mit Tag `${IMAGE_TAG:-local}`. Phase 6 baut und pusht sie, Phase 8 zieht sie auf dem VPS.
+- Getrennte Konfiguration für staging und production kommt in Phase 8. `compose.yaml` ist dafür schon so gebaut, dass nur die `.env` wechselt.
+- `C:\Timo\Docker	witch-worker` und seine Container bleiben unberührt (F-001), siehe F-016.
 
 ## Phase 6 – CI ⬜
 Grob: PR-Workflow (restore, build, format, Tests mit Postgres, Images bauen) · Push nach GHCR mit SHA-Tag bei Merge auf `main` · Dependabot (NuGet, Docker, Actions; keine 11.x-Pakete, E-007) · Secret Scanning.

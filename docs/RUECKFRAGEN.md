@@ -109,3 +109,17 @@ So funktioniert es:
 **Möglichkeiten:** (a) Nur die **Änderung** zählt. Wer 12 Monate nichts ändert, bekommt die Warnmail, egal welcher Status. (b) Solange ein aktiver Status gesetzt ist, gibt es **nie** eine Warnmail.
 **Vorschlag:** (a). Das ist eindeutig, die Frist hängt nicht davon ab, ob du vergisst, einen Status zurückzusetzen, und eine kurze Notiz reicht, um die 12 Monate neu zu starten.
 **Antwort (26.11.):** Ja, auch „Pilot“ bekommt die Warnmail.
+
+### F-016 · Worker lokal neben der laufenden Studie · beantwortet
+**Wichtig ab:** Schritt 5.4.
+**Kontext:** Deine Studie läuft noch bis etwa 03.12. mit deinen Twitch-Zugangsdaten. Startet der Worker aus `compose.yaml` mit denselben Daten, laufen zwei Worker gegen dasselbe Twitch-Limit (pro Client-ID). Das kann die Studie stören. Ohne Zugangsdaten startet der Worker gar nicht (er prüft sie beim Start).
+**Möglichkeiten:** (a) Der Worker hat ein **Compose-Profil** `worker`. `docker compose up` startet ihn nicht, `docker compose --profile worker up` schon. Auf dem VPS wird das Profil per `COMPOSE_PROFILES=worker` in der `.env` eingeschaltet. (b) Der Worker startet immer mit, und du trägst bis zum Ende der Studie keine Zugangsdaten ein (Container startet dann ständig neu).
+**Vorschlag:** (a). Die Abnahme in 5.8 prüft beim Worker dann Image, Schema-Skript und Healthcheck, aber keine echte Runde gegen Twitch. Eine echte Runde machen wir, wenn die Studie fertig ist oder du eine zweite Twitch-App (kostenlos) für Tests anlegst.
+**Antwort (27.11.):** Planung passt, also Vorschlag (a): Profil `worker`.
+
+### F-017 · HTTPS lokal mit Caddy · beantwortet
+**Wichtig ab:** Schritt 5.6.
+**Kontext:** Lokal kann Caddy kein Let's-Encrypt-Zertifikat für `localhost` holen. Er stellt sich dann selbst eins aus (eigene Zertifizierungsstelle). Der Browser warnt davor, bis du Caddys Stammzertifikat in Windows als vertrauenswürdig einträgst (ein Befehl, jederzeit wieder entfernbar).
+**Möglichkeiten:** (a) Lokal **HTTPS** unter `https://localhost`, Zertifikat vertrauen ist optional und steht als Anleitung in der README. (b) Lokal nur **HTTP** über Caddy. Dann lassen sich HSTS, Secure-Cookies und das Admin-Cookie (`__Host-`) lokal nicht so testen wie auf dem Server.
+**Vorschlag:** (a). Lokal läuft dann dasselbe wie später auf dem VPS, nur mit anderem Zertifikat. Ob du das Zertifikat einträgst, entscheidest du selbst. Ohne Eintrag klickst du einmal „Trotzdem fortfahren“.
+**Antwort (27.11.):** HTTPS, die Zertifikatswarnung klicke ich vorerst weg.

@@ -219,6 +219,13 @@ Umsetzung von E-023 (F-013, F-015).
 - **Datenschutzerklärung** beschreibt die Frist jetzt (DE/EN). Die Aufbewahrung in Backups ergänze ich in Phase 7 (TODO, anwaltlich prüfen lassen).
 **Alternative:** Ein eigener Hintergrunddienst nur für die Frist. Der vorhandene Aufräum-Dienst läuft ohnehin stündlich, ein zweiter Timer bringt nichts.
 
+## E-032 · Rahmen für Phase 5: Worker per Profil, lokal HTTPS mit Caddys eigenem Zertifikat
+**Entscheidungen (F-016, F-017):**
+- **Worker nur mit Compose-Profil `worker`.** `docker compose up` startet ihn nicht, `docker compose --profile worker up` schon. Auf dem VPS schaltet `COMPOSE_PROFILES=worker` in der `.env` ihn dauerhaft ein.
+- **Lokal HTTPS unter `https://localhost`.** Caddy stellt das Zertifikat mit seiner eigenen Zertifizierungsstelle aus. Die Warnung im Browser wird vorerst weggeklickt, die Anleitung zum Vertrauen steht trotzdem in der README.
+**Warum:** Die Studie (F-001) läuft noch mit denselben Twitch-Zugangsdaten. Zwei Worker teilen sich das Limit pro Client-ID und könnten die Studie stören. Mit HTTPS verhalten sich Secure-Cookies, das `__Host-`-Admin-Cookie und HSTS lokal genauso wie auf dem Server. Mit reinem HTTP ließe sich genau das nicht testen.
+**Folge:** Die Abnahme in 5.8 prüft beim Worker Image, Schema-Skript und Healthcheck, aber keine echte Runde gegen Twitch.
+
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
 **Lernpunkt:** Die Git-Historie umzuschreiben (`git filter-branch` bzw. `git filter-repo`) ist nur unbedenklich, **solange noch nichts gepusht ist**. Danach hätten andere Kopien die alte Historie, und Daten, die einmal veröffentlicht sind, muss man als öffentlich betrachten.
