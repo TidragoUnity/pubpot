@@ -83,6 +83,30 @@ public sealed class WorkerMetricsTests
         Assert.Equal(1, finished.LastMeasurement!.Value);
     }
 
+    /// <summary>
+    /// Ohne Nullen beim Start übersieht <c>increase()</c> das erste Ereignis jeder Art (E-059). Der Collector hängt
+    /// vor dem Start, damit der echte Weg über den Host geprüft wird.
+    /// </summary>
+    [Fact]
+    public async Task Every_round_result_starts_at_zero_when_the_host_starts()
+    {
+        var builder = Host.CreateApplicationBuilder();
+        builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?> { ["Metrics:Port"] = "0" });
+        builder.Services.AddWorkerMetrics(builder.Configuration);
+        using var host = builder.Build();
+        using var rounds = new MetricCollector<long>(
+            host.Services.GetRequiredService<IMeterFactory>(), WorkerMetrics.MeterName, "pubpot.worker.rounds");
+
+        Assert.Empty(rounds.GetMeasurementSnapshot());
+        await host.StartAsync(Ct);
+        await host.StopAsync(Ct);
+
+        var measurements = rounds.GetMeasurementSnapshot();
+        Assert.All(measurements, m => Assert.Equal(0, m.Value));
+        Assert.Equal(["complete", "failed", "incomplete"],
+            measurements.Select(m => (string?)m.Tags["result"]).Order(StringComparer.Ordinal));
+    }
+
     [Fact]
     public async Task Metrics_endpoint_serves_worker_metrics_in_prometheus_format()
     {
@@ -103,6 +127,7 @@ public sealed class WorkerMetricsTests
         await host.StopAsync(Ct);
 
         Assert.Matches(@"(?m)^pubpot_worker_rounds_total\{[^}]*result=""complete""[^}]*\} 1$", metrics);
+        Assert.Matches(@"(?m)^pubpot_worker_rounds_total\{[^}]*result=""failed""[^}]*\} 0$", metrics);
         Assert.Matches(@"(?m)^pubpot_worker_last_round_streams\{[^}]*\} 42$", metrics);
         Assert.Matches(@"(?m)^pubpot_worker_last_complete_round_time_seconds\{[^}]*\} \d", metrics);
         Assert.Matches(@"(?m)^pubpot_worker_finished\{[^}]*\} 0$", metrics);

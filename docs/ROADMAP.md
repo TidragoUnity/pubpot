@@ -150,6 +150,7 @@ Ziel: Du siehst in Grafana, wie es der Anwendung geht, bekommst eine Mail, wenn 
 | 7.7 | **Backups:** Dienst `backup` sichert jede Nacht um 03:00 beide Datenbanken (`pg_dump`, dazu Rollen). Aufbewahrung 7 Tage täglich und 4 Wochen wöchentlich, Ordner per `BACKUP_DIR` (Standard `deploy/backups`, steht in `.gitignore`). Meldet Erfolg und Größe als Metrik. `scripts/restore.sh` stellt eine Datenbank aus einer Datei wieder her | ✅ |
 | 7.8 | **Restore-Test:** automatisch im Smoke-Test der CI (Backup → in leere Datenbank zurückspielen → Anmeldungen und Worker-Daten vergleichen), dazu eine Anleitung für den Test von Hand in der README. Datenschutzerklärung: wie lange Daten in Backups bleiben (TODO, anwaltlich prüfen lassen) | ✅ |
 | 7.9 | **Abnahme:** alles starten, Dashboard ansehen, **jeden Alarm einmal auslösen** (Website stoppen, Worker ohne Twitch, Fehler erzeugen, Backup kaputt machen) und die Mails in Mailpit prüfen. Restore von Hand. README-Abschnitt „Monitoring“ mit Zugängen, Ports und Befehlen | ✅ |
+| 7.10 | **Nachbesserung, Zähler ab dem Start mit 0** (vom Nutzer gefunden, E-059): Die erste Anmeldung jeder Art fehlte im Dashboard, weil `increase()` den Schritt von „gab es nicht“ auf 1 nicht sieht. Alle eigenen Zähler (Website und Worker) melden sich beim Start mit 0. „Anmeldungen pro Tag“ zeigt echte Tagesbalken der letzten 7 Tage mit ganzen Zahlen | ✅ |
 
 **Was für alle Schritte gilt**
 - Jeder Schritt ist ein eigener Branch und PR (F-019). Neue Images (Prometheus, Grafana usw.) sind fest auf eine Version gepinnt, Dependabot hält sie aktuell.

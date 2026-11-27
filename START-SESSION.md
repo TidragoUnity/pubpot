@@ -35,7 +35,8 @@ Am Ende jeder Sitzung die Abschnitte **Stand** und **Nächste Aufgabe** aktualis
   - Profil `monitoring`: Prometheus, Grafana mit Start-Dashboard, Alertmanager, Blackbox, node-exporter, cAdvisor (E-053 bis E-055). Elf Alarmregeln mit Unit-Tests.
   - Dienst `backup` nachts mit `scripts/restore.sh` (E-056). Restore-Test im Smoke-Test (E-057).
   - Abnahme: jeder Alarm ausgelöst, Mails in Mailpit (E-058). Die README hat den Abschnitt „Monitoring, Alarme und Backups“.
-- 429 Tests, 15 Regel-Tests, Smoke-Test mit 24 Prüfungen, 5 Migrationen.
+  - 7.10: Eigene Zähler starten mit 0, damit `increase()` das erste Ereignis sieht. „Anmeldungen pro Tag“ als Tagesbalken (E-059).
+- 431 Tests, 15 Regel-Tests, Smoke-Test mit 25 Prüfungen, 5 Migrationen.
 - **Keine offenen Rückfragen.** Ideen für nach V1 stehen in `docs/IDEEN.md` (I-01 bis I-04).
 
 ## Nächste Aufgabe

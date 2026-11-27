@@ -8,6 +8,10 @@ namespace TwitchWorker;
 /// Messwerte des Workers für Prometheus (Schritt 7.3, E-052). Daraus entsteht später der Alarm
 /// „Worker seit 15 Minuten ohne vollständige Runde“.
 /// </summary>
+/// <remarks>
+/// Beim Start meldet <see cref="Initialize"/> jedes Rundenergebnis einmal mit 0 (Schritt 7.10, E-059). Sonst übersieht
+/// <c>increase()</c> in Prometheus das erste Ereignis jeder Art, weil die Reihe gleich mit 1 beginnt.
+/// </remarks>
 public sealed class WorkerMetrics
 {
     public const string MeterName = "TwitchWorker";
@@ -48,6 +52,20 @@ public sealed class WorkerMetrics
 
     public void Finished() => Volatile.Write(ref _finished, 1);
 
+    /// <summary>
+    /// Alle Zeitreihen mit 0 anlegen. Läuft erst, wenn der Host gestartet ist (<see cref="WorkerMetricsInitializer"/>):
+    /// Vorher hört OpenTelemetry noch nicht zu. Eine 0 ändert nichts, auch wenn schon eine Runde gezählt wurde.
+    /// </summary>
+    public void Initialize()
+    {
+        foreach (var result in Results)
+        {
+            _rounds.Add(0, Result(result));
+        }
+    }
+
+    private static readonly string[] Results = ["complete", "incomplete", "failed"];
+
     private IEnumerable<Measurement<long>> ObserveLastRoundStreams()
     {
         var streams = Volatile.Read(ref _lastRoundStreams);
@@ -70,6 +88,7 @@ public static class WorkerTelemetry
     {
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<WorkerMetrics>();
+        services.AddHostedService<WorkerMetricsInitializer>();
 
         var port = configuration.GetValue("Metrics:Port", 9464);
         if (port <= 0)
@@ -103,4 +122,16 @@ public static class WorkerTelemetry
                     }
                 }));
     }
+}
+
+/// <summary>Ruft <see cref="WorkerMetrics.Initialize"/> auf, sobald der Host gestartet ist (E-059).</summary>
+internal sealed class WorkerMetricsInitializer(WorkerMetrics metrics, IHostApplicationLifetime lifetime) : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        lifetime.ApplicationStarted.Register(metrics.Initialize);
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

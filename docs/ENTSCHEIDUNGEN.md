@@ -378,6 +378,33 @@ Zwei Funde aus der Abnahme 5.8.
 - **Blackbox-Exporter statt Uptime Kuma** („oder vergleichbar“ laut Auftrag): Erreichbarkeit der Website über Caddy, Worker über seine Metriken. Alles als Datei im Repo, getestet, ein Alarmweg über Alertmanager. Die Push-URL des Workers kommt trotzdem, für einen externen Dienst in Phase 8.
 **Warum:** Konfiguration als Code lässt sich prüfen, versionieren und auf dem VPS identisch wiederherstellen. Klick-Konfiguration geht mit einem Volume verloren.
 
+## E-059 · Zähler ab dem Start mit 0, Anmeldungen als Tagesbalken (7.10)
+**Fehler (vom Nutzer im Dashboard gefunden):** Die erste Anmeldung jeder Art fehlte im Panel „Anmeldungen pro Tag“. Eine erste Creator-Anmeldung zeigte eine Linie bei 0.
+- Ein OpenTelemetry-Zähler mit Label (`kind="creator"`) erscheint in `/metrics` erst beim ersten Ereignis, gleich mit dem Wert 1.
+- `increase()` in Prometheus zählt nur Differenzen zwischen gespeicherten Werten. Den Schritt von „gab es nicht“ auf 1 sieht es nicht.
+- Betroffen waren alle eigenen Zähler: Anmeldungen, Bestätigungen, Spam, Mails, Aufräumen und Worker-Runden. Nach jedem Neustart der App wiederholte sich das.
+- Mit der IP oder mit localhost hatte es nichts zu tun: IPs stehen bewusst nicht in den Metriken.
+
+**Lösung, der übliche Rat von Prometheus („initialize your metrics“):**
+- Beim Start meldet die App jede Zeitreihe einmal mit 0. Dafür sind alle Label-Werte fest bekannt: `kind`, `reason`, `type` (jetzt als Konstanten in `CleanupType`) und `result`.
+- Das geschieht erst bei `ApplicationStarted`. Vorher hört OpenTelemetry noch nicht zu, und die Nullen gingen verloren.
+- Ein Neustart setzt die Zähler auf 0 zurück. Prometheus erkennt das als Reset und rechnet richtig weiter.
+- Die eingebauten Zähler von ASP.NET Core (Anfragen nach Route und Statuscode) lassen sich so nicht vorbelegen. Dort geht höchstens der allererste 500er pro Route verloren. Der Alarm „Fehlerquote“ reagiert auf anhaltende Fehler und bleibt deshalb zuverlässig.
+
+**Dashboard:**
+- „Anmeldungen pro Tag“ zeigt jetzt echte Tagesbalken der letzten 7 Tage (eigener Zeitraum im Panel). Bestätigte Anmeldungen sind gestapelt nach Art, alle gespeicherten stehen als Punkt daneben.
+- Vorher war es eine gleitende 24-Stunden-Summe als Linie.
+- `increase(…[$__interval] offset -$__interval)` mit `interval: 1d`: Jeder Punkt zählt ab seinem Zeitpunkt einen Tag nach vorn. So hat auch der laufende Tag schon einen Balken. Ohne den negativen Offset erschiene er erst am nächsten Tag.
+- Prometheus teilt die Tage nach UTC. Ein Balken beginnt um 01:00 deutscher Zeit, im Sommer um 02:00. Das steht im Info-Text des Panels.
+- `round()` um alle Zählungen: `increase()` rechnet bis an den Rand des Zeitfensters hoch, daher Werte wie 1,04.
+- `check-dashboard-queries.py` ersetzt `$__interval` für die Prüfung durch `1d` und lässt den negativen Offset weg. Die Prüfung fragt nur „jetzt“ ab, und nach vorn gibt es noch keine Daten.
+
+**Geprüft:**
+- Tests: Nach dem Start eines Hosts sind alle Reihen mit 0 da. Die drei neuen Prüfungen schlagen ohne den Fix fehl.
+- Smoke-Test: Die eigenen Zähler stehen ab dem Start in `/metrics`, ebenso die Worker-Runden mit 0. Die Panels „Anmeldungen pro Tag“ und „Mails und Spam“ liefern Daten.
+- Im lokalen Stack: Eine Developer-Anmeldung über Caddy erschien in Prometheus als Schritt von 0 auf 1. Der Neustart (2 auf 0) wurde als Reset erkannt.
+- Werte, die vor dem Fix verloren gingen, lassen sich nachträglich nicht herstellen.
+
 ## E-058 · Abnahme Phase 7: jeden Alarm auslösen, ohne Twitch und ohne die `.env` zu ändern (7.9)
 **Vorgehen:**
 - Der lokale Stack lief mit den Profilen `worker` und `monitoring`, dazu eine Abnahme-Datei aus dem Scratchpad mit Grafana-Passwort und Dummy-Zugangsdaten für Twitch.
