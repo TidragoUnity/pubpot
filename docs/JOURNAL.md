@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 6.4 – Image-Scan mit Trivy
+- Trivy prüft die drei Images im Job „Images und Smoke-Test“. Bericht mit hohen und kritischen Lücken in der Zusammenfassung, rot nur bei kritischen Lücken mit Update (E-044).
+- Trivy wird über `setup-trivy` v0.3.1 in Version v0.76.2 installiert, beides unveränderliche Releases, festgenagelt. Grund ist die Kompromittierung der `trivy-action` im März 2026.
+- Neu: wöchentlicher CI-Lauf montags und Start von Hand (`workflow_dispatch`).
+- Vorab lokal gegen die Images in GHCR gescannt: alle drei 0 Funde, Ubuntu und .NET-Pakete erkannt.
+- **Nachtrag zu 6.3:** Die ersten Images (Commit `2d7a814`) liegen in GHCR mit Tags SHA und `main`, mit SBOM und Provenance. Sie waren **sofort öffentlich** (anonym geprüft), weil die CI des öffentlichen Repos sie angelegt hat. Der Checklisten-Punkt dazu entfällt.
+- **Als Nächstes:** 6.5 Dependabot.
+
 ## 2026-11-27 · Schritt 6.3 – Push nach GHCR
 - Neuer Job `publish` (Matrix für web, migrate, worker): nur auf `main`, nur nach grünem Build, Tests und Smoke-Test. Tags `<commit-sha>` und `main`, mit SBOM, Provenance und OCI-Labels, Anmeldung über `GITHUB_TOKEN` (E-043).
 - Im PR wird der Job übersprungen. Der erste echte Push passiert beim Merge dieses PRs, danach wird er geprüft.

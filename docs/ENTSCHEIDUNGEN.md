@@ -295,7 +295,7 @@ Zwei Funde aus der Abnahme 5.8.
 
 ## E-040 · Rahmen für Phase 6: öffentliche Images, ein PR pro Schritt
 **Entscheidungen (F-018, F-019):**
-- **Images in GHCR öffentlich.** Der Server zieht sie ohne Token. In den Images steckt nur, was ohnehin im öffentlichen Repo liegt. GitHub legt neue Packages privat an. Umstellen geht nur in der Weboberfläche, einmal pro Image (Checkliste).
+- **Images in GHCR öffentlich.** Der Server zieht sie ohne Token. In den Images steckt nur, was ohnehin im öffentlichen Repo liegt. Angelegt von der CI des öffentlichen Repos, sind sie automatisch öffentlich (siehe E-043).
 - **Ein Branch und ein Pull Request pro Roadmap-Schritt**, ab 6.1. Branch-Name `x.y-kurzname`, z. B. `6.1-ci`. Ist die CI grün, merge ich per „Squash and merge“ mit dem Titel `x.y: …`. Auf `main` bleibt so ein Commit pro Schritt wie bisher. ROADMAP, JOURNAL und START-SESSION ändern sich im selben PR.
 - **6.1 gleich als PR:** Die neue CI prüft damit schon ihren eigenen Pull Request. Ab 6.7 erzwingen Regeln diesen Ablauf.
 **Warum:** Erst durch Pull Requests hat die CI das letzte Wort. Ungeprüfter Code kommt nicht auf `main`, und jeder Schritt lässt sich auf GitHub mit Diff und CI-Ergebnis nachvollziehen.
@@ -328,7 +328,15 @@ Zwei Funde aus der Abnahme 5.8.
 - **SBOM und Provenance** hängen als Attestierungen am Image. Die SBOM listet alle enthaltenen Pakete. Die Provenance sagt, aus welchem Commit und mit welchem Workflow das Image gebaut wurde. Beides wertet später auch Trivy aus.
 - **OCI-Labels** über `docker/metadata-action`. `org.opencontainers.image.source` verknüpft das Package mit dem Repo.
 - **Werte aus `${{ }}` nur über `env:` in Skripte** (Schutz vor Script Injection), auch wenn sie hier harmlos sind. So bleibt es eine feste Regel.
-**Nach dem ersten Push:** GitHub legt die Packages privat an. Du stellst sie einmal auf öffentlich (F-018, Checkliste).
+**Nach dem ersten Push:** Entgegen der Erwartung waren die Packages sofort öffentlich. GitHub übernimmt die Sichtbarkeit des öffentlichen Repos, wenn die CI des Repos das Package anlegt. Anonym geprüft: alle drei per `docker pull` ohne Anmeldung abrufbar. Ein Klick ist also nicht nötig (F-018 erledigt).
+
+## E-044 · Image-Scan mit Trivy, wöchentlicher Lauf
+**Entscheidungen:**
+- **Trivy im Job „Images und Smoke-Test“**, nach dem Smoke-Test, für alle drei Images. Der Bericht (hohe und kritische Lücken, für die es ein Update gibt) steht in der Zusammenfassung des Laufs. **Rot nur bei kritischen Lücken mit verfügbarem Update.** Lücken ohne Update kann niemand beheben. Ein Alarm dafür würde nur dazu erziehen, rote Läufe zu ignorieren.
+- **Installation über `aquasecurity/setup-trivy` v0.3.1 und Trivy v0.76.2**, beides unveränderliche Releases, auf SHA bzw. Version festgenagelt. Hintergrund: Im März 2026 wurden 76 von 77 Tags der `trivy-action` auf Schadcode umgebogen, der Secrets aus CI-Läufen stahl (CVE-2026-33634). Genau dagegen helfen festgenagelte SHAs. Ein Tag wie `@v0.35` hätte damals den Schadcode geladen.
+- **Wöchentlicher Lauf** (montags, `schedule`) und Start von Hand (`workflow_dispatch`): Neue Lücken werden bekannt, auch wenn sich am Code nichts ändert. Ein geplanter Lauf veröffentlicht keine Images, `publish` reagiert nur auf Pushes.
+**Ergebnis beim Einführen:** alle drei Images 0 hohe und kritische Lücken. Trivy erkennt Ubuntu 24.04 auch in den chiseled-Images und prüft die .NET-Pakete über die `deps.json`.
+**Grenze:** Das `efbundle` im Migrations-Image ist eine Single-File-Anwendung. Deren eingebettete Pakete sieht Trivy nicht. Sie sind dieselben wie in der Web-App, und die wird gescannt.
 
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).
