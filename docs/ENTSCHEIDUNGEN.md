@@ -87,7 +87,7 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 **Entscheidung:** Eine Middleware (`Security/SecurityHeaders.cs`) setzt auf jede Antwort: CSP nur mit `'self'` (kein `unsafe-inline`, kein `unsafe-eval`, keine Inline-Styles), `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy: same-origin`, `Permissions-Policy` und `Cross-Origin-Opener/Resource-Policy`. Dazu kommt HSTS für ein Jahr inklusive Subdomains, aber ohne `preload`. Der `Server`-Header ist abgeschaltet. Die Cookie-Policy gilt für alle Cookies: HttpOnly, SameSite=Lax, Secure bei HTTPS.
 **Warum jetzt:** Eine CSP nachträglich einzuführen ist mühsam, weil dann überall Inline-Skripte und -Styles auffallen. Von Anfang an strikt heißt: Jede Verletzung zeigt sich sofort im Browser.
 **Folge für die Entwicklung:** Kein `style="…"` und kein `<script>…</script>` im Markup. Styles gehören nach `site.css`, Skripte als Datei nach `wwwroot/js`.
-**Noch offen (Phase 5):** HSTS und `upgrade-insecure-requests` greifen nur, wenn die App HTTPS erkennt. Hinter Caddy kommt das über `X-Forwarded-Proto`, dafür braucht es die Forwarded-Headers-Middleware.
+**Noch offen (Phase 5):** HSTS und `upgrade-insecure-requests` greifen nur, wenn die App HTTPS erkennt. Hinter Caddy kommt das über `X-Forwarded-Proto`, dafür braucht es die Forwarded-Headers-Middleware. → Erledigt in 5.1 (E-033).
 **Warum kein `preload`:** Ein Eintrag in die HSTS-Preload-Liste der Browser lässt sich kaum rückgängig machen. Das entscheiden wir, wenn die Domain sicher feststeht.
 
 ## E-019 · Was die Tests absichern (und warum so)
@@ -124,7 +124,7 @@ Das ist auch dein Lernmaterial: Hier steht, warum etwas so gebaut ist.
 - **Data-Protection-Schlüssel in der Datenbank** (`data_protection_keys`, eigene Migration). Im Container würden sie bei jedem Neustart verloren gehen. Dann wären offene Formulare ungültig, und später würden alle Admins abgemeldet.
 - **Statusseite `/status/{code}`** statt einer reinen 404-Seite: Sie zeigt passende Texte für 404, 429 und alles andere.
 
-**Offen für Phase 5:** Hinter Caddy sieht die App ohne Forwarded Headers nur die IP von Caddy. Alle Besucher würden sich dann ein Rate-Limit teilen.
+**Offen für Phase 5:** Hinter Caddy sieht die App ohne Forwarded Headers nur die IP von Caddy. Alle Besucher würden sich dann ein Rate-Limit teilen. → Erledigt in 5.1 (E-033).
 
 ## E-023 · Aufbewahrung bestätigter Anmeldungen (F-013)
 **Entscheidung:**
@@ -225,6 +225,13 @@ Umsetzung von E-023 (F-013, F-015).
 - **Lokal HTTPS unter `https://localhost`.** Caddy stellt das Zertifikat mit seiner eigenen Zertifizierungsstelle aus. Die Warnung im Browser wird vorerst weggeklickt, die Anleitung zum Vertrauen steht trotzdem in der README.
 **Warum:** Die Studie (F-001) läuft noch mit denselben Twitch-Zugangsdaten. Zwei Worker teilen sich das Limit pro Client-ID und könnten die Studie stören. Mit HTTPS verhalten sich Secure-Cookies, das `__Host-`-Admin-Cookie und HSTS lokal genauso wie auf dem Server. Mit reinem HTTP ließe sich genau das nicht testen.
 **Folge:** Die Abnahme in 5.8 prüft beim Worker Image, Schema-Skript und Healthcheck, aber keine echte Runde gegen Twitch.
+
+## E-033 · Forwarded Headers nur vom vertrauten Proxy-Netz
+**Entscheidung:** Die App übernimmt `X-Forwarded-For` und `X-Forwarded-Proto` nur von Absendern aus `Proxy__KnownNetworks` (CIDR, kommagetrennt). In Compose ist das das feste Netz von Caddy (Schritt 5.6). `X-Forwarded-Host` wird nicht übernommen. Es zählt nur ein Proxy (`ForwardLimit = 1`). Die Middleware läuft als Erstes, damit HSTS, Cookies und Rate-Limiting schon die echten Werte sehen.
+**Warum:** Ohne diese Header sieht die App hinter Caddy nur Caddys IP, und alle Besucher teilen sich ein Rate-Limit. Außerdem hält sie jede Verbindung für HTTP, dann gibt es weder HSTS noch Secure-Cookies (E-018, E-022). Wer die Header aber von jedem annimmt, lässt Angreifer ihre IP frei wählen und das Rate-Limiting umgehen.
+**Falle:** Sind in ASP.NET **keine** vertrauten Proxys eingetragen, übernimmt die Middleware die Header von **jedem** Absender. Ohne `Proxy__KnownNetworks` (etwa bei `dotnet run`) ist die Middleware deshalb gar nicht eingeschaltet. Ein Test prüft das. Ein ungültiger Eintrag bricht den Start ab.
+**Docker-Detail:** Bei Dual-Stack meldet Kestrel IPv4-Absender oft als `::ffff:172.30.0.2`. Die Middleware erkennt solche Adressen, ein Test deckt es ab.
+**Host-Header:** Links in Mails kommen aus `Site:BaseUrl` (E-021). Deshalb braucht die App den ursprünglichen Host nicht, und ein gefälschter Host kann nichts anrichten.
 
 ## E-008 · Privatsphäre im öffentlichen Repo
 **Entscheidung (F-011):** Die Commits laufen über die anonyme GitHub-Adresse, `docs/AUFTRAG.md` bleibt nur lokal (`.gitignore`).

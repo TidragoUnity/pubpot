@@ -85,12 +85,12 @@ Den Verlauf (was wann passiert ist) findest du in [JOURNAL.md](JOURNAL.md), offe
 
 > Ergebnis Lighthouse (Abnahme, lokal): Login, Liste, Detail, Löschen und `/de|en/signup/keep` jeweils mobil und Desktop **100/100/100** (Performance, Barrierefreiheit, Best Practices). SEO 54 nur wegen des gewollten `noindex` (`is-crawlable`) und der dann überflüssigen Meta-Beschreibung, genauso wie bei der Bestätigungsseite.
 
-## Phase 5 – Docker und Compose lokal ⬜
+## Phase 5 – Docker und Compose lokal 🔄
 Ziel: `docker compose up` startet die ganze Anwendung lokal, so wie sie später auf dem VPS läuft. Die Anmeldung samt Double-Opt-in lässt sich unter `https://localhost` mit Mailpit testen.
 
 | # | Schritt | Status |
 |---|---|---|
-| 5.1 | **Forwarded Headers:** Hinter Caddy liest die App `X-Forwarded-For` (echte Client-IP fürs Rate-Limiting) und `X-Forwarded-Proto` (HTTPS für HSTS und Secure-Cookies). Vertraut wird nur einem festen Docker-Netz (`Proxy__KnownNetworks`), sonst könnte jeder Besucher seine IP fälschen. Tests für vertrauten und nicht vertrauten Absender (E-018, E-022) | ⬜ |
+| 5.1 | **Forwarded Headers:** Hinter Caddy liest die App `X-Forwarded-For` (echte Client-IP fürs Rate-Limiting) und `X-Forwarded-Proto` (HTTPS für HSTS und Secure-Cookies). Vertraut wird nur einem festen Docker-Netz (`Proxy__KnownNetworks`), sonst könnte jeder Besucher seine IP fälschen. Tests für vertrauten und nicht vertrauten Absender (E-018, E-022) | ✅ |
 | 5.2 | **Dockerfile Web:** Multi-Stage (Build mit SDK 11, Laufzeit `aspnet:10.0` in der „chiseled“-Variante: ohne Shell und Paketmanager, Nicht-Root). Healthcheck als eingebauter Befehl `healthcheck`, weil das Image weder `curl` noch `wget` enthält. Restore als eigene Schicht für schnelle Builds | ⬜ |
 | 5.3 | **Migrations-Bundle:** zweites Ziel `migrate` im selben Dockerfile mit `dotnet ef migrations bundle`. Es läuft als einmaliger Container vor dem Start der App und braucht nur den Connection-String. Probelauf gegen die lokale Datenbank (zweimal hintereinander, der zweite Lauf ändert nichts) | ⬜ |
 | 5.4 | **Worker:** Schema als versionierte SQL-Skripte (`deploy/db/twitch/001_schema.sql`) mit kleinem Runner und Tabelle `schema_migrations`, `CREATE TABLE` fliegt aus dem Code (E-011). Der Worker prüft beim Start nur noch, ob das Schema da ist. Dockerfile auf chiseled umgestellt, Healthcheck (Alter der Heartbeat-Datei) als eingebauter Befehl. Die alte `src/TwitchWorker/docker-compose.yml` entfällt | ⬜ |

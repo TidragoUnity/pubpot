@@ -8,8 +8,8 @@ namespace PubPot.Web.Spam;
 /// Das Anzeigen der Seiten (GET) ist nicht begrenzt. Zu viele Absendungen → 429 mit freundlicher Seite.
 /// </summary>
 /// <remarks>
-/// WICHTIG für Phase 5: Hinter Caddy sieht die App sonst nur die IP von Caddy – alle Besucher teilten sich
-/// dann ein Kontingent. Dort muss die Forwarded-Headers-Middleware die echte Client-IP übernehmen.
+/// Hinter Caddy sähe die App sonst nur die IP von Caddy, und alle Besucher teilten sich ein Kontingent.
+/// Die echte Client-IP setzt die Forwarded-Headers-Middleware, nur für den vertrauten Proxy (E-033).
 /// Die IP wird nur im Arbeitsspeicher als Schlüssel verwendet, nie gespeichert oder geloggt.
 /// </remarks>
 public static class RateLimits

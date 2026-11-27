@@ -154,8 +154,12 @@ builder.Services.AddScoped<AdminSignups>();
 // Kein "Server: Kestrel"-Header: verrät unnötig, welche Software läuft.
 builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
 
+// Hinter Caddy: echte Client-IP (Rate-Limiting) und HTTPS (HSTS, Secure-Cookies) aus den Forwarded-Headern,
+// aber nur von Absendern aus Proxy:KnownNetworks (E-033). Ohne Eintrag bleibt die Middleware aus.
+var trustedProxies = builder.Services.AddTrustedProxies(builder.Configuration);
+
 // Für alle Cookies (auch künftige wie Antiforgery und Admin-Login): HttpOnly, SameSite=Lax,
-// Secure bei HTTPS. Hinter Caddy kommt "HTTPS" über X-Forwarded-Proto an (wird in Phase 5 eingerichtet).
+// Secure bei HTTPS. Hinter Caddy kommt "HTTPS" über X-Forwarded-Proto an (siehe oben).
 builder.Services.Configure<CookiePolicyOptions>(o =>
 {
     o.MinimumSameSitePolicy = SameSiteMode.Lax;
@@ -202,6 +206,13 @@ if (!app.Services.GetRequiredService<IOptions<AdminOptions>>().Value.IsEnabled)
 if (!app.Services.GetRequiredService<IOptions<NotificationOptions>>().Value.EmailEnabled)
 {
     app.Logger.LogWarning("Keine Hinweis-Mails bei neuen Anmeldungen, weil Notifications:Email fehlt.");
+}
+
+// Ganz vorne: Alles danach (HSTS, Cookies, Rate-Limiting) soll schon die echte IP und das echte Protokoll sehen.
+if (trustedProxies.Count > 0)
+{
+    app.UseForwardedHeaders();
+    app.Logger.LogInformation("Forwarded Headers aktiv für {Networks}.", string.Join(", ", trustedProxies));
 }
 
 app.UseSecurityHeaders();

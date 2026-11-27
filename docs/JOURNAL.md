@@ -5,6 +5,14 @@ Damit kann jede neue Arbeitssitzung nahtlos weitermachen.
 
 ---
 
+## 2026-11-27 · Schritt 5.1 – Forwarded Headers
+- Neue Einstellung `Proxy__KnownNetworks` (z. B. `172.30.0.0/24`). Nur Anfragen aus diesen Netzen dürfen der App die Client-IP (`X-Forwarded-For`) und HTTPS (`X-Forwarded-Proto`) mitteilen (E-033). Ohne Eintrag ist die Middleware aus, sonst würde ASP.NET jedem Absender glauben.
+- Die Middleware läuft als Erstes, vor Security-Headern, HSTS, Cookies und Rate-Limiting.
+- 12 neue Tests (`ForwardedHeadersTests`): HSTS und Secure-Cookie über den vertrauten Proxy, auch mit IPv4-in-IPv6-Adresse (`::ffff:…`). Fremde Absender werden ignoriert, ebenso alle, wenn kein Netz eingetragen ist. Hinter dem Proxy hat jeder Besucher sein eigenes Rate-Limit, ein gefälschtes `X-Forwarded-For` holt kein neues. Ungültige Netze brechen den Start ab.
+- **Gegenprobe:** Mit abgeschalteter Middleware schlagen genau die 3 Tests für den vertrauten Proxy fehl.
+- Da TestServer keine Absender-IP kennt, setzt ein kleiner Test-Filter (`IStartupFilter`) sie aus einem Test-Header.
+- **Als Nächstes:** 5.2 Dockerfile für die Web-App.
+
 ## 2026-11-27 · Phase 5 geplant
 - Phase 5 in 8 Schritte aufgeteilt (5.1 Forwarded Headers bis 5.8 Abnahme) und von dir freigegeben.
 - F-016: Der Worker startet nur mit dem Compose-Profil `worker`, damit er die laufende Studie nicht stört. F-017: lokal HTTPS mit Caddys eigenem Zertifikat, die Warnung wird weggeklickt (E-032).
